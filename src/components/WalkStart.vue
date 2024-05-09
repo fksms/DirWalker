@@ -14,7 +14,8 @@ const walkParams = ref({
   use_apparent_size: false,
 });
 
-walkParams.value.target_directories.push("/Users/shogo/Downloads");
+//walkParams.value.target_directories.push("/Users/shogo/Downloads");
+walkParams.value.target_directories.push("/Users/shogo");
 
 
 async function walkStart() {

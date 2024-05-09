@@ -45,15 +45,12 @@ pub fn nodes_to_json(nodes: Option<Vec<Node>>) -> Result<String, String> {
     }
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 // Walk Start
 #[tauri::command(rename_all = "snake_case")]
 fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> Result<String, String> {
+
+    // 終了フラグをfalseに設定
+    state.set_abort_flag(false);
     
     let decode_result: Result<WalkParams, _> = serde_json::from_str(&str_params);
     println!("Receive Params.");
@@ -62,7 +59,7 @@ fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> Result<
         // 正常にパラメータをデコードできた場合
         Ok(walk_params) => {
             println!("Decode done.");
-            let walk_data = exec_dust(walk_params);
+            let walk_data = exec_dust(walk_params, state.get_error_handler());
             println!("Walk done.");
 
             // ノードをセット
@@ -90,12 +87,20 @@ fn node_reload(state: tauri::State<'_, WalkManager>) -> Result<String, String> {
     return nodes_to_json(nodes);
 }
 
+// 強制終了
+#[tauri::command(rename_all = "snake_case")]
+fn abort(state: tauri::State<'_, WalkManager>) {
+
+    // 終了フラグをtrueに設定
+    state.set_abort_flag(true);
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            greet,
             walk_start,
             node_reload,
+            abort,
         ])
         .setup(|app|{
             let walk_manager = WalkManager::new();

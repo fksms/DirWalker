@@ -28,20 +28,11 @@ pub struct WalkParams {
     pub use_apparent_size: bool,
 }
 
-pub fn exec_dust(walk_params: WalkParams) -> Option<Vec<Node>> {
+pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>) -> Option<Vec<Node>> {
 
     // エラー格納用
-    let errors = RuntimeErrors::default();
-    let error_listen_for_ctrlc = Arc::new(Mutex::new(errors));
-    let errors_for_rayon = error_listen_for_ctrlc.clone();
-    let errors_final = error_listen_for_ctrlc.clone();
-
-    // Ctrl-Cで中止
-    ctrlc::set_handler(move || {
-        error_listen_for_ctrlc.lock().unwrap().abort = true;
-        println!("\nAborting");
-    })
-    .expect("Error setting Ctrl-C handler");
+    let errors_for_rayon = errors.clone();
+    let errors_final = errors.clone();
     
     // 以下パラメータ設定
     let target_dirs = match walk_params.target_directories {
@@ -111,6 +102,7 @@ pub fn exec_dust(walk_params: WalkParams) -> Option<Vec<Node>> {
 
     // 強制終了
     if errors_final.lock().unwrap().abort {
+        println!("Aborting");
         return None;
     }
 

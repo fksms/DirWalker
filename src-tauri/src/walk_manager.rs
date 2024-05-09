@@ -1,11 +1,13 @@
+use std::sync::Arc;
 use std::sync::Mutex;
 
 use crate::node::Node;
+use crate::progress::RuntimeErrors;
 
 // Walkの結果や実行状態を管理するマネージャー
 pub struct WalkManager{
-    nodes: Mutex<Option<Vec<Node>>>,    // ノード格納用
-    abort_flag: Mutex<bool>,            // 強制終了フラグ
+    nodes: Mutex<Option<Vec<Node>>>,        // ノード格納用
+    errors: Arc<Mutex<RuntimeErrors>>,      // エラー格納用
 }
 
 impl WalkManager {
@@ -13,7 +15,7 @@ impl WalkManager {
     pub fn new() -> Self {
         Self {
             nodes: Mutex::new(None),
-            abort_flag: Mutex::new(false)
+            errors: Arc::new(Mutex::new(RuntimeErrors::default()))
         }
     }
 
@@ -29,15 +31,14 @@ impl WalkManager {
         return locked_nodes.clone();
     }
 
-    // 強制終了フラグをセット
-    pub fn set_abort_flag(&self, flag: bool) {
-        let mut locked_abort_flag = self.abort_flag.lock().unwrap();
-        *locked_abort_flag = flag;
+    // エラーハンドラを取得
+    pub fn get_error_handler(&self) -> &Arc<Mutex<RuntimeErrors>> {
+        return &(self.errors);
     }
 
-    // 強制終了フラグ状態を取得
-    pub fn get_abort_flag(&self) -> bool {
-        let locked_abort_flag = self.abort_flag.lock().unwrap();
-        return locked_abort_flag.clone();
+    // 終了フラグを設定
+    pub fn set_abort_flag(&self, flag: bool) {
+        let mut locked_errors = self.errors.lock().unwrap();
+        locked_errors.abort = flag;
     }
 }
