@@ -16,7 +16,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct DustParams {
+pub struct WalkParams {
     pub target_directories: Option<Vec<String>>,
     pub regex_filter: Option<Vec<String>>,
     pub regex_invert_filter: Option<Vec<String>>,
@@ -28,7 +28,7 @@ pub struct DustParams {
     pub use_apparent_size: bool,
 }
 
-pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
+pub fn exec_dust(walk_params: WalkParams) -> Option<Vec<Node>> {
 
     // エラー格納用
     let errors = RuntimeErrors::default();
@@ -44,12 +44,12 @@ pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
     .expect("Error setting Ctrl-C handler");
     
     // 以下パラメータ設定
-    let target_dirs = match dust_params.target_directories {
+    let target_dirs = match walk_params.target_directories {
         Some(values) => values,
         None => vec![String::from("."); 0],
     };
 
-    let filter_regexs = match dust_params.regex_filter {
+    let filter_regexs = match walk_params.regex_filter {
         Some(values) => values
             .iter()
             .map(|reg| Regex::new(reg).unwrap())
@@ -57,7 +57,7 @@ pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
         None => vec![],
     };
 
-    let invert_filter_regexs = match dust_params.regex_invert_filter {
+    let invert_filter_regexs = match walk_params.regex_invert_filter {
         Some(values) => values
             .iter()
             .map(|reg| Regex::new(reg).unwrap())
@@ -65,7 +65,7 @@ pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
         None => vec![],
     };
 
-    let ignore_directories = match dust_params.ignore_directories {
+    let ignore_directories = match walk_params.ignore_directories {
         Some(values) => values
             .iter()
             .map(PathBuf::from)
@@ -73,9 +73,9 @@ pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
         None => vec![],
     };
 
-    let by_filecount = dust_params.by_filecount;
-    let limit_filesystem = dust_params.limit_filesystem;
-    let follow_links = dust_params.dereference_links;
+    let by_filecount = walk_params.by_filecount;
+    let limit_filesystem = walk_params.limit_filesystem;
+    let follow_links = walk_params.dereference_links;
 
     let simplified_dirs = simplify_dir_names(target_dirs);
     let allowed_filesystems = limit_filesystem
@@ -87,7 +87,7 @@ pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
         .flat_map(|x| simplified_dirs.iter().map(move |d| d.join(&x)))
         .collect();
 
-    let ignore_hidden = dust_params.ignore_hidden_files;
+    let ignore_hidden = walk_params.ignore_hidden_files;
 
     let indicator = PIndicator::build_me();
 
@@ -96,7 +96,7 @@ pub fn exec_dust(dust_params: DustParams) -> Option<Vec<Node>> {
         filter_regex: &filter_regexs,
         invert_filter_regex: &invert_filter_regexs,
         allowed_filesystems,
-        use_apparent_size: dust_params.use_apparent_size,
+        use_apparent_size: walk_params.use_apparent_size,
         by_filecount,
         ignore_hidden,
         follow_links,

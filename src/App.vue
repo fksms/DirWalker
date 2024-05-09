@@ -2,6 +2,7 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import Greet from "./components/Greet.vue";
+import NodeReload from "./components/NodeReload.vue";
 import WalkStart from "./components/WalkStart.vue";
 </script>
 
@@ -40,6 +41,7 @@ import WalkStart from "./components/WalkStart.vue";
 
     <Greet />
     <WalkStart />
+    <NodeReload />
   </div>
 </template>
 
