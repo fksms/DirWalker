@@ -25,10 +25,29 @@ impl WalkManager {
         *locked_nodes = nodes;
     }
 
-    // ノードを取得
-    pub fn get_nodes(&self) -> Option<Vec<Node>> {
+    /*
+    // ノード全体を取得
+    pub fn get_all_nodes(&self) -> Option<Vec<Node>> {
         let locked_nodes = self.nodes.lock().unwrap();
         return locked_nodes.clone();
+    }
+    */
+
+    // 深さ指定で部分的ノードを取得
+    pub fn get_partial_nodes(&self, depth: usize) -> Option<Vec<Node>> {
+        let locked_nodes = self.nodes.lock().unwrap();
+
+        let new_nodes = match locked_nodes.clone() {
+            Some(nodes) => nodes
+                .iter()
+                .map(|node| create_partial_node(node, depth))
+                .collect::<Vec<Node>>(),
+            None => {
+                return None;
+            },
+        };
+
+        return Some(new_nodes);
     }
 
     // エラーハンドラを取得
@@ -41,4 +60,27 @@ impl WalkManager {
         let mut locked_errors = self.errors.lock().unwrap();
         locked_errors.abort = flag;
     }
+}
+
+// 深さ指定で部分的ノードを生成
+pub fn create_partial_node(node: &Node, depth: usize) -> Node {
+    let mut new_node = Node {
+        name: node.name.clone(),
+        size: node.size,
+        children: Vec::new(),
+        inode_device: node.inode_device,
+        depth: node.depth,
+    };
+
+    if new_node.depth >= depth {
+        // Depth exceeds 6, truncate children
+        new_node.children.clear();
+    } else {
+        // Process children recursively
+        for child in &node.children {
+            new_node.children.push(create_partial_node(child, depth));
+        }
+    }
+
+    return new_node;
 }

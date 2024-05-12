@@ -51,11 +51,7 @@ pub fn walk_it(dirs: HashSet<PathBuf>, walk_data: &WalkData) -> Vec<Node> {
 }
 
 // Remove files which have the same inode, we don't want to double count them.
-fn clean_inodes(
-    x: Node,
-    inodes: &mut HashSet<(u64, u64)>,
-    use_apparent_size: bool,
-) -> Option<Node> {
+fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bool) -> Option<Node> {
     if !use_apparent_size {
         if let Some(id) = x.inode_device {
             if !inodes.insert(id) {

@@ -6,7 +6,7 @@ use regex::Regex;
 use serde::Serialize;
 use std::path::PathBuf;
 
-#[derive(Debug, Eq, Clone, Serialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize)]
 pub struct Node {
     pub name: PathBuf,
     pub size: u64,
@@ -54,10 +54,4 @@ pub fn build_node(
             depth,
         }
     })
-}
-
-impl PartialEq for Node {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name && self.size == other.size && self.children == other.children
-    }
 }
