@@ -3,11 +3,13 @@ use std::sync::Mutex;
 
 use crate::node::Node;
 use crate::progress::RuntimeErrors;
+use crate::progress::Progress;
 
 // Walkの結果や実行状態を管理するマネージャー
 pub struct WalkManager{
     nodes: Mutex<Option<Vec<Node>>>,        // ノード格納用
     errors: Arc<Mutex<RuntimeErrors>>,      // エラー格納用
+    progress: Arc<Progress>,
 }
 
 impl WalkManager {
@@ -15,7 +17,8 @@ impl WalkManager {
     pub fn new() -> Self {
         Self {
             nodes: Mutex::new(None),
-            errors: Arc::new(Mutex::new(RuntimeErrors::default()))
+            errors: Arc::new(Mutex::new(RuntimeErrors::default())),
+            progress: Arc::new(Progress::default()),
         }
     }
 
@@ -50,7 +53,7 @@ impl WalkManager {
         return Some(new_nodes);
     }
 
-    // エラーハンドラを取得
+    // errorハンドラを取得
     pub fn get_error_handler(&self) -> &Arc<Mutex<RuntimeErrors>> {
         return &(self.errors);
     }
@@ -59,6 +62,11 @@ impl WalkManager {
     pub fn set_abort_flag(&self, flag: bool) {
         let mut locked_errors = self.errors.lock().unwrap();
         locked_errors.abort = flag;
+    }
+
+    // progressハンドラを取得
+    pub fn get_progress_handler(&self) -> &Arc<Progress> {
+        return &(self.progress);
     }
 }
 

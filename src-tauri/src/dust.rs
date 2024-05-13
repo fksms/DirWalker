@@ -1,10 +1,11 @@
 use crate::progress::RuntimeErrors;
+use crate::progress::Progress;
 use crate::dir_walker::WalkData;
-use crate::progress::PIndicator;
 use crate::dir_walker::walk_it;
 use crate::utils::get_filesystem_devices;
 use crate::utils::simplify_dir_names;
 use crate::node::Node;
+use crate::progress::{indicator_spawn, indicator_stop};
 
 use std::collections::HashSet;
 use std::panic;
@@ -28,7 +29,7 @@ pub struct WalkParams {
     pub use_apparent_size: bool,
 }
 
-pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>) -> Option<Vec<Node>> {
+pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>, progress: &Arc<Progress>) -> Option<Vec<Node>> {
 
     // エラー格納用
     let errors_for_rayon = errors.clone();
@@ -80,8 +81,6 @@ pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>) ->
 
     let ignore_hidden = walk_params.ignore_hidden_files;
 
-    let indicator = PIndicator::build_me();
-
     let walk_data = WalkData {
         ignore_directories: ignored_full_path,
         filter_regex: &filter_regexs,
@@ -91,14 +90,21 @@ pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>) ->
         by_filecount,
         ignore_hidden,
         follow_links,
-        progress_data: indicator.data.clone(),
+        progress_data: progress.clone(),
         errors: errors_for_rayon,
     };
     let stack_size = None;
     init_rayon(&stack_size);
 
+    // Progressを表示
+    let indicator_handler = indicator_spawn(progress);
+
     // Walk
     let top_level_nodes = walk_it(simplified_dirs, &walk_data);
+
+    // Progressを終了
+    indicator_stop(indicator_handler);
+    println!();
 
     // 強制終了
     if errors_final.lock().unwrap().abort {
@@ -106,8 +112,11 @@ pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>) ->
         return None;
     }
 
-    // 以下エラー出力
+    // エラー出力
     let final_errors = walk_data.errors.lock().unwrap();
+    if final_errors.no_permissions {
+        eprintln!("Did not have permissions for all directories");
+    }
     if !final_errors.file_not_found.is_empty() {
         let err = final_errors
             .file_not_found
@@ -116,9 +125,6 @@ pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>) ->
             .collect::<Vec<&str>>()
             .join(", ");
         eprintln!("No such file or directory: {}", err);
-    }
-    if final_errors.no_permissions {
-        eprintln!("Did not have permissions for all directories");
     }
     if !final_errors.unknown_error.is_empty() {
         let err = final_errors

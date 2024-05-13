@@ -3,8 +3,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use crate::node::Node;
-use crate::progress::Operation;
-use crate::progress::PAtomicInfo;
+use crate::progress::Progress;
 use crate::progress::RuntimeErrors;
 use crate::progress::ORDERING;
 use crate::utils::is_filtered_out_due_to_invert_regex;
@@ -29,7 +28,7 @@ pub struct WalkData<'a> {
     pub by_filecount: bool,
     pub ignore_hidden: bool,
     pub follow_links: bool,
-    pub progress_data: Arc<PAtomicInfo>,
+    pub progress_data: Arc<Progress>,
     pub errors: Arc<Mutex<RuntimeErrors>>,
 }
 
@@ -39,10 +38,9 @@ pub fn walk_it(dirs: HashSet<PathBuf>, walk_data: &WalkData) -> Vec<Node> {
         .into_iter()
         .filter_map(|d| {
             let prog_data = &walk_data.progress_data;
-            prog_data.clear_state(&d);
-            let node = walk(d, walk_data, 0)?;
+            prog_data.clear_state();
 
-            prog_data.state.store(Operation::PREPARING, ORDERING);
+            let node = walk(d, walk_data, 0)?;
 
             clean_inodes(node, &mut inodes, walk_data.use_apparent_size)
         })

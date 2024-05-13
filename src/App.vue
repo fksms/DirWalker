@@ -39,9 +39,15 @@ import WalkStart from "./components/WalkStart.vue";
       >
     </p>
 
-    <Abort />
-    <WalkStart />
-    <NodeReload />
+    <p>
+      <Abort />
+    </p>
+    <p>
+      <WalkStart />
+    </p>
+    <p>
+      <NodeReload />
+    </p>
   </div>
 </template>
 

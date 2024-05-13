@@ -1,60 +1,23 @@
 use std::{
-    collections::HashSet,
-    path::Path,
-    sync::{
-        atomic::{AtomicU64, AtomicU8, AtomicUsize, Ordering},
-        mpsc::Sender,
-        Arc, RwLock,
-    },
-    thread::JoinHandle,
+    collections::HashSet, io::Write, sync::{
+        atomic::{AtomicU64, AtomicUsize, Ordering},
+        mpsc::{self, RecvTimeoutError, Sender},
+        Arc,
+    }, thread::JoinHandle, time::Duration
 };
-
-/* -------------------------------------------------------------------------- */
 
 pub const ORDERING: Ordering = Ordering::Relaxed;
 
-pub trait ThreadSyncTrait<T> {
-    fn set(&self, val: T);
-    fn get(&self) -> T;
-}
-
-#[derive(Default)]
-pub struct ThreadStringWrapper {
-    inner: RwLock<String>,
-}
-
-impl ThreadSyncTrait<String> for ThreadStringWrapper {
-    fn set(&self, val: String) {
-        *self.inner.write().unwrap() = val;
-    }
-
-    fn get(&self) -> String {
-        (*self.inner.read().unwrap()).clone()
-    }
-}
-
 /* -------------------------------------------------------------------------- */
 
-// creating an enum this way allows to have simpler syntax compared to a Mutex or a RwLock
-#[allow(non_snake_case)]
-pub mod Operation {
-    pub const INDEXING: u8 = 0;
-    pub const PREPARING: u8 = 1;
-}
-
 #[derive(Default)]
-pub struct PAtomicInfo {
+pub struct Progress {
     pub num_files: AtomicUsize,
     pub total_file_size: AtomicU64,
-    pub state: AtomicU8,
-    pub current_path: ThreadStringWrapper,
 }
 
-impl PAtomicInfo {
-    pub fn clear_state(&self, dir: &Path) {
-        self.state.store(Operation::INDEXING, ORDERING);
-        let dir_name = dir.to_string_lossy().to_string();
-        self.current_path.set(dir_name);
+impl Progress {
+    pub fn clear_state(&self) {
         self.total_file_size.store(0, ORDERING);
         self.num_files.store(0, ORDERING);
     }
@@ -70,18 +33,44 @@ pub struct RuntimeErrors {
 
 /* -------------------------------------------------------------------------- */
 
-pub struct PIndicator {
-    pub thread: Option<(Sender<()>, JoinHandle<()>)>,
-    pub data: Arc<PAtomicInfo>,
+// Progressを表示
+pub fn indicator_spawn(progress: &Arc<Progress>) -> Option<(Sender<()>, JoinHandle<()>)> {
+    let prog_data = progress.clone();
+    
+    let (stop_handler, receiver) = mpsc::channel::<()>();
+    
+    let time_info_thread = std::thread::spawn(move || {
+        let mut stdout = std::io::stdout();
+        let mut msg = "".to_string();
+
+        // While the timeout triggers we go round the loop
+        // If we disconnect or the sender sends its message we exit the while loop
+        while let Err(RecvTimeoutError::Timeout) =
+            receiver.recv_timeout(Duration::from_millis(100))
+        {
+            // Clear the text written by 'write!'& Return at the start of line
+            print!("\r{:width$}", " ", width = msg.len());
+
+            let file_count = prog_data.num_files.load(ORDERING);
+            let size = prog_data.total_file_size.load(ORDERING);
+            let file_str = format!("{file_count} files, {size}");
+            msg = format!("Indexing: {file_str}");
+
+            write!(stdout, "\r{msg}").unwrap();
+            stdout.flush().unwrap();
+        }
+    });
+
+    return Some((stop_handler, time_info_thread));
 }
 
-impl PIndicator {
-    pub fn build_me() -> Self {
-        Self {
-            thread: None,
-            data: Arc::new(PAtomicInfo {
-                ..Default::default()
-            }),
+// Progressを終了
+pub fn indicator_stop(thread: Option<(Sender<()>, JoinHandle<()>)>) {
+    match thread {
+        Some(t) => {
+            t.0.send(()).unwrap();
+            t.1.join().unwrap();
         }
+        None => {}
     }
 }

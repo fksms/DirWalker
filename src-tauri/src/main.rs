@@ -45,7 +45,7 @@ pub fn nodes_to_json(nodes: Option<Vec<Node>>) -> Result<String, String> {
     }
 }
 
-// Walk Start
+// Walk Start（asyncで非同期とする）
 #[tauri::command(rename_all = "snake_case")]
 async fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> Result<String, String> {
 
@@ -59,7 +59,9 @@ async fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> R
         // 正常にパラメータをデコードできた場合
         Ok(walk_params) => {
             println!("Decode done.");
-            let walk_data = exec_dust(walk_params, state.get_error_handler());
+
+            // Walk
+            let walk_data = exec_dust(walk_params, state.get_error_handler(), state.get_progress_handler());
             println!("Walk done.");
 
             // ノードをセット
