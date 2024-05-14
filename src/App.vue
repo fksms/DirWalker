@@ -3,6 +3,7 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import Abort from "./components/Abort.vue";
 import NodeReload from "./components/NodeReload.vue";
+import ProgressView from "./components/ProgressView.vue";
 import WalkStart from "./components/WalkStart.vue";
 </script>
 
@@ -44,6 +45,9 @@ import WalkStart from "./components/WalkStart.vue";
     </p>
     <p>
       <WalkStart />
+    </p>
+    <p>
+      <ProgressView />
     </p>
     <p>
       <NodeReload />

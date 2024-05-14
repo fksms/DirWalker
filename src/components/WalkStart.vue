@@ -3,20 +3,15 @@ import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 
 const walkParams = ref({
-  target_directories: [],
+  target_directory: "",
   regex_filter: [],
   regex_invert_filter: [],
   ignore_directories: [],
-  by_filecount: false,
-  limit_filesystem: false,
-  dereference_links: false,
-  ignore_hidden_files: false,
   use_apparent_size: false,
 });
 
-walkParams.value.target_directories.push("/Users/shogo/Downloads");
-//walkParams.value.target_directories.push("/Users/shogo");
-
+walkParams.value.target_directory = "/Users/shogo/Downloads";
+//walkParams.value.target_directory = "/Users/shogo";
 
 async function walkStart() {
   // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command

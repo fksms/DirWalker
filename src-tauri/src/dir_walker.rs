@@ -3,8 +3,8 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use crate::node::Node;
-use crate::progress::Progress;
-use crate::progress::RuntimeErrors;
+use crate::progress::ProgressHandler;
+use crate::progress::ErrorHandler;
 use crate::progress::ORDERING;
 use crate::utils::is_filtered_out_due_to_invert_regex;
 use crate::utils::is_filtered_out_due_to_regex;
@@ -18,35 +18,34 @@ use std::collections::HashSet;
 use crate::node::build_node;
 use std::fs::DirEntry;
 
-use crate::platform::get_metadata;
 pub struct WalkData<'a> {
     pub ignore_directories: HashSet<PathBuf>,
     pub filter_regex: &'a [Regex],
     pub invert_filter_regex: &'a [Regex],
-    pub allowed_filesystems: HashSet<u64>,
     pub use_apparent_size: bool,
-    pub by_filecount: bool,
-    pub ignore_hidden: bool,
-    pub follow_links: bool,
-    pub progress_data: Arc<Progress>,
-    pub errors: Arc<Mutex<RuntimeErrors>>,
+    pub progress_data: Arc<ProgressHandler>,
+    pub errors: Arc<Mutex<ErrorHandler>>,
 }
 
-pub fn walk_it(dirs: HashSet<PathBuf>, walk_data: &WalkData) -> Vec<Node> {
+/* -------------------------------------------------------------------------- */
+
+pub fn walk_it(dir: PathBuf, walk_data: &WalkData) -> Option<Node> {
     let mut inodes = HashSet::new();
-    let top_level_nodes: Vec<_> = dirs
-        .into_iter()
-        .filter_map(|d| {
-            let prog_data = &walk_data.progress_data;
-            prog_data.clear_state();
 
-            let node = walk(d, walk_data, 0)?;
+    let prog_data = &walk_data.progress_data;
+    prog_data.clear_state();
 
-            clean_inodes(node, &mut inodes, walk_data.use_apparent_size)
-        })
-        .collect();
-    top_level_nodes
+    match walk(dir, walk_data, 0) {
+        Some(node) => {
+            return clean_inodes(node, &mut inodes, walk_data.use_apparent_size);
+        },
+        None => {
+            return None;
+        }
+    };
 }
+
+/* -------------------------------------------------------------------------- */
 
 // Remove files which have the same inode, we don't want to double count them.
 fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bool) -> Option<Node> {
@@ -57,11 +56,8 @@ fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bo
             }
         }
     }
-
-    // Sort Nodes so iteration order is predictable
-    let mut tmp: Vec<_> = x.children;
-    tmp.sort_by(sort_by_inode);
-    let new_children: Vec<_> = tmp
+    
+    let new_children: Vec<_> = x.children
         .into_iter()
         .filter_map(|c| clean_inodes(c, inodes, use_apparent_size))
         .collect();
@@ -70,38 +66,14 @@ fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bo
         name: x.name,
         size: x.size + new_children.iter().map(|c| c.size).sum::<u64>(),
         children: new_children,
-        inode_device: x.inode_device,
+        inode_device: None, // メモリ削減
         depth: x.depth,
     })
 }
 
-fn sort_by_inode(a: &Node, b: &Node) -> std::cmp::Ordering {
-    // Sorting by inode is quicker than by sorting by name/size
-    if let Some(x) = a.inode_device {
-        if let Some(y) = b.inode_device {
-            if x.0 != y.0 {
-                return x.0.cmp(&y.0);
-            } else if x.1 != y.1 {
-                return x.1.cmp(&y.1);
-            }
-        }
-    }
-    a.name.cmp(&b.name)
-}
+/* -------------------------------------------------------------------------- */
 
 fn ignore_file(entry: &DirEntry, walk_data: &WalkData) -> bool {
-    let is_dot_file = entry.file_name().to_str().unwrap_or("").starts_with('.');
-    let is_ignored_path = walk_data.ignore_directories.contains(&entry.path());
-
-    if !walk_data.allowed_filesystems.is_empty() {
-        let size_inode_device = get_metadata(&entry.path(), false);
-
-        if let Some((_size, Some((_id, dev)))) = size_inode_device {
-            if !walk_data.allowed_filesystems.contains(&dev) {
-                return true;
-            }
-        }
-    }
 
     // Keeping `walk_data.filter_regex.is_empty()` is important for performance reasons, it stops unnecessary work
     if !walk_data.filter_regex.is_empty()
@@ -118,17 +90,20 @@ fn ignore_file(entry: &DirEntry, walk_data: &WalkData) -> bool {
         return true;
     }
 
-    (is_dot_file && walk_data.ignore_hidden) || is_ignored_path
+    return walk_data.ignore_directories.contains(&entry.path());
 }
 
 fn walk(dir: PathBuf, walk_data: &WalkData, depth: usize) -> Option<Node> {
     let prog_data = &walk_data.progress_data;
     let errors = &walk_data.errors;
+
+    // abortフラグでNoneをリターン
     if errors.lock().unwrap().abort {
         return None;
     }
 
     let children = if dir.is_dir() {
+        // dirがディレクトリの場合
         let read_dir = fs::read_dir(&dir);
         match read_dir {
             Ok(entries) => {
@@ -146,7 +121,6 @@ fn walk(dir: PathBuf, walk_data: &WalkData, depth: usize) -> Option<Node> {
                             if !ignore_file(entry, walk_data) {
                                 if let Ok(data) = entry.file_type() {
                                     if data.is_dir()
-                                        || (walk_data.follow_links && data.is_symlink())
                                     {
                                         return walk(entry.path(), walk_data, depth + 1);
                                     }
@@ -158,8 +132,6 @@ fn walk(dir: PathBuf, walk_data: &WalkData, depth: usize) -> Option<Node> {
                                         walk_data.invert_filter_regex,
                                         walk_data.use_apparent_size,
                                         data.is_symlink(),
-                                        data.is_file(),
-                                        walk_data.by_filecount,
                                         depth,
                                     );
 
@@ -196,22 +168,25 @@ fn walk(dir: PathBuf, walk_data: &WalkData, depth: usize) -> Option<Node> {
             }
         }
     } else {
+        // dirがファイルの場合
         if !dir.is_file() {
+            // dirがディレクトリでもファイルでも無い場合
             let mut editable_error = errors.lock().unwrap();
             let bad_file = dir.as_os_str().to_string_lossy().into();
             editable_error.file_not_found.insert(bad_file);
         }
+        // 空配列をリターン
         vec![]
     };
-    build_node(
+    let node = build_node(
         dir,
         children,
         walk_data.filter_regex,
         walk_data.invert_filter_regex,
         walk_data.use_apparent_size,
         false,
-        false,
-        walk_data.by_filecount,
         depth,
-    )
+    );
+
+    return node;
 }

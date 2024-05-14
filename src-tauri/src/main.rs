@@ -2,34 +2,37 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod dir_walker;
-mod dust;
+mod init_walk;
 mod node;
 mod platform;
 mod progress;
 mod utils;
 mod walk_manager;
 
-use crate::dust::WalkParams;
-use crate::dust::exec_dust;
+use tauri::Manager;
+
+use crate::init_walk::WalkParams;
+use crate::init_walk::init_walk;
 use crate::node::Node;
 use crate::walk_manager::WalkManager;
 
-use tauri::Manager;
+// 部分的ノードの深さ
+const DEPTH_OF_PARTIAL_NODE: usize = 3;
 
 // ノードをjsonに変換
-pub fn nodes_to_json(nodes: Option<Vec<Node>>) -> Result<String, String> {
-    match nodes {
+pub fn node_to_json(node: Option<Node>) -> Result<String, String> {
+    match node {
         // ノードに要素がある場合
-        Some(nodes) => {
+        Some(node) => {
             println!("Node found.");
 
-            let encode_result: Result<String, _> = serde_json::to_string(&nodes);
+            let encode_result: Result<String, _> = serde_json::to_string(&node);
 
             match encode_result {
                 // 正常にノードデータをエンコードできた場合
-                Ok(str_nodes) => {
+                Ok(str_node) => {
                     println!("Encode done.");
-                    Ok(str_nodes)
+                    Ok(str_node)
                 }
                 // ノードデータのエンコードに失敗した場合
                 Err(err) => {
@@ -47,7 +50,7 @@ pub fn nodes_to_json(nodes: Option<Vec<Node>>) -> Result<String, String> {
 
 // Walk Start（asyncで非同期とする）
 #[tauri::command(rename_all = "snake_case")]
-async fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> Result<String, String> {
+async fn walk_start(str_params: &str, state: tauri::State<'_, WalkManager>, app: tauri::AppHandle) -> Result<String, String> {
 
     // 終了フラグをfalseに設定
     state.set_abort_flag(false);
@@ -61,18 +64,17 @@ async fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> R
             println!("Decode done.");
 
             // Walk
-            let walk_data = exec_dust(walk_params, state.get_error_handler(), state.get_progress_handler());
+            let walk_data = init_walk(walk_params, state.get_error_handler(), state.get_progress_handler(), app);
             println!("Walk done.");
 
             // ノードをセット
-            state.set_nodes(walk_data);
+            state.set_node(walk_data);
 
             // 深さ指定で部分的ノードを取得
-            let depth = 3;
-            let partial_nodes = state.get_partial_nodes(depth);
+            let partial_node = state.get_partial_node(DEPTH_OF_PARTIAL_NODE);
 
             // ノードをjsonに変換
-            return nodes_to_json(partial_nodes);
+            return node_to_json(partial_node);
         }
         // パラメータのデコードに失敗した場合
         Err(err) => {
@@ -82,16 +84,15 @@ async fn walk_start(state: tauri::State<'_, WalkManager>, str_params: &str) -> R
     }
 }
 
-// ノードをリロード
+// ノードをリロード（asyncで非同期とする）
 #[tauri::command(rename_all = "snake_case")]
-fn node_reload(state: tauri::State<'_, WalkManager>) -> Result<String, String> {
+async fn node_reload(state: tauri::State<'_, WalkManager>) -> Result<String, String> {
 
     // 深さ指定で部分的ノードを取得
-    let depth = 3;
-    let partial_nodes = state.get_partial_nodes(depth);
+    let partial_node = state.get_partial_node(DEPTH_OF_PARTIAL_NODE);
 
     // ノードをjsonに変換
-    return nodes_to_json(partial_nodes);
+    return node_to_json(partial_node);
 }
 
 // 強制終了

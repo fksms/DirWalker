@@ -2,59 +2,48 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use crate::node::Node;
-use crate::progress::RuntimeErrors;
-use crate::progress::Progress;
+use crate::progress::ErrorHandler;
+use crate::progress::ProgressHandler;
 
 // Walkの結果や実行状態を管理するマネージャー
 pub struct WalkManager{
-    nodes: Mutex<Option<Vec<Node>>>,        // ノード格納用
-    errors: Arc<Mutex<RuntimeErrors>>,      // エラー格納用
-    progress: Arc<Progress>,
+    node: Mutex<Option<Node>>,          // ノード格納用
+    errors: Arc<Mutex<ErrorHandler>>,   // エラー格納用
+    progress: Arc<ProgressHandler>,     // 処理ステータス格納用
 }
 
 impl WalkManager {
     // 初期化
     pub fn new() -> Self {
         Self {
-            nodes: Mutex::new(None),
-            errors: Arc::new(Mutex::new(RuntimeErrors::default())),
-            progress: Arc::new(Progress::default()),
+            node: Mutex::new(None),
+            errors: Arc::new(Mutex::new(ErrorHandler::default())),
+            progress: Arc::new(ProgressHandler::default()),
         }
     }
 
     // ノードをセット
-    pub fn set_nodes(&self, nodes: Option<Vec<Node>>) {
-        let mut locked_nodes = self.nodes.lock().unwrap();
-        *locked_nodes = nodes;
+    pub fn set_node(&self, node: Option<Node>) {
+        let mut locked_node = self.node.lock().unwrap();
+        *locked_node = node;
     }
-
-    /*
-    // ノード全体を取得
-    pub fn get_all_nodes(&self) -> Option<Vec<Node>> {
-        let locked_nodes = self.nodes.lock().unwrap();
-        return locked_nodes.clone();
-    }
-    */
 
     // 深さ指定で部分的ノードを取得
-    pub fn get_partial_nodes(&self, depth: usize) -> Option<Vec<Node>> {
-        let locked_nodes = self.nodes.lock().unwrap();
+    pub fn get_partial_node(&self, depth: usize) -> Option<Node> {
+        let locked_node = self.node.lock().unwrap();
 
-        let new_nodes = match locked_nodes.clone() {
-            Some(nodes) => nodes
-                .iter()
-                .map(|node| create_partial_node(node, depth))
-                .collect::<Vec<Node>>(),
+        match locked_node.clone() {
+            Some(node) => {
+                return Some(create_partial_node(&node, depth));
+            },
             None => {
                 return None;
             },
         };
-
-        return Some(new_nodes);
     }
 
     // errorハンドラを取得
-    pub fn get_error_handler(&self) -> &Arc<Mutex<RuntimeErrors>> {
+    pub fn get_error_handler(&self) -> &Arc<Mutex<ErrorHandler>> {
         return &(self.errors);
     }
 
@@ -65,7 +54,7 @@ impl WalkManager {
     }
 
     // progressハンドラを取得
-    pub fn get_progress_handler(&self) -> &Arc<Progress> {
+    pub fn get_progress_handler(&self) -> &Arc<ProgressHandler> {
         return &(self.progress);
     }
 }

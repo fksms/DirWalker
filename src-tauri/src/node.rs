@@ -23,8 +23,6 @@ pub fn build_node(
     invert_filter_regex: &[Regex],
     use_apparent_size: bool,
     is_symlink: bool,
-    is_file: bool,
-    by_filecount: bool,
     depth: usize,
 ) -> Option<Node> {
     get_metadata(&dir, use_apparent_size).map(|data| {
@@ -37,11 +35,8 @@ pub fn build_node(
         let size = if is_filtered_out_due_to_regex(filter_regex, &dir)
             || is_filtered_out_due_to_invert_regex(invert_filter_regex, &dir)
             || (is_symlink && !use_apparent_size)
-            || by_filecount && !is_file
         {
             0
-        } else if by_filecount {
-            1
         } else {
             data.0
         };

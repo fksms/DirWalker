@@ -1,11 +1,10 @@
-use crate::progress::RuntimeErrors;
-use crate::progress::Progress;
+use crate::progress::ErrorHandler;
+use crate::progress::ProgressHandler;
 use crate::dir_walker::WalkData;
 use crate::dir_walker::walk_it;
-use crate::utils::get_filesystem_devices;
-use crate::utils::simplify_dir_names;
 use crate::node::Node;
 use crate::progress::{indicator_spawn, indicator_stop};
+use crate::utils::normalize_path;
 
 use std::collections::HashSet;
 use std::panic;
@@ -16,30 +15,26 @@ use regex::Regex;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
+// Rayonのスタックサイズ
+const STACK_SIZE_OF_RAYON: usize = 1024 * 1024 * 1024; // Set stack size to 1024MB
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WalkParams {
-    pub target_directories: Option<Vec<String>>,
+    pub target_directory: String,
     pub regex_filter: Option<Vec<String>>,
     pub regex_invert_filter: Option<Vec<String>>,
     pub ignore_directories: Option<Vec<String>>,
-    pub by_filecount: bool,
-    pub limit_filesystem: bool,
-    pub dereference_links: bool,
-    pub ignore_hidden_files: bool,
     pub use_apparent_size: bool,
 }
 
-pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>, progress: &Arc<Progress>) -> Option<Vec<Node>> {
+pub fn init_walk(walk_params: WalkParams, errors: &Arc<Mutex<ErrorHandler>>, progress: &Arc<ProgressHandler>, app: tauri::AppHandle) -> Option<Node> {
 
     // エラー格納用
     let errors_for_rayon = errors.clone();
     let errors_final = errors.clone();
     
     // 以下パラメータ設定
-    let target_dirs = match walk_params.target_directories {
-        Some(values) => values,
-        None => vec![String::from("."); 0],
-    };
+    let simplified_dir = normalize_path(walk_params.target_directory);
 
     let filter_regexs = match walk_params.regex_filter {
         Some(values) => values
@@ -65,42 +60,28 @@ pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>, pr
         None => vec![],
     };
 
-    let by_filecount = walk_params.by_filecount;
-    let limit_filesystem = walk_params.limit_filesystem;
-    let follow_links = walk_params.dereference_links;
-
-    let simplified_dirs = simplify_dir_names(target_dirs);
-    let allowed_filesystems = limit_filesystem
-        .then(|| get_filesystem_devices(simplified_dirs.iter()))
-        .unwrap_or_default();
-
     let ignored_full_path: HashSet<PathBuf> = ignore_directories
         .into_iter()
-        .flat_map(|x| simplified_dirs.iter().map(move |d| d.join(&x)))
+        .map(|x| simplified_dir.join(&x))
         .collect();
-
-    let ignore_hidden = walk_params.ignore_hidden_files;
 
     let walk_data = WalkData {
         ignore_directories: ignored_full_path,
         filter_regex: &filter_regexs,
         invert_filter_regex: &invert_filter_regexs,
-        allowed_filesystems,
         use_apparent_size: walk_params.use_apparent_size,
-        by_filecount,
-        ignore_hidden,
-        follow_links,
         progress_data: progress.clone(),
         errors: errors_for_rayon,
     };
-    let stack_size = None;
-    init_rayon(&stack_size);
+
+    // Rayonスレッドを作成
+    init_rayon();
 
     // Progressを表示
-    let indicator_handler = indicator_spawn(progress);
+    let indicator_handler = indicator_spawn(progress, app);
 
     // Walk
-    let top_level_nodes = walk_it(simplified_dirs, &walk_data);
+    let top_level_node = walk_it(simplified_dir, &walk_data);
 
     // Progressを終了
     indicator_stop(indicator_handler);
@@ -137,33 +118,28 @@ pub fn exec_dust(walk_params: WalkParams, errors: &Arc<Mutex<RuntimeErrors>>, pr
     }
 
     // ノード出力
-    return Some(top_level_nodes);
+    return top_level_node;
 }
 
-fn init_rayon(stack_size: &Option<usize>) {
+fn init_rayon() {
     // Rayon seems to raise this error on 32-bit builds
     // The global thread pool has not been initialized.: ThreadPoolBuildError { kind: GlobalPoolAlreadyInitialized }
     if cfg!(target_pointer_width = "64") {
         let result = panic::catch_unwind(|| {
-            match stack_size {
-                Some(n) => rayon::ThreadPoolBuilder::new()
-                    .stack_size(*n)
-                    .build_global(),
-                None => {
-                    let large_stack = usize::pow(1024, 3);
-                    let mut s = System::new();
-                    s.refresh_memory();
-                    let available = s.available_memory();
+            let large_stack = STACK_SIZE_OF_RAYON;
+            let mut s = System::new();
+            s.refresh_memory();
+            let available = s.available_memory();
 
-                    if available > large_stack.try_into().unwrap() {
-                        // Larger stack size to handle cases with lots of nested directories
-                        rayon::ThreadPoolBuilder::new()
-                            .stack_size(large_stack)
-                            .build_global()
-                    } else {
-                        rayon::ThreadPoolBuilder::new().build_global()
-                    }
-                }
+            if available > large_stack.try_into().unwrap() {
+                // Larger stack size to handle cases with lots of nested directories
+                rayon::ThreadPoolBuilder::new()
+                    .stack_size(large_stack)
+                    .build_global()
+            } else {
+                // Do not specify stack size
+                rayon::ThreadPoolBuilder::new()
+                    .build_global()
             }
         });
         if result.is_err() {
