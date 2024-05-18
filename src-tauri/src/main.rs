@@ -71,7 +71,7 @@ async fn walk_start(str_params: &str, state: tauri::State<'_, WalkManager>, app:
             state.set_node(walk_data);
 
             // 深さ指定で部分的ノードを取得
-            let partial_node = state.get_partial_node(DEPTH_OF_PARTIAL_NODE);
+            let partial_node = state.get_full_node();
 
             // ノードをjsonに変換
             return node_to_json(partial_node);

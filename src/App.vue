@@ -1,66 +1,128 @@
 <script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import Abort from "./components/Abort.vue";
-import NodeReload from "./components/NodeReload.vue";
-import ProgressView from "./components/ProgressView.vue";
-import WalkStart from "./components/WalkStart.vue";
+
+import { ref, watch } from "vue";
+import { invoke } from "@tauri-apps/api/tauri";
+import { listen } from "@tauri-apps/api/event";
+
+import { generateSunburst } from "./components/GenerateSunburst";
+
+/* -------------------------------------------------------------------------- */
+
+// Walkのパラメータ（バックエンドに渡す）
+const walkParams = ref({
+  target_directory: "",
+  regex_filter: [],
+  regex_invert_filter: [],
+  ignore_directories: [],
+  use_apparent_size: false,
+});
+
+walkParams.value.target_directory = "/Users/shogo/Downloads";
+//walkParams.value.target_directory = "/Users/shogo";
+
+// 受信メッセージ格納用（バックエンドから受け取る）
+const progressMessage = ref("");
+
+// ボタンの状態
+const buttonState = ref(false);
+
+// Walkデータ格納用
+const walkData = ref(null);
+
+// SVGSVGElement格納用
+const svgContainer = ref(null);
+
+// DOM要素への参照
+const svgContainerRef = ref(null);
+
+// svgContainerの変更を監視して、描画を更新する
+watch(svgContainer, (newValue) => {
+  const container = svgContainerRef.value;
+  if (container && newValue) {
+    // 既存の描画をクリア
+    container.innerHTML = '';
+    // 新しい SVGElement を追加
+    container.appendChild(newValue);
+  }
+});
+
+/* -------------------------------------------------------------------------- */
+
+// Walk Start
+async function walkStart() {
+  await invoke("walk_start", { str_params: JSON.stringify(walkParams.value) })
+    .then((success) => {
+      // 成功した場合
+      // 受信メッセージを変更
+      progressMessage.value = "Post-processing";
+
+      // 受信したJSONをオブジェクトにデコード
+      walkData.value = JSON.parse(success);
+
+      // SVGエレメントを作成して格納
+      svgContainer.value = generateSunburst(walkData.value);
+
+      // 受信メッセージを変更
+      progressMessage.value = "Completion!";
+    })
+    .catch((failure) => {
+      // 失敗した場合
+      progressMessage.value = "Error!";
+      console.error(failure);
+    });
+  buttonState.value = false;
+}
+
+// Abort
+async function abort() {
+  await invoke("abort", {})
+  buttonState.value = true;
+}
+
+// Progress View
+async function progressView() {
+  await listen("ProgressNotification", event => {
+    // 受信メッセージを格納
+    progressMessage.value = event.payload;
+  });
+}
+progressView();
+
+// ステートを変更
+async function changeState() {
+  buttonState.value = !buttonState.value;
+  if (buttonState.value) {
+    walkStart();
+  } else {
+    abort();
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+
 </script>
 
 <template>
-  <div class="container">
-    <h1>Welcome to Tauri!</h1>
+  <div style="background-color: #37474F; height: 100vh;">
+    <v-container class="d-flex flex-row">
 
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
+      <v-btn density="compact" :color="buttonState ? 'blue-grey-darken-1' : 'amber-darken-1'"
+        :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState">
+      </v-btn>
 
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
+      <span style="color:#ffffff" class="mx-5">
+        {{ progressMessage }}
+      </span>
 
-    <p>
-      Recommended IDE setup:
-      <a href="https://code.visualstudio.com/" target="_blank">VS Code</a>
-      +
-      <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-      +
-      <a href="https://github.com/tauri-apps/tauri-vscode" target="_blank"
-        >Tauri</a
-      >
-      +
-      <a href="https://github.com/rust-lang/rust-analyzer" target="_blank"
-        >rust-analyzer</a
-      >
-    </p>
+    </v-container>
 
-    <p>
-      <Abort />
-    </p>
-    <p>
-      <WalkStart />
-    </p>
-    <p>
-      <ProgressView />
-    </p>
-    <p>
-      <NodeReload />
-    </p>
+    <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
+
+    <v-container>
+      <div ref="svgContainerRef" style="width: 70vh; height: 70vh;"></div>
+    </v-container>
+
   </div>
 </template>
 
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-</style>
+<style></style>

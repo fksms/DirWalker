@@ -132,7 +132,7 @@ fn walk(dir: PathBuf, walk_data: &WalkData, depth: usize) -> Option<Node> {
                                         walk_data.invert_filter_regex,
                                         walk_data.use_apparent_size,
                                         data.is_symlink(),
-                                        depth,
+                                        depth + 1,
                                     );
 
                                     prog_data.num_files.fetch_add(1, ORDERING);

@@ -28,6 +28,12 @@ impl WalkManager {
         *locked_node = node;
     }
 
+    // ノード全体を取得
+    pub fn get_full_node(&self) -> Option<Node> {
+        let locked_node = self.node.lock().unwrap();
+        return locked_node.clone();
+    }
+
     // 深さ指定で部分的ノードを取得
     pub fn get_partial_node(&self, depth: usize) -> Option<Node> {
         let locked_node = self.node.lock().unwrap();
