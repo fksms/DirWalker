@@ -1,6 +1,30 @@
+<script setup>
+
+import { ref, watch } from "vue";
+
 import * as d3 from 'd3'
 
-function generateSunburst(data) { // returnの型は(SVGSVGElement | null)
+// SVGSVGElement格納用
+const svgContainer = ref();
+
+// DOM要素への参照
+const svgContainerRef = ref();
+
+// svgContainerの変更を監視して、描画を更新する
+watch(svgContainer, (newValue) => {
+    const container = svgContainerRef.value;
+    if (container && newValue) {
+        // 既存の描画をクリア
+        container.innerHTML = '';
+        // 新しいSVGSVGElementを追加
+        container.appendChild(newValue);
+    }
+});
+
+// Sunburstの作成
+//
+// returnの型は(SVGSVGElement | null)
+function generateSunburst(data) {
 
     // SVG（viewBox）のサイズ
     const width = 500;
@@ -110,8 +134,8 @@ function generateSunburst(data) { // returnの型は(SVGSVGElement | null)
         .attr("fill-opacity", 1);
 
 
-    return svg.node();
-
+    //return svg.node();
+    svgContainer.value = svg.node();
 
 
     // visibleDepthで指定した値より深いノードはfalseを返す
@@ -221,7 +245,7 @@ function generateSunburst(data) { // returnの型は(SVGSVGElement | null)
             // ポインターイベントの設定
             .attr("pointer-events", d => arcVisible(d, minDepth) ? "auto" : "none")
             // arcにカーソルを合わせた時
-            .on("mouseenter", (event, d) => { /* doSomething */ })
+            .on("mouseenter", (event, d) => { console.log(d); })
             // arc上で右クリックした時
             .on("contextmenu", (event, d) => {
                 //event.preventDefault();
@@ -251,7 +275,7 @@ function generateSunburst(data) { // returnの型は(SVGSVGElement | null)
                     // d属性（パス）を設定
                     .attr("d", d => arc(value))
                     // fill属性（塗りつぶし）を設定
-                    .attr("fill", d => d3.color("#5F5F5F"))
+                    .attr("fill", d => d3.color("#777777"))
                     // arcにカーソルを合わせた時
                     .on("mouseenter", (event, d) => { /* doSomething */ });
             }
@@ -324,7 +348,15 @@ function generateSunburst(data) { // returnの型は(SVGSVGElement | null)
             });
         // --------------------ここまでmain-arc用--------------------
     }
-
 }
 
-export { generateSunburst }
+// 外部から参照可能なプロパティを定義
+defineExpose({
+    generateSunburst,
+});
+
+</script>
+
+<template>
+    <div ref="svgContainerRef" style="width: 70vh; height: 70vh;"></div>
+</template>
