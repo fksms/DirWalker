@@ -1,7 +1,42 @@
 <script setup>
 
-import { ref } from "vue";
-import { listen } from "@tauri-apps/api/event";
+import { ref, watch } from "vue";
+
+
+
+function generateDirectoryList(data) {
+  console.log(data);
+  const size = toReadable(data.value)
+  console.log(size[0] + " " + size[1]);
+}
+
+
+// TB/GB/MB/KBに変換
+function toReadable(size) {
+  if (size >= 1e12) {
+    return [(size / 1e12).toFixed(1), "TB"];
+  }
+  else if (size >= 1e9) {
+    return [(size / 1e9).toFixed(1), "GB"];
+  }
+  else if (size >= 1e6) {
+    return [(size / 1e6).toFixed(1), "MB"];
+  }
+  else if (size >= 1e3) {
+    return [(size / 1e3).toFixed(1), "KB"];
+  }
+  else {
+    return [size.toFixed(1), "B"];
+  }
+}
+
+
+// 外部から参照可能なプロパティを定義
+defineExpose({
+  generateDirectoryList,
+  toReadable,
+});
+
 
 const desserts = [
   {
@@ -49,24 +84,5 @@ const desserts = [
 </script>
 
 <template>
-  <v-simple-table>
-    <template v-slot:default>
-      <thead>
-        <tr>
-          <th class="text-left">
-            Name
-          </th>
-          <th class="text-left">
-            Calories
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in desserts" :key="item.name">
-          <td>{{ item.name }}</td>
-          <td>{{ item.calories }}</td>
-        </tr>
-      </tbody>
-    </template>
-  </v-simple-table>
+  <v-data-table-virtual :items="desserts" density="compact" height="400"></v-data-table-virtual>
 </template>

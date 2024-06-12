@@ -4,6 +4,10 @@ import { ref, watch } from "vue";
 
 import * as d3 from 'd3'
 
+// 親から渡されたコンポーネントの参照を受け取る
+const props = defineProps(["viewDirectoryFileList"]);
+
+
 // SVGSVGElement格納用
 const svgContainer = ref();
 
@@ -40,7 +44,7 @@ function generateSunburst(data) {
     const angleThreshold = 2.0;
 
     // アニメーションの遷移時間[msec]
-    const transitionDuration = 750;
+    const transitionDuration = 600;
 
 
     // HierarchyNodeの作成
@@ -117,11 +121,14 @@ function generateSunburst(data) {
         .attr("r", radius)
         .attr("fill", "none")
         .attr("pointer-events", "all")
-        .on("click", (event, d) => clicked(event, d));
+        .on("click", (event, d) => arcClicked(d));
 
 
     // Arcを作成
     appendArc(0, true);
+
+    // 中心にサイズを表記
+    appendText(root.value);
 
 
     // 初回のアニメーション（初回は不透明度を0に設定してから1になるようにフェードインさせる）
@@ -133,7 +140,21 @@ function generateSunburst(data) {
         .ease(d3.easeLinear)
         .attr("fill-opacity", 1);
 
+    // 初回のアニメーション（初回は不透明度を0に設定してから1になるようにフェードインさせる）
+    svg.selectAll("text")
+        .attr("fill-opacity", 0);
+    svg.selectAll("text")
+        .transition()
+        .duration(transitionDuration)
+        .ease(d3.easeLinear)
+        .attr("fill-opacity", 1);
 
+
+    // Listを作成
+    props.viewDirectoryFileList.generateDirectoryList(root);
+
+
+    // SVGSVGElementを格納
     //return svg.node();
     svgContainer.value = svg.node();
 
@@ -245,7 +266,10 @@ function generateSunburst(data) {
             // ポインターイベントの設定
             .attr("pointer-events", d => arcVisible(d, minDepth) ? "auto" : "none")
             // arcにカーソルを合わせた時
-            .on("mouseenter", (event, d) => { console.log(d); })
+            .on("mouseenter", (event, d) => {
+                // Listを作成
+                props.viewDirectoryFileList.generateDirectoryList(d);
+            })
             // arc上で右クリックした時
             .on("contextmenu", (event, d) => {
                 //event.preventDefault();
@@ -256,7 +280,7 @@ function generateSunburst(data) {
         svg.selectAll("path.main-arc")
             .filter(d => d.children)
             .style("cursor", "pointer")
-            .on("click", (event, d) => clicked(event, d));
+            .on("click", (event, d) => arcClicked(d));
 
         // ラベルの設定
         svg.selectAll("path.main-arc")
@@ -289,10 +313,27 @@ function generateSunburst(data) {
     }
 
 
+    // テキストを設定
+    //
+    // size: ファイルサイズを入力
+    function appendText(size) {
+        svg.selectAll("text")
+            .data(props.viewDirectoryFileList.toReadable(size))
+            .join("text")
+            .attr("text-anchor", "middle")
+            .attr("fill", "#FFFFFF")
+            .attr("x", 0)
+            .attr("y", (d, i) => i * 35 - 5)
+            .attr("font-size", "2em")
+            .attr("pointer-events", "none")
+            .text(d => d);
+    }
+
+
     // クリック時の動作
     //
     // p: クリックされた円弧のデータ
-    function clicked(event, p) {
+    function arcClicked(p) {
         // 中心円をクリックした場合、"circle"タグのdatumにクリックされた円弧の親を設定、parentが存在しない場合はrootを設定
         parent.datum(p.parent || root);
 
@@ -311,11 +352,15 @@ function generateSunburst(data) {
         // 移動先のノードの深さ
         const targetDepth = p.depth;
 
-        // "path"の要素を全て削除
+        // "path", "text"の要素を全て削除
         svg.selectAll("path").remove();
+        svg.selectAll("text").remove();
 
         // Arcを作成
         appendArc(targetDepth, false);
+
+        // 中心にサイズを表記
+        appendText(p.value);
 
         // 変更を反映させる
         svg.enter();
@@ -324,6 +369,10 @@ function generateSunburst(data) {
         svg.selectAll("path.squashed-arc")
             .attr("fill-opacity", 0);
         // --------------------ここまでsquashed-arc用--------------------
+        // --------------------ここからtext用--------------------
+        svg.selectAll("text")
+            .attr("fill-opacity", 0);
+        // --------------------ここまでtext用--------------------
 
         // --------------------ここからmain-arc用--------------------
         // d.current: 移動前の円弧の座標
@@ -345,6 +394,13 @@ function generateSunburst(data) {
                     .ease(d3.easeLinear)
                     .attr("fill-opacity", 1);
                 // --------------------ここまでsquashed-arc用--------------------
+                // --------------------ここからtext用--------------------
+                svg.selectAll("text")
+                    .transition()
+                    .duration(transitionDuration / 3)
+                    .ease(d3.easeLinear)
+                    .attr("fill-opacity", 1);
+                // --------------------ここまでtext用--------------------
             });
         // --------------------ここまでmain-arc用--------------------
     }
@@ -358,5 +414,5 @@ defineExpose({
 </script>
 
 <template>
-    <div ref="svgContainerRef" style="width: 70vh; height: 70vh;"></div>
+    <div ref="svgContainerRef" style="height: 70vmin;"></div>
 </template>

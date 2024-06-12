@@ -20,10 +20,14 @@ const viewDirectoryFileList = ref();
 
     <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
 
-    <v-container>
+    <v-container fluid>
       <v-row>
-        <ViewSunburstChart ref="viewSunburstChart"></ViewSunburstChart>
-        <ViewDirectoryFileList ref="viewDirectoryFileList"></ViewDirectoryFileList>
+        <v-col>
+          <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList"></ViewSunburstChart>
+        </v-col>
+        <v-col>
+          <ViewDirectoryFileList ref="viewDirectoryFileList"></ViewDirectoryFileList>
+        </v-col>
       </v-row>
     </v-container>
 

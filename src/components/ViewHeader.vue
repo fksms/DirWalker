@@ -91,7 +91,7 @@ async function abort() {
 
 
 <template>
-    <v-container class="d-flex flex-row">
+    <v-container fluid class="d-flex flex-row">
 
         <v-btn density="compact" :color="buttonState ? 'blue-grey-darken-1' : 'amber-darken-1'"
             :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState">
