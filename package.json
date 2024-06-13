@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@mdi/font": "^7.4.47",
     "@tauri-apps/api": "^1",
     "d3": "^7.9.0",
     "vite-plugin-vuetify": "^2.0.3",

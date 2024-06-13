@@ -86,9 +86,7 @@ async function abort() {
 
 /* -------------------------------------------------------------------------- */
 
-
 </script>
-
 
 <template>
     <v-container fluid class="d-flex flex-row">
@@ -97,7 +95,7 @@ async function abort() {
             :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState">
         </v-btn>
 
-        <span style="color:#ffffff" class="mx-5">
+        <span class="mx-5 text-white">
             {{ progressMessage }}
         </span>
 

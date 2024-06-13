@@ -1,13 +1,32 @@
 <script setup>
 
-import { ref, watch } from "vue";
+import { ref } from "vue";
+
+import '@mdi/font/css/materialdesignicons.css'
 
 
+// 描画用情報格納用
+const ownColor = ref();
+const ownName = ref();
+const ownSize = ref();
+const children = ref();
 
-function generateDirectoryList(data) {
-  console.log(data);
-  const size = toReadable(data.value)
-  console.log(size[0] + " " + size[1]);
+
+// リストを作成
+function generateDirectoryList(node) {
+  ownColor.value = node.color;
+  ownName.value = node.data.name;
+  ownSize.value = node.data.size;
+  children.value = node.children;
+}
+
+
+// パスの最後の部分を取得
+function getLastPath(path) {
+  // パスをスラッシュで分割
+  const segments = path.split('/');
+  // 最後の要素を返す
+  return segments[segments.length - 1];
 }
 
 
@@ -31,6 +50,14 @@ function toReadable(size) {
 }
 
 
+// 配列から文字列に変換
+function array2String(array) {
+  // デリミタを指定
+  const delimiter = " "
+  return array.join(delimiter);
+}
+
+
 // 外部から参照可能なプロパティを定義
 defineExpose({
   generateDirectoryList,
@@ -38,51 +65,44 @@ defineExpose({
 });
 
 
-const desserts = [
-  {
-    name: 'Frozen Yogurt',
-    calories: 159,
-  },
-  {
-    name: 'Ice cream sandwich',
-    calories: 237,
-  },
-  {
-    name: 'Eclair',
-    calories: 262,
-  },
-  {
-    name: 'Cupcake',
-    calories: 305,
-  },
-  {
-    name: 'Gingerbread',
-    calories: 356,
-  },
-  {
-    name: 'Jelly bean',
-    calories: 375,
-  },
-  {
-    name: 'Lollipop',
-    calories: 392,
-  },
-  {
-    name: 'Honeycomb',
-    calories: 408,
-  },
-  {
-    name: 'Donut',
-    calories: 452,
-  },
-  {
-    name: 'KitKat',
-    calories: 518,
-  },
-]
-
 </script>
 
 <template>
-  <v-data-table-virtual :items="desserts" density="compact" height="400"></v-data-table-virtual>
+  <v-table class="bg-transparent text-white">
+    <tbody>
+      <tr v-if="ownColor && ownName && ownSize">
+        <th width="10%"><v-icon :color="ownColor">mdi-circle</v-icon></th>
+        <th width="65%" nowrap class="text-left">{{ getLastPath(ownName) }}</th>
+        <th width="25%" nowrap class="text-right">{{ array2String(toReadable(ownSize)) }}</th>
+      </tr>
+    </tbody>
+  </v-table>
+  <v-table density="compact" class="bg-transparent text-white" hover height="400">
+    <tbody>
+      <tr v-for="item in children" :key="item.data.name" @click="">
+        <td width="10%"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
+        <td width="65%" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
+        <td width="25%" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
+      </tr>
+    </tbody>
+  </v-table>
 </template>
+
+
+<style>
+td,
+th {
+  /* 文字数が多い場合は省略 */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 0;
+  /* 上下のボーダーを削除 */
+  border: none !important;
+}
+
+tr:hover td {
+  /* blue-grey-lighten-1 */
+  background-color: #78909C;
+}
+</style>

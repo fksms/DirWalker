@@ -14,7 +14,7 @@ const viewDirectoryFileList = ref();
 </script>
 
 <template>
-  <div style="background-color: #37474F; height: 100vh;">
+  <div class="bg-blue-grey-darken-3" style="height: 100vh;">
 
     <ViewHeader ref="viewHeader" :viewSunburstChart="viewSunburstChart"></ViewHeader>
 
@@ -34,4 +34,9 @@ const viewDirectoryFileList = ref();
   </div>
 </template>
 
-<style></style>
+<style>
+/* フォントの指定 */
+:root {
+  font-family: Avenir, Futura, 'Century Gothic', YuGothic, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+}
+</style>
