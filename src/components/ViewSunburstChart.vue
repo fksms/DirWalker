@@ -217,8 +217,8 @@ function generateSunburst(data) {
         .attr("fill-opacity", 1);
 
 
-    // Listを作成
-    props.viewDirectoryFileList.generateDirectoryList(root);
+    // Listの更新
+    updateList(root);
 
 
     // SVGSVGElementを格納
@@ -235,12 +235,18 @@ function generateSunburst(data) {
     }
 
 
+    // TB/GB/MB/KBに変換
+    function toReadable(size) {
+        return props.viewDirectoryFileList.toReadable(size);
+    }
+
+
     // テキストを描画
     //
     // fileSize: ファイルサイズを入力
     function drawText(fileSize) {
         svg.selectAll("text")
-            .data(props.viewDirectoryFileList.toReadable(fileSize))
+            .data(toReadable(fileSize))
             .join("text")
             .attr("text-anchor", "middle")
             .attr("fill", "#FFFFFF")
@@ -354,7 +360,12 @@ function generateSunburst(data) {
         squashedArcs.forEach((value, key) => {
             // 円弧の角度[degree]が大きいもののみ表示
             if ((value.x1 - value.x0) > (angleThreshold * Math.PI / 180)) {
-                console.log(value);
+
+                // リスト生成時のオプションを指定
+                const option = {
+                    threshold: value.head // リスト生成時の閾値
+                }
+
                 // path要素を生成
                 svg.append("path")
                     // データを作成
@@ -396,6 +407,9 @@ function generateSunburst(data) {
 
         // circleのデータを更新
         circle.datum(p);
+
+        // Listの更新
+        updateList(p);
 
         // クリックされた円弧の移動先を設定
         // "each"によって全てのノードについて設定を行う
@@ -485,8 +499,8 @@ function generateSunburst(data) {
 
         // タイマーをセット
         timerHandler = setTimeout(() => {
-            // Listを作成
-            props.viewDirectoryFileList.generateDirectoryList(p);
+            // Listの更新
+            updateList(p);
         }, hoverTimeout);
 
         // リピート用関数
@@ -521,6 +535,15 @@ function generateSunburst(data) {
             .attr("fill-opacity", 1);
     }
 }
+
+
+// Listの更新
+//
+// node: ノードデータ
+function updateList(node) {
+    return props.viewDirectoryFileList.generateDirectoryList(node);
+}
+
 
 // 外部から参照可能なプロパティを定義
 defineExpose({
