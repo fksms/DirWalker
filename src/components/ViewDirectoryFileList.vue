@@ -72,6 +72,22 @@ function updateSunburst(node) {
 }
 
 
+// カーソルを合わせた時の動作
+//
+// node: ノードデータ
+function mouseEntered(node) {
+  return props.viewSunburstChart.mouseEntered(null, node);
+}
+
+
+// カーソルを離した時の動作
+//
+// node: ノードデータ
+function mouseLeaved(node) {
+  return props.viewSunburstChart.mouseLeaved(null, node);
+}
+
+
 // 外部から参照可能なプロパティを定義
 defineExpose({
   generateDirectoryList,
@@ -82,7 +98,7 @@ defineExpose({
 </script>
 
 <template>
-  <v-table class="bg-transparent text-white">
+  <v-table class="bg-transparent text-white cursor-default">
     <tbody>
       <tr v-if="ownColor && ownName && ownSize">
         <th width="10%"><v-icon :color="ownColor">mdi-circle</v-icon></th>
@@ -93,7 +109,8 @@ defineExpose({
   </v-table>
   <v-table density="compact" class="bg-transparent text-white" hover height="400">
     <tbody>
-      <tr v-for="item in children" :key="item.data.name" @click="updateSunburst(item)">
+      <tr v-for="item in children" :key="item.data.name" @click="updateSunburst(item)" @mouseenter="mouseEntered(item)"
+        @mouseleave="mouseLeaved(item)">
         <td width="10%"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
         <td width="65%" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
         <td width="25%" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
@@ -119,5 +136,9 @@ tr:hover td {
   /* blue-grey-lighten-1 */
   background-color: #78909C;
   cursor: pointer;
+}
+
+.cursor-default {
+  cursor: default;
 }
 </style>

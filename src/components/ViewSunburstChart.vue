@@ -121,10 +121,19 @@ function generateSunburst(data) {
     // scaleOrdinal: 配列の繰り返し設定を行う
     const colorWheel = d3.scaleOrdinal().range(directoryColorCodes);
 
+    // nodeId用カウンター
+    let count = 0;
+
     // 各ノードにプロパティを追加する
     //
     // each: ノードを幅優先で呼び出す
     partition.each(d => {
+
+        // nodeIdの追加（SVGのidは数字から始まってはいけないため、先頭に文字を付ける）
+        // https://stackoverflow.com/questions/58302561/howto-select-an-element-by-its-id-d3
+        d.nodeId = "M" + count;
+        count++;
+
         // currentプロパティの追加
         d.current = {
             x0: d.x0,
@@ -186,14 +195,20 @@ function generateSunburst(data) {
     // datum: 単一のエレメントを作成
     svgElement.append("circle")
         .datum(partition)
+        // IDを設定
+        .attr("id", partition.nodeId)
+        // 半径を設定
         .attr("r", radius)
+        // fill属性（塗りつぶし）を設定
         .attr("fill", "none")
+        // ポインターイベントの設定
         .attr("pointer-events", "all")
+        // 左クリックした時
         .on("click", (event, d) => leftClicked(d.parent))
         // カーソルを合わせた時
         .on("mouseenter", (event, d) => { mouseEntered(event, d) })
         // カーソルを離した時
-        .on("mouseleave", (event, d) => { mouseLeaved(event) });
+        .on("mouseleave", (event, d) => { mouseLeaved(event, d) });
 
     // Arcを描画
     drawArc(0, true);
@@ -331,6 +346,8 @@ function drawArc(lowerDepth, isFirstCalled) {
         .join("path")
         // classを設定
         .classed("main-arc", true)
+        // IDを設定
+        .attr("id", d => d.nodeId)
         // d属性（パス）を設定
         .attr("d", d => {
             // First Called
@@ -349,7 +366,7 @@ function drawArc(lowerDepth, isFirstCalled) {
         // カーソルを合わせた時
         .on("mouseenter", (event, d) => { mouseEntered(event, d) })
         // カーソルを離した時
-        .on("mouseleave", (event, d) => { mouseLeaved(event) })
+        .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
         // 右クリックした時
         .on("contextmenu", (event, d) => {
             //event.preventDefault();
@@ -359,7 +376,9 @@ function drawArc(lowerDepth, isFirstCalled) {
     // 子ノードを持っている場合はクリック可能に
     svgElement.selectAll("path.main-arc")
         .filter(d => d.children)
+        // カーソルを指差しの手にする
         .style("cursor", "pointer")
+        // 左クリックした時
         .on("click", (event, d) => leftClicked(d));
     // --------------------ここまでmain-arc用--------------------
 
@@ -380,6 +399,8 @@ function drawArc(lowerDepth, isFirstCalled) {
                 .datum(value.parentNode)
                 // classを設定
                 .classed("squashed-arc", true)
+                // IDを設定
+                .attr("id", "_")
                 // d属性（パス）を設定
                 .attr("d", d => {
                     coordinates.x0 = value.x0;
@@ -393,7 +414,7 @@ function drawArc(lowerDepth, isFirstCalled) {
                 // カーソルを合わせた時
                 .on("mouseenter", (event, d) => { mouseEntered(event, d) })
                 // カーソルを離した時
-                .on("mouseleave", (event, d) => { mouseLeaved(event) })
+                .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
                 // 右クリックした時
                 .on("contextmenu", (event, d) => {
                     //event.preventDefault();
@@ -407,33 +428,29 @@ function drawArc(lowerDepth, isFirstCalled) {
 
 // 左クリックされた時の動作
 //
-// p: クリックされた円弧or円のデータ
-function leftClicked(p) {
+// node: クリックされた円弧or円のデータ
+function leftClicked(node) {
 
     // pがnull（parentがnullの時にクリックされた）の場合はリターンして何もしない
-    if (p == null) return;
+    if (node == null) return;
 
     // circleのデータを更新
     svgElement.select("circle")
-        .datum(p);
+        .datum(node);
 
     // Listの更新
-    updateList(p);
+    updateList(node);
 
-    // クリックされた円弧の移動先を設定
-    // "each"によって全てのノードについて設定を行う
-    //
-    // p: 移動前のノードデータ
-    // d: 移動後のノードデータ
+    // 円弧の移動先（target）を設定
     partition.each(d => d.target = {
-        x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-        x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-        y0: Math.max(0, d.y0 - p.depth),
-        y1: Math.max(0, d.y1 - p.depth)
+        x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+        x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+        y0: Math.max(0, d.y0 - node.depth),
+        y1: Math.max(0, d.y1 - node.depth)
     });
 
     // 移動先のノードの深さ
-    const targetDepth = p.depth;
+    const targetDepth = node.depth;
 
     // "path", "text"の要素を全て削除
     svgElement.selectAll("path").remove();
@@ -443,7 +460,7 @@ function leftClicked(p) {
     drawArc(targetDepth, false);
 
     // FileSizeを描画
-    drawFileSize(p.value);
+    drawFileSize(node.value);
 
     // 変更を反映させる
     svgElement.enter();
@@ -491,30 +508,42 @@ function leftClicked(p) {
 
 // タイマーハンドラー
 let timerHandler = null;
+
 // 他のアニメーションをinterruptしないように、transitionにnameを設定する
 const transitionName = "blink"
 
 
 // カーソルを合わせた時の動作
 //
-// event: イベントハンドラー
-// p: カーソルを合わせた円弧or円のデータ
-function mouseEntered(event, p) {
-    // カーソルを合わせた円弧or円のパスを取得
-    const target = d3.select(event.currentTarget);
+// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
+// node: カーソルを合わせた円弧or円のデータ
+function mouseEntered(event, node) {
+
+    // 円弧or円のパスを格納
+    let targetElement = null;
+
+    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
+    if (event) {
+        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
+        targetElement = d3.select(event.currentTarget);
+
+        // タイマーをセット
+        timerHandler = setTimeout(() => {
+            // Listの更新
+            updateList(node);
+        }, hoverTimeout);
+    }
+    else {
+        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
+        targetElement = svgElement.select("#" + node.nodeId);
+    }
 
     // アニメーションをリピート
     repeat();
 
-    // タイマーをセット
-    timerHandler = setTimeout(() => {
-        // Listの更新
-        updateList(p);
-    }, hoverTimeout);
-
     // リピート用関数
     function repeat() {
-        target
+        targetElement
             .transition(transitionName)
             .duration(blinkInterval / 2)
             .ease(d3.easeLinear)
@@ -530,16 +559,28 @@ function mouseEntered(event, p) {
 
 // カーソルを離した時の動作
 //
-// event: イベントハンドラー
-function mouseLeaved(event) {
-    // カーソルを離した円弧or円のパスを取得
-    const target = d3.select(event.currentTarget);
+// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
+// node: カーソルを合わせた円弧or円のデータ
+function mouseLeaved(event, node) {
 
-    // タイマーをキャンセル
-    clearTimeout(timerHandler);
+    // 円弧or円のパスを格納
+    let targetElement = null;
+
+    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
+    if (event) {
+        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
+        targetElement = d3.select(event.currentTarget);
+
+        // タイマーをキャンセル
+        clearTimeout(timerHandler);
+    }
+    else {
+        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
+        targetElement = svgElement.select("#" + node.nodeId);
+    }
 
     // アニメーションを中断
-    target
+    targetElement
         .interrupt(transitionName)
         .attr("fill-opacity", 1);
 }
@@ -557,6 +598,8 @@ function updateList(node) {
 defineExpose({
     generateSunburst,
     leftClicked,
+    mouseEntered,
+    mouseLeaved,
 });
 
 </script>

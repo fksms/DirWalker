@@ -95,9 +95,15 @@ async function abort() {
             :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState">
         </v-btn>
 
-        <span class="mx-5 text-white">
+        <span class="mx-5 text-white cursor-default">
             {{ progressMessage }}
         </span>
 
     </v-container>
 </template>
+
+<style>
+.cursor-default {
+    cursor: default;
+}
+</style>

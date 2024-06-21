@@ -37,8 +37,8 @@ const viewDirectoryFileList = ref();
 </template>
 
 <style>
-/* フォントの指定 */
 :root {
+  /* フォントの指定 */
   font-family: Avenir, Futura, 'Century Gothic', YuGothic, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
 
   user-select: none;
