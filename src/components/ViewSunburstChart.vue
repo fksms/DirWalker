@@ -2,7 +2,7 @@
 
 import { ref, watch } from "vue";
 
-import * as d3 from 'd3'
+import * as d3 from "d3";
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewDirectoryFileList"]);
@@ -11,7 +11,7 @@ const props = defineProps(["viewDirectoryFileList"]);
 // DOM格納用
 const svgDOM = ref();
 
-// DOM要素への参照
+// DOMへの参照
 const svgDOMRef = ref();
 
 // svgContainerの変更を監視して、描画を更新する
@@ -556,6 +556,7 @@ function updateList(node) {
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateSunburst,
+    leftClicked,
 });
 
 </script>

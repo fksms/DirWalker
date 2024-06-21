@@ -23,10 +23,12 @@ const viewDirectoryFileList = ref();
     <v-container fluid>
       <v-row>
         <v-col>
-          <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList"></ViewSunburstChart>
+          <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList">
+          </ViewSunburstChart>
         </v-col>
         <v-col>
-          <ViewDirectoryFileList ref="viewDirectoryFileList"></ViewDirectoryFileList>
+          <ViewDirectoryFileList ref="viewDirectoryFileList" :viewSunburstChart="viewSunburstChart">
+          </ViewDirectoryFileList>
         </v-col>
       </v-row>
     </v-container>
@@ -38,5 +40,13 @@ const viewDirectoryFileList = ref();
 /* フォントの指定 */
 :root {
   font-family: Avenir, Futura, 'Century Gothic', YuGothic, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
 }
 </style>

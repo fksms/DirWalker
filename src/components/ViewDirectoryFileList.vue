@@ -2,7 +2,10 @@
 
 import { ref } from "vue";
 
-import '@mdi/font/css/materialdesignicons.css'
+import "@mdi/font/css/materialdesignicons.css";
+
+// 親から渡されたコンポーネントの参照を受け取る
+const props = defineProps(["viewSunburstChart"]);
 
 
 // 描画用情報格納用
@@ -58,6 +61,17 @@ function array2String(array) {
 }
 
 
+// Sunburstの更新
+//
+// node: ノードデータ
+function updateSunburst(node) {
+  // childrenが存在しない場合はupdateしない
+  if (node.children) {
+    return props.viewSunburstChart.leftClicked(node);
+  }
+}
+
+
 // 外部から参照可能なプロパティを定義
 defineExpose({
   generateDirectoryList,
@@ -79,7 +93,7 @@ defineExpose({
   </v-table>
   <v-table density="compact" class="bg-transparent text-white" hover height="400">
     <tbody>
-      <tr v-for="item in children" :key="item.data.name" @click="">
+      <tr v-for="item in children" :key="item.data.name" @click="updateSunburst(item)">
         <td width="10%"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
         <td width="65%" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
         <td width="25%" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
@@ -104,5 +118,6 @@ th {
 tr:hover td {
   /* blue-grey-lighten-1 */
   background-color: #78909C;
+  cursor: pointer;
 }
 </style>
