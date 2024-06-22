@@ -82,6 +82,9 @@ async function abort() {
     await invoke("abort", {})
     // ボタンの状態を戻す
     buttonState.value = true;
+
+    // 受信メッセージを変更
+    progressMessage.value = "Abort!";
 }
 
 /* -------------------------------------------------------------------------- */

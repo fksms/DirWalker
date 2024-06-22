@@ -5,11 +5,13 @@ import { ref } from "vue";
 import ViewHeader from "./components/ViewHeader.vue";
 import ViewSunburstChart from "./components/ViewSunburstChart.vue";
 import ViewDirectoryFileList from "./components/ViewDirectoryFileList.vue";
+import ViewBreadcrumbsList from "./components/ViewBreadcrumbsList.vue"
 
 // コンポーネントの参照を作成
 const viewHeader = ref();
 const viewSunburstChart = ref();
 const viewDirectoryFileList = ref();
+const viewBreadcrumbsList = ref();
 
 </script>
 
@@ -20,13 +22,16 @@ const viewDirectoryFileList = ref();
 
     <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
 
-    <v-container fluid>
+    <ViewBreadcrumbsList ref="viewBreadcrumbsList" :viewSunburstChart="viewSunburstChart"></ViewBreadcrumbsList>
+
+    <v-container fluid class="pt-0 pb-0">
       <v-row>
-        <v-col>
-          <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList">
+        <v-col align-self="center">
+          <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList"
+            :viewBreadcrumbsList="viewBreadcrumbsList">
           </ViewSunburstChart>
         </v-col>
-        <v-col>
+        <v-col align-self="center">
           <ViewDirectoryFileList ref="viewDirectoryFileList" :viewSunburstChart="viewSunburstChart">
           </ViewDirectoryFileList>
         </v-col>

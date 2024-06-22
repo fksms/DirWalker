@@ -8,10 +8,12 @@ import "@mdi/font/css/materialdesignicons.css";
 const props = defineProps(["viewSunburstChart"]);
 
 
-// 描画用情報格納用
+// 自身の情報
 const ownColor = ref();
 const ownName = ref();
 const ownSize = ref();
+
+// 子ノード
 const children = ref();
 
 
@@ -33,31 +35,17 @@ function getLastPath(path) {
 }
 
 
-// TB/GB/MB/KBに変換
-function toReadable(size) {
-  if (size >= 1e12) {
-    return [(size / 1e12).toFixed(1), "TB"];
-  }
-  else if (size >= 1e9) {
-    return [(size / 1e9).toFixed(1), "GB"];
-  }
-  else if (size >= 1e6) {
-    return [(size / 1e6).toFixed(1), "MB"];
-  }
-  else if (size >= 1e3) {
-    return [(size / 1e3).toFixed(1), "KB"];
-  }
-  else {
-    return [size.toFixed(1), "B"];
-  }
-}
-
-
 // 配列から文字列に変換
 function array2String(array) {
   // デリミタを指定
   const delimiter = " "
   return array.join(delimiter);
+}
+
+
+// TB/GB/MB/KBに変換
+function toReadable(value) {
+  return props.viewSunburstChart.toReadable(value);
 }
 
 
@@ -91,9 +79,7 @@ function mouseLeaved(node) {
 // 外部から参照可能なプロパティを定義
 defineExpose({
   generateDirectoryList,
-  toReadable,
 });
-
 
 </script>
 
@@ -107,9 +93,9 @@ defineExpose({
       </tr>
     </tbody>
   </v-table>
-  <v-table density="compact" class="bg-transparent text-white" hover height="400">
+  <v-table density="compact" class="bg-transparent text-white" hover height="360">
     <tbody>
-      <tr v-for="item in children" :key="item.data.name" @click="updateSunburst(item)" @mouseenter="mouseEntered(item)"
+      <tr v-for="item in children" v-bind:key="item" @click="updateSunburst(item)" @mouseenter="mouseEntered(item)"
         @mouseleave="mouseLeaved(item)">
         <td width="10%"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
         <td width="65%" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>

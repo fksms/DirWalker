@@ -5,7 +5,7 @@ import { ref, watch } from "vue";
 import * as d3 from "d3";
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(["viewDirectoryFileList"]);
+const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
 
 
 // DOM格納用
@@ -159,9 +159,9 @@ function generateSunburst(data) {
 
                 // 考え方
                 //
-                // depth=1: 「原色/白」のカラーをX等分して、2つ目
-                // depth=2: 「depth=1/白」のカラーをX-1等分して、2つ目
-                // depth=3: 「depth=2/白」カラーをX-2等分して、2つ目
+                // depth=1: 「原色->白」のカラーをX等分して、2つ目
+                // depth=2: 「depth=1->白」のカラーをX-1等分して、2つ目
+                // depth=3: 「depth=2->白」カラーをX-2等分して、2つ目
                 // ...
                 const newColorArray = d3.scaleLinear().domain([0, visibleDepth - d.depth + 3]).range([d.parent.color, "#FFFFFF"]);
                 d.color = rgb2Hex(newColorArray(1)); // 階層が深くなるごとに明るくなる
@@ -237,6 +237,9 @@ function generateSunburst(data) {
     // Listの更新
     updateList(partition);
 
+    // Breadcrumbsの更新
+    updateBreadcrumbs(partition);
+
     // DOMを格納
     svgDOM.value = svgElement.node();
 }
@@ -253,7 +256,21 @@ function arcVisible(node, lowerDepth) {
 
 // TB/GB/MB/KBに変換
 function toReadable(value) {
-    return props.viewDirectoryFileList.toReadable(value);
+    if (value >= 1e12) {
+        return [(value / 1e12).toFixed(1), "TB"];
+    }
+    else if (value >= 1e9) {
+        return [(value / 1e9).toFixed(1), "GB"];
+    }
+    else if (value >= 1e6) {
+        return [(value / 1e6).toFixed(1), "MB"];
+    }
+    else if (value >= 1e3) {
+        return [(value / 1e3).toFixed(1), "KB"];
+    }
+    else {
+        return [value.toFixed(1), "B"];
+    }
 }
 
 
@@ -441,6 +458,9 @@ function leftClicked(node) {
     // Listの更新
     updateList(node);
 
+    // Breadcrumbsの更新
+    updateBreadcrumbs(node);
+
     // 円弧の移動先（target）を設定
     partition.each(d => d.target = {
         x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
@@ -594,12 +614,21 @@ function updateList(node) {
 }
 
 
+// Breadcrumbsの更新
+//
+// node: ノードデータ
+function updateBreadcrumbs(node) {
+    return props.viewBreadcrumbsList.generateBreadcrumbs(node);
+}
+
+
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateSunburst,
     leftClicked,
     mouseEntered,
     mouseLeaved,
+    toReadable,
 });
 
 </script>
