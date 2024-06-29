@@ -14,7 +14,7 @@ const ownName = ref();
 const ownSize = ref();
 
 // 子ノード
-const children = ref();
+const children = ref([]);
 
 
 // リストを作成
@@ -87,22 +87,22 @@ defineExpose({
   <v-table class="bg-transparent text-white cursor-default">
     <tbody>
       <tr v-if="ownColor && ownName && ownSize">
-        <th width="10%"><v-icon :color="ownColor">mdi-circle</v-icon></th>
-        <th width="65%" nowrap class="text-left">{{ getLastPath(ownName) }}</th>
-        <th width="25%" nowrap class="text-right">{{ array2String(toReadable(ownSize)) }}</th>
+        <th width="36"><v-icon :color="ownColor">mdi-circle</v-icon></th>
+        <th width="auto" nowrap class="text-left">{{ getLastPath(ownName) }}</th>
+        <th width="100" nowrap class="text-right">{{ array2String(toReadable(ownSize)) }}</th>
       </tr>
     </tbody>
   </v-table>
-  <v-table density="compact" class="bg-transparent text-white" hover height="360">
-    <tbody>
-      <tr v-for="item in children" v-bind:key="item" @click="updateSunburst(item)" @mouseenter="mouseEntered(item)"
-        @mouseleave="mouseLeaved(item)">
-        <td width="10%"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
-        <td width="65%" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
-        <td width="25%" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
+  <v-data-table :items="children" density="compact" class="bg-transparent text-white" hover hide-no-data
+    hide-default-header :hide-default-footer="(children.length <= 10) ? true : false" :items-per-page="10">
+    <template v-slot:item="{ item }">
+      <tr @click="updateSunburst(item)" @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
+        <td width="36"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
+        <td width="auto" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
+        <td width="100" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
       </tr>
-    </tbody>
-  </v-table>
+    </template>
+  </v-data-table>
 </template>
 
 
@@ -125,6 +125,21 @@ tr:hover td {
 }
 
 .cursor-default {
+  cursor: default;
+}
+
+/* フッターの上にある水平線を透明に設定 */
+hr.v-divider {
+  color: transparent;
+}
+
+/* VDataTableのitems-per-page dropdownを非表示 */
+.v-data-table-footer__items-per-page {
+  display: none !important;
+}
+
+/* フッター上のカーソルをdefaultに設定 */
+.v-data-table-footer__info {
   cursor: default;
 }
 </style>

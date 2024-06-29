@@ -634,5 +634,5 @@ defineExpose({
 </script>
 
 <template>
-    <div ref="svgDOMRef" style="height: 70vmin;"></div>
+    <div ref="svgDOMRef" style="height: 60vmin;"></div>
 </template>

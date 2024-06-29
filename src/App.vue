@@ -26,12 +26,12 @@ const viewBreadcrumbsList = ref();
 
     <v-container fluid class="pt-0 pb-0">
       <v-row>
-        <v-col align-self="center">
+        <v-col align-self="start" class="pt-10">
           <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList"
             :viewBreadcrumbsList="viewBreadcrumbsList">
           </ViewSunburstChart>
         </v-col>
-        <v-col align-self="center">
+        <v-col align-self="start">
           <ViewDirectoryFileList ref="viewDirectoryFileList" :viewSunburstChart="viewSunburstChart">
           </ViewDirectoryFileList>
         </v-col>

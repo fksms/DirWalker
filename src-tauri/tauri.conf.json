@@ -20,10 +20,12 @@
     "windows": [
       {
         "title": "tauri-test",
-        "width": 800,
-        "height": 600,        
-        "minWidth": 800,
-        "minHeight": 600
+        "width": 864,
+        "height": 648,
+        "minWidth": 864,
+        "minHeight": 648,
+        "maxWidth": 1920,
+        "maxHeight": 648
       }
     ],
     "security": {
