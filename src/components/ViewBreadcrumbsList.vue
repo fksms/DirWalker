@@ -39,10 +39,7 @@ function getLastPath(path) {
 //
 // node: ノードデータ
 function updateSunburst(node) {
-    // childrenが存在しない場合はupdateしない
-    if (node.children) {
-        return props.viewSunburstChart.leftClicked(node);
-    }
+    return props.viewSunburstChart.leftClicked(node);
 }
 
 

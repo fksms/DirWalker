@@ -19,10 +19,19 @@ const children = ref([]);
 
 // リストを作成
 function generateDirectoryList(node) {
+
+  // 配列を初期化
+  children.value.splice(0);
+
   ownColor.value = node.color;
   ownName.value = node.data.name;
   ownSize.value = node.data.size;
-  children.value = node.children;
+
+  // childrenがnullではない場合
+  if (node.children != null) {
+    // Deep copy
+    children.value = node.children.concat();
+  }
 }
 
 
@@ -53,10 +62,7 @@ function toReadable(value) {
 //
 // node: ノードデータ
 function updateSunburst(node) {
-  // childrenが存在しない場合はupdateしない
-  if (node.children) {
-    return props.viewSunburstChart.leftClicked(node);
-  }
+  return props.viewSunburstChart.leftClicked(node);
 }
 
 

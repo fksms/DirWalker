@@ -142,6 +142,14 @@ function generateSunburst(data) {
             y1: d.y1
         };
 
+        // targetプロパティの追加
+        d.target = {
+            x0: d.x0,
+            x1: d.x1,
+            y0: d.y0,
+            y1: d.y1
+        };
+
         // colorプロパティの追加
         //
         // 子ノードがある場合
@@ -175,6 +183,7 @@ function generateSunburst(data) {
         else {
             d.color = fileColorCode; // ライトグレー
         }
+
     });
 
     // svgタグの作成
@@ -203,12 +212,12 @@ function generateSunburst(data) {
         .attr("fill", "none")
         // ポインターイベントの設定
         .attr("pointer-events", "all")
-        // 左クリックした時
-        .on("click", (event, d) => leftClicked(d.parent))
         // カーソルを合わせた時
         .on("mouseenter", (event, d) => { mouseEntered(event, d) })
         // カーソルを離した時
-        .on("mouseleave", (event, d) => { mouseLeaved(event, d) });
+        .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
+        // 左クリックした時
+        .on("click", (event, d) => leftClicked(d.parent));
 
     // Arcを描画
     drawArc(0, true);
@@ -347,8 +356,9 @@ function drawArc(lowerDepth, isFirstCalled) {
                 else {
                     // 格納された座標を取得
                     let tmpCoordinates = squashedArcs.get(parentName);
-                    tmpCoordinates.x1 = coordinates.x1;
                     // 座標をUpdate
+                    tmpCoordinates.x1 = coordinates.x1;
+                    // 座標を格納
                     squashedArcs.set(parentName, tmpCoordinates);
                 }
                 // --------------------ここまでsquashed-arc用--------------------
@@ -380,23 +390,19 @@ function drawArc(lowerDepth, isFirstCalled) {
         .attr("fill-opacity", d => arcVisible(d, lowerDepth) ? 1 : 0)
         // ポインターイベントの設定
         .attr("pointer-events", d => arcVisible(d, lowerDepth) ? "auto" : "none")
+        // カーソルを指差しの手にする
+        .style("cursor", "pointer")
         // カーソルを合わせた時
         .on("mouseenter", (event, d) => { mouseEntered(event, d) })
         // カーソルを離した時
         .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
+        // 左クリックした時
+        .on("click", (event, d) => leftClicked(d))
         // 右クリックした時
         .on("contextmenu", (event, d) => {
             //event.preventDefault();
             /* doSomething */
         });
-
-    // 子ノードを持っている場合はクリック可能に
-    svgElement.selectAll("path.main-arc")
-        .filter(d => d.children)
-        // カーソルを指差しの手にする
-        .style("cursor", "pointer")
-        // 左クリックした時
-        .on("click", (event, d) => leftClicked(d));
     // --------------------ここまでmain-arc用--------------------
 
     // --------------------ここからsquashed-arc用--------------------
@@ -404,6 +410,14 @@ function drawArc(lowerDepth, isFirstCalled) {
     squashedArcs.forEach((value, key) => {
         // 円弧の角度[degree]が大きいもののみ表示
         if ((value.x1 - value.x0) > (angleThreshold * Math.PI / 180)) {
+
+            // squashed-arc用座標を生成
+            const squashedArcCoordinates = {
+                x0: value.x0,
+                x1: value.x1,
+                y0: value.y0,
+                y1: value.y1
+            }
 
             // リスト生成時のオプションを指定
             const option = {
@@ -420,10 +434,7 @@ function drawArc(lowerDepth, isFirstCalled) {
                 .attr("id", "_")
                 // d属性（パス）を設定
                 .attr("d", d => {
-                    coordinates.x0 = value.x0;
-                    coordinates.x1 = value.x1;
-                    coordinates.y0 = value.y0;
-                    coordinates.y1 = value.y1;
+                    coordinates = squashedArcCoordinates;
                     return arc(coordinates);
                 })
                 // fill属性（塗りつぶし）を設定
@@ -448,12 +459,14 @@ function drawArc(lowerDepth, isFirstCalled) {
 // node: クリックされた円弧or円のデータ
 function leftClicked(node) {
 
-    // pがnull（parentがnullの時にクリックされた）の場合はリターンして何もしない
+    // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
     if (node == null) return;
 
+    // childrenがnullの場合はリターンして何もしない
+    if (node.children == null) return;
+
     // circleのデータを更新
-    svgElement.select("circle")
-        .datum(node);
+    svgElement.select("circle").datum(node);
 
     // Listの更新
     updateList(node);
@@ -461,12 +474,29 @@ function leftClicked(node) {
     // Breadcrumbsの更新
     updateBreadcrumbs(node);
 
-    // 円弧の移動先（target）を設定
-    partition.each(d => d.target = {
-        x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
-        x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
-        y0: Math.max(0, d.y0 - node.depth),
-        y1: Math.max(0, d.y1 - node.depth)
+    // 各ノードにプロパティを追加する
+    //
+    // each: ノードを幅優先で呼び出す
+    partition.each(d => {
+
+        // 処理軽減のために、面積な小さなアークをパスから除外しており、
+        // その結果として、除外されたアークはcurrentプロパティが更新されなくなる。
+        // そのため、ここでcurrentプロパティの更新を行う。
+        d.current = {
+            x0: d.target.x0,
+            x1: d.target.x1,
+            y0: d.target.y0,
+            y1: d.target.y1
+        }
+
+        // 円弧の移動先（target）を設定
+        d.target = {
+            x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+            x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+            y0: Math.max(0, d.y0 - node.depth),
+            y1: Math.max(0, d.y1 - node.depth)
+        };
+
     });
 
     // 移動先のノードの深さ
@@ -485,18 +515,7 @@ function leftClicked(node) {
     // 変更を反映させる
     svgElement.enter();
 
-    // --------------------ここからsquashed-arc用--------------------
-    svgElement.selectAll("path.squashed-arc")
-        .attr("fill-opacity", 0);
-    // --------------------ここまでsquashed-arc用--------------------
-    // --------------------ここからtext用--------------------
-    svgElement.selectAll("text")
-        .attr("fill-opacity", 0);
-    // --------------------ここまでtext用--------------------
-
-    // --------------------ここからmain-arc用--------------------
-    // d.current: 移動前の円弧の座標
-    // d.target: 移動後の円弧の座標
+    // main-arcのアニメーション
     svgElement.selectAll("path.main-arc")
         .transition()
         .duration(transitionDuration)
@@ -504,25 +523,26 @@ function leftClicked(node) {
             const i = d3.interpolate(d.current, d.target);
             return t => d.current = i(t);
         })
-        .attrTween("d", d => () => arc(d.current))
-        // 終了後に実行
-        .on("end", (event, d) => {
-            // --------------------ここからsquashed-arc用--------------------
-            svgElement.selectAll("path.squashed-arc")
-                .transition()
-                .duration(transitionDuration / 3)
-                .ease(d3.easeLinear)
-                .attr("fill-opacity", 1);
-            // --------------------ここまでsquashed-arc用--------------------
-            // --------------------ここからtext用--------------------
-            svgElement.selectAll("text")
-                .transition()
-                .duration(transitionDuration / 3)
-                .ease(d3.easeLinear)
-                .attr("fill-opacity", 1);
-            // --------------------ここまでtext用--------------------
-        });
-    // --------------------ここまでmain-arc用--------------------
+        .attrTween("d", d => () => arc(d.current));
+
+    // squashed-arcのアニメーション
+    svgElement.selectAll("path.squashed-arc")
+        .attr("fill-opacity", 0);
+    svgElement.selectAll("path.squashed-arc")
+        .transition()
+        .duration(transitionDuration)
+        .ease(d3.easeExpIn)
+        .attr("fill-opacity", 1);
+
+    // textのアニメーション
+    svgElement.selectAll("text")
+        .attr("fill-opacity", 0);
+    svgElement.selectAll("text")
+        .transition()
+        .duration(transitionDuration)
+        .ease(d3.easeExpIn)
+        .attr("fill-opacity", 1);
+
 }
 
 
