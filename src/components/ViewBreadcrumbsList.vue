@@ -43,6 +43,14 @@ function updateSunburst(node) {
 }
 
 
+// コンテキストメニューの表示
+//
+// node: ノードデータ
+function showContextMenu(node) {
+    return props.viewSunburstChart.rightClicked(node);
+}
+
+
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateBreadcrumbs,
@@ -56,7 +64,8 @@ defineExpose({
         <ul class="breadcrumbs">
             <li v-for="(item, index) in ancestors">
                 <a v-bind:class="{ 'current': index == ancestors.length - 1 }"
-                    @click="(index != ancestors.length - 1) ? updateSunburst(item) : null">
+                    @click.left="(index != ancestors.length - 1) ? updateSunburst(item) : null"
+                    @click.right.prevent="showContextMenu(item)">
                     {{ getLastPath(item.data.name) }}
                 </a>
             </li>

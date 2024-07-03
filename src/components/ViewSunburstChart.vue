@@ -4,6 +4,9 @@ import { ref, watch } from "vue";
 
 import * as d3 from "d3";
 
+import { showContextMenu } from "./ShowContextMenu";
+
+
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
 
@@ -213,11 +216,16 @@ function generateSunburst(data) {
         // ポインターイベントの設定
         .attr("pointer-events", "all")
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => { mouseEntered(event, d) })
+        .on("mouseenter", (event, d) => mouseEntered(event, d))
         // カーソルを離した時
-        .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
+        .on("mouseleave", (event, d) => mouseLeaved(event, d))
         // 左クリックした時
-        .on("click", (event, d) => leftClicked(d.parent));
+        .on("click", (event, d) => leftClicked(d.parent))
+        // 右クリックした時
+        .on("contextmenu", (event, d) => {
+            event.preventDefault(); // デフォルトの動作をキャンセル
+            rightClicked(d)
+        });
 
     // Arcを描画
     drawArc(0, true);
@@ -393,15 +401,15 @@ function drawArc(lowerDepth, isFirstCalled) {
         // カーソルを指差しの手にする
         .style("cursor", "pointer")
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => { mouseEntered(event, d) })
+        .on("mouseenter", (event, d) => mouseEntered(event, d))
         // カーソルを離した時
-        .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
+        .on("mouseleave", (event, d) => mouseLeaved(event, d))
         // 左クリックした時
         .on("click", (event, d) => leftClicked(d))
         // 右クリックした時
         .on("contextmenu", (event, d) => {
-            //event.preventDefault();
-            /* doSomething */
+            event.preventDefault(); // デフォルトの動作をキャンセル
+            rightClicked(d)
         });
     // --------------------ここまでmain-arc用--------------------
 
@@ -440,13 +448,13 @@ function drawArc(lowerDepth, isFirstCalled) {
                 // fill属性（塗りつぶし）を設定
                 .attr("fill", squashedColorCode) // ダークグレー
                 // カーソルを合わせた時
-                .on("mouseenter", (event, d) => { mouseEntered(event, d) })
+                .on("mouseenter", (event, d) => mouseEntered(event, d))
                 // カーソルを離した時
-                .on("mouseleave", (event, d) => { mouseLeaved(event, d) })
+                .on("mouseleave", (event, d) => mouseLeaved(event, d))
                 // 右クリックした時
                 .on("contextmenu", (event, d) => {
-                    //event.preventDefault();
-                    /* doSomething */
+                    event.preventDefault(); // デフォルトの動作をキャンセル
+                    rightClicked(d)
                 });
         }
     });
@@ -542,7 +550,19 @@ function leftClicked(node) {
         .duration(transitionDuration)
         .ease(d3.easeExpIn)
         .attr("fill-opacity", 1);
+}
 
+
+// 右クリックされた時の動作
+//
+// node: クリックされた円弧or円のデータ
+function rightClicked(node) {
+
+    // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
+    if (node == null) return;
+
+    // コンテキストメニューを表示
+    showContextMenu(node);
 }
 
 
@@ -646,6 +666,7 @@ function updateBreadcrumbs(node) {
 defineExpose({
     generateSunburst,
     leftClicked,
+    rightClicked,
     mouseEntered,
     mouseLeaved,
     toReadable,

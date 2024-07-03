@@ -1,19 +1,19 @@
+use crate::dir_walker::walk_it;
+use crate::dir_walker::WalkData;
+use crate::node::Node;
 use crate::progress::ErrorHandler;
 use crate::progress::ProgressHandler;
-use crate::dir_walker::WalkData;
-use crate::dir_walker::walk_it;
-use crate::node::Node;
 use crate::progress::{indicator_spawn, indicator_stop};
 use crate::utils::normalize_path;
 
+use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::panic;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use sysinfo::{System, SystemExt};
-use regex::Regex;
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
 
 // Rayonのスタックサイズ
 const STACK_SIZE_OF_RAYON: usize = 1024 * 1024 * 1024; // Set stack size to 1024MB
@@ -27,12 +27,16 @@ pub struct WalkParams {
     pub use_apparent_size: bool,
 }
 
-pub fn init_walk(walk_params: WalkParams, errors: &Arc<Mutex<ErrorHandler>>, progress: &Arc<ProgressHandler>, app: tauri::AppHandle) -> Option<Node> {
-
+pub fn init_walk(
+    walk_params: WalkParams,
+    errors: &Arc<Mutex<ErrorHandler>>,
+    progress: &Arc<ProgressHandler>,
+    app: tauri::AppHandle,
+) -> Option<Node> {
     // エラー格納用
     let errors_for_rayon = errors.clone();
     let errors_final = errors.clone();
-    
+
     // 以下パラメータ設定
     let simplified_dir = normalize_path(walk_params.target_directory);
 
@@ -53,10 +57,7 @@ pub fn init_walk(walk_params: WalkParams, errors: &Arc<Mutex<ErrorHandler>>, pro
     };
 
     let ignore_directories = match walk_params.ignore_directories {
-        Some(values) => values
-            .iter()
-            .map(PathBuf::from)
-            .collect::<Vec<PathBuf>>(),
+        Some(values) => values.iter().map(PathBuf::from).collect::<Vec<PathBuf>>(),
         None => vec![],
     };
 
@@ -138,8 +139,7 @@ fn init_rayon() {
                     .build_global()
             } else {
                 // Do not specify stack size
-                rayon::ThreadPoolBuilder::new()
-                    .build_global()
+                rayon::ThreadPoolBuilder::new().build_global()
             }
         });
         if result.is_err() {

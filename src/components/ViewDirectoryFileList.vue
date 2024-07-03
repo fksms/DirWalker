@@ -20,41 +20,41 @@ const children = ref([]);
 // リストを作成
 function generateDirectoryList(node) {
 
-  // 配列を初期化
-  children.value.splice(0);
+    // 配列を初期化
+    children.value.splice(0);
 
-  ownColor.value = node.color;
-  ownName.value = node.data.name;
-  ownSize.value = node.data.size;
+    ownColor.value = node.color;
+    ownName.value = node.data.name;
+    ownSize.value = node.data.size;
 
-  // childrenがnullではない場合
-  if (node.children != null) {
-    // Deep copy
-    children.value = node.children.concat();
-  }
+    // childrenがnullではない場合
+    if (node.children != null) {
+        // Deep copy
+        children.value = node.children.concat();
+    }
 }
 
 
 // パスの最後の部分を取得
 function getLastPath(path) {
-  // パスをスラッシュで分割
-  const segments = path.split('/');
-  // 最後の要素を返す
-  return segments[segments.length - 1];
+    // パスをスラッシュで分割
+    const segments = path.split('/');
+    // 最後の要素を返す
+    return segments[segments.length - 1];
 }
 
 
 // 配列から文字列に変換
 function array2String(array) {
-  // デリミタを指定
-  const delimiter = " "
-  return array.join(delimiter);
+    // デリミタを指定
+    const delimiter = " "
+    return array.join(delimiter);
 }
 
 
 // TB/GB/MB/KBに変換
 function toReadable(value) {
-  return props.viewSunburstChart.toReadable(value);
+    return props.viewSunburstChart.toReadable(value);
 }
 
 
@@ -62,7 +62,15 @@ function toReadable(value) {
 //
 // node: ノードデータ
 function updateSunburst(node) {
-  return props.viewSunburstChart.leftClicked(node);
+    return props.viewSunburstChart.leftClicked(node);
+}
+
+
+// コンテキストメニューの表示
+//
+// node: ノードデータ
+function showContextMenu(node) {
+    return props.viewSunburstChart.rightClicked(node);
 }
 
 
@@ -70,7 +78,7 @@ function updateSunburst(node) {
 //
 // node: ノードデータ
 function mouseEntered(node) {
-  return props.viewSunburstChart.mouseEntered(null, node);
+    return props.viewSunburstChart.mouseEntered(null, node);
 }
 
 
@@ -78,74 +86,75 @@ function mouseEntered(node) {
 //
 // node: ノードデータ
 function mouseLeaved(node) {
-  return props.viewSunburstChart.mouseLeaved(null, node);
+    return props.viewSunburstChart.mouseLeaved(null, node);
 }
 
 
 // 外部から参照可能なプロパティを定義
 defineExpose({
-  generateDirectoryList,
+    generateDirectoryList,
 });
 
 </script>
 
 <template>
-  <v-table class="bg-transparent text-white cursor-default">
-    <tbody>
-      <tr v-if="ownColor && ownName && ownSize">
-        <th width="36"><v-icon :color="ownColor">mdi-circle</v-icon></th>
-        <th width="auto" nowrap class="text-left">{{ getLastPath(ownName) }}</th>
-        <th width="100" nowrap class="text-right">{{ array2String(toReadable(ownSize)) }}</th>
-      </tr>
-    </tbody>
-  </v-table>
-  <v-data-table :items="children" density="compact" class="bg-transparent text-white" hover hide-no-data
-    hide-default-header :hide-default-footer="(children.length <= 10) ? true : false" :items-per-page="10">
-    <template v-slot:item="{ item }">
-      <tr @click="updateSunburst(item)" @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
-        <td width="36"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
-        <td width="auto" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
-        <td width="100" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
-      </tr>
-    </template>
-  </v-data-table>
+    <v-table class="bg-transparent text-white cursor-default">
+        <tbody>
+            <tr v-if="ownColor && ownName && ownSize">
+                <th width="36"><v-icon :color="ownColor">mdi-circle</v-icon></th>
+                <th width="auto" nowrap class="text-left">{{ getLastPath(ownName) }}</th>
+                <th width="100" nowrap class="text-right">{{ array2String(toReadable(ownSize)) }}</th>
+            </tr>
+        </tbody>
+    </v-table>
+    <v-data-table :items="children" density="compact" class="bg-transparent text-white" hover hide-no-data
+        hide-default-header :hide-default-footer="(children.length <= 10) ? true : false" :items-per-page="10">
+        <template v-slot:item="{ item }">
+            <tr @click.left="updateSunburst(item)" @click.right.prevent="showContextMenu(item)"
+                @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
+                <td width="36"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
+                <td width="auto" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
+                <td width="100" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
+            </tr>
+        </template>
+    </v-data-table>
 </template>
 
 
 <style>
 td,
 th {
-  /* 文字数が多い場合は省略 */
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: 0;
-  /* 上下のボーダーを削除 */
-  border: none !important;
+    /* 文字数が多い場合は省略 */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 0;
+    /* 上下のボーダーを削除 */
+    border: none !important;
 }
 
 tr:hover td {
-  /* blue-grey-lighten-1 */
-  background-color: #78909C;
-  cursor: pointer;
+    /* blue-grey-lighten-1 */
+    background-color: #78909C;
+    cursor: pointer;
 }
 
 .cursor-default {
-  cursor: default;
+    cursor: default;
 }
 
 /* フッターの上にある水平線を透明に設定 */
 hr.v-divider {
-  color: transparent;
+    color: transparent;
 }
 
 /* VDataTableのitems-per-page dropdownを非表示 */
 .v-data-table-footer__items-per-page {
-  display: none !important;
+    display: none !important;
 }
 
 /* フッター上のカーソルをdefaultに設定 */
 .v-data-table-footer__info {
-  cursor: default;
+    cursor: default;
 }
 </style>

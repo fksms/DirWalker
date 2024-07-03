@@ -3,8 +3,8 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use crate::node::Node;
-use crate::progress::ProgressHandler;
 use crate::progress::ErrorHandler;
+use crate::progress::ProgressHandler;
 use crate::progress::ORDERING;
 use crate::utils::is_filtered_out_due_to_invert_regex;
 use crate::utils::is_filtered_out_due_to_regex;
@@ -38,7 +38,7 @@ pub fn walk_it(dir: PathBuf, walk_data: &WalkData) -> Option<Node> {
     match walk(dir, walk_data, 0) {
         Some(node) => {
             return clean_inodes(node, &mut inodes, walk_data.use_apparent_size);
-        },
+        }
         None => {
             return None;
         }
@@ -48,7 +48,11 @@ pub fn walk_it(dir: PathBuf, walk_data: &WalkData) -> Option<Node> {
 /* -------------------------------------------------------------------------- */
 
 // Remove files which have the same inode, we don't want to double count them.
-fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bool) -> Option<Node> {
+fn clean_inodes(
+    x: Node,
+    inodes: &mut HashSet<(u64, u64)>,
+    use_apparent_size: bool,
+) -> Option<Node> {
     if !use_apparent_size {
         if let Some(id) = x.inode_device {
             if !inodes.insert(id) {
@@ -56,8 +60,9 @@ fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bo
             }
         }
     }
-    
-    let new_children: Vec<_> = x.children
+
+    let new_children: Vec<_> = x
+        .children
         .into_iter()
         .filter_map(|c| clean_inodes(c, inodes, use_apparent_size))
         .collect();
@@ -74,7 +79,6 @@ fn clean_inodes(x: Node, inodes: &mut HashSet<(u64, u64)>, use_apparent_size: bo
 /* -------------------------------------------------------------------------- */
 
 fn ignore_file(entry: &DirEntry, walk_data: &WalkData) -> bool {
-
     // Keeping `walk_data.filter_regex.is_empty()` is important for performance reasons, it stops unnecessary work
     if !walk_data.filter_regex.is_empty()
         && entry.path().is_file()
@@ -120,8 +124,7 @@ fn walk(dir: PathBuf, walk_data: &WalkData, depth: usize) -> Option<Node> {
 
                             if !ignore_file(entry, walk_data) {
                                 if let Ok(data) = entry.file_type() {
-                                    if data.is_dir()
-                                    {
+                                    if data.is_dir() {
                                         return walk(entry.path(), walk_data, depth + 1);
                                     }
 

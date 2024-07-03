@@ -1,9 +1,13 @@
 use std::{
-    collections::HashSet, io::Write, sync::{
+    collections::HashSet,
+    io::Write,
+    sync::{
         atomic::{AtomicU64, AtomicUsize, Ordering},
         mpsc::{self, RecvTimeoutError, Sender},
         Arc,
-    }, thread::JoinHandle, time::Duration
+    },
+    thread::JoinHandle,
+    time::Duration,
 };
 
 use tauri::Manager;
@@ -39,18 +43,22 @@ pub struct ErrorHandler {
 /* -------------------------------------------------------------------------- */
 
 // Progressを表示
-pub fn indicator_spawn(progress: &Arc<ProgressHandler>, app: tauri::AppHandle) -> Option<(Sender<()>, JoinHandle<()>)> {
+pub fn indicator_spawn(
+    progress: &Arc<ProgressHandler>,
+    app: tauri::AppHandle,
+) -> Option<(Sender<()>, JoinHandle<()>)> {
     let prog_data = progress.clone();
-    
+
     let (sender, receiver) = mpsc::channel::<()>();
-    
+
     let indicator_thread = std::thread::spawn(move || {
         let mut stdout = std::io::stdout();
         let mut msg = "".to_string();
 
         // While the timeout triggers we go round the loop
         // If we disconnect or the sender sends its message we exit the while loop
-        while let Err(RecvTimeoutError::Timeout) = receiver.recv_timeout(Duration::from_millis(INDICATOR_UPDATE_INTERVAL))
+        while let Err(RecvTimeoutError::Timeout) =
+            receiver.recv_timeout(Duration::from_millis(INDICATOR_UPDATE_INTERVAL))
         {
             // Clear the text written by 'write!'& Return at the start of line
             print!("\r{:width$}", " ", width = msg.len());

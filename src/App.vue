@@ -16,42 +16,42 @@ const viewBreadcrumbsList = ref();
 </script>
 
 <template>
-  <div class="bg-blue-grey-darken-3" style="height: 100vh;">
+    <div class="bg-blue-grey-darken-3" style="height: 100vh;">
 
-    <ViewHeader ref="viewHeader" :viewSunburstChart="viewSunburstChart"></ViewHeader>
+        <ViewHeader ref="viewHeader" :viewSunburstChart="viewSunburstChart"></ViewHeader>
 
-    <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
+        <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
 
-    <ViewBreadcrumbsList ref="viewBreadcrumbsList" :viewSunburstChart="viewSunburstChart"></ViewBreadcrumbsList>
+        <ViewBreadcrumbsList ref="viewBreadcrumbsList" :viewSunburstChart="viewSunburstChart"></ViewBreadcrumbsList>
 
-    <v-container fluid class="pt-0 pb-0">
-      <v-row>
-        <v-col align-self="start" class="pt-10">
-          <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList"
-            :viewBreadcrumbsList="viewBreadcrumbsList">
-          </ViewSunburstChart>
-        </v-col>
-        <v-col align-self="start">
-          <ViewDirectoryFileList ref="viewDirectoryFileList" :viewSunburstChart="viewSunburstChart">
-          </ViewDirectoryFileList>
-        </v-col>
-      </v-row>
-    </v-container>
+        <v-container fluid class="pt-0 pb-0">
+            <v-row>
+                <v-col align-self="start" class="pt-10">
+                    <ViewSunburstChart ref="viewSunburstChart" :viewDirectoryFileList="viewDirectoryFileList"
+                        :viewBreadcrumbsList="viewBreadcrumbsList">
+                    </ViewSunburstChart>
+                </v-col>
+                <v-col align-self="start">
+                    <ViewDirectoryFileList ref="viewDirectoryFileList" :viewSunburstChart="viewSunburstChart">
+                    </ViewDirectoryFileList>
+                </v-col>
+            </v-row>
+        </v-container>
 
-  </div>
+    </div>
 </template>
 
 <style>
 :root {
-  /* フォントの指定 */
-  font-family: Avenir, Futura, 'Century Gothic', YuGothic, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+    /* フォントの指定 */
+    font-family: Avenir, Futura, 'Century Gothic', YuGothic, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
 
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-drag: none;
-  -khtml-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
 }
 </style>
