@@ -48,7 +48,7 @@ const angleThreshold = 2.0;
 const transitionDuration = 600;
 
 // マウスホバーしてからListに反映されるまでの時間[msec]
-const hoverTimeout = 400;
+const hoverTimeout = 500;
 
 // マウスホバーした際の点滅の間隔[msec]
 const blinkInterval = 600;
@@ -216,7 +216,7 @@ function generateSunburst(data) {
         // ポインターイベントの設定
         .attr("pointer-events", "all")
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => mouseEntered(event, d))
+        .on("mouseenter", (event, d) => mouseEntered(event, d, null))
         // カーソルを離した時
         .on("mouseleave", (event, d) => mouseLeaved(event, d))
         // 左クリックした時
@@ -252,7 +252,7 @@ function generateSunburst(data) {
         .attr("fill-opacity", 1);
 
     // Listの更新
-    updateList(partition);
+    updateList(partition, null);
 
     // Breadcrumbsの更新
     updateBreadcrumbs(partition);
@@ -401,7 +401,7 @@ function drawArc(lowerDepth, isFirstCalled) {
         // カーソルを指差しの手にする
         .style("cursor", "pointer")
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => mouseEntered(event, d))
+        .on("mouseenter", (event, d) => mouseEntered(event, d, null))
         // カーソルを離した時
         .on("mouseleave", (event, d) => mouseLeaved(event, d))
         // 左クリックした時
@@ -429,6 +429,7 @@ function drawArc(lowerDepth, isFirstCalled) {
 
             // リスト生成時のオプションを指定
             const option = {
+                color: squashedColorCode,
                 threshold: value.head // リスト生成時の閾値
             }
 
@@ -448,7 +449,7 @@ function drawArc(lowerDepth, isFirstCalled) {
                 // fill属性（塗りつぶし）を設定
                 .attr("fill", squashedColorCode) // ダークグレー
                 // カーソルを合わせた時
-                .on("mouseenter", (event, d) => mouseEntered(event, d))
+                .on("mouseenter", (event, d) => mouseEntered(event, d, option))
                 // カーソルを離した時
                 .on("mouseleave", (event, d) => mouseLeaved(event, d))
                 // 右クリックした時
@@ -477,7 +478,7 @@ function leftClicked(node) {
     svgElement.select("circle").datum(node);
 
     // Listの更新
-    updateList(node);
+    updateList(node, null);
 
     // Breadcrumbsの更新
     updateBreadcrumbs(node);
@@ -577,7 +578,8 @@ const transitionName = "blink"
 //
 // event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
 // node: カーソルを合わせた円弧or円のデータ
-function mouseEntered(event, node) {
+// option: オプション
+function mouseEntered(event, node, option) {
 
     // 円弧or円のパスを格納
     let targetElement = null;
@@ -590,7 +592,7 @@ function mouseEntered(event, node) {
         // タイマーをセット
         timerHandler = setTimeout(() => {
             // Listの更新
-            updateList(node);
+            updateList(node, option);
         }, hoverTimeout);
     }
     else {
@@ -649,8 +651,9 @@ function mouseLeaved(event, node) {
 // Listの更新
 //
 // node: ノードデータ
-function updateList(node) {
-    return props.viewDirectoryFileList.generateDirectoryList(node);
+// option: オプション
+function updateList(node, option) {
+    return props.viewDirectoryFileList.generateDirectoryList(node, option);
 }
 
 

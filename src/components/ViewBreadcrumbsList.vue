@@ -11,6 +11,8 @@ const ancestors = ref([]);
 
 
 // パンくずリストを作成
+//
+// node: カーソルを合わせた円弧or円のデータ
 function generateBreadcrumbs(node) {
 
     // 配列を初期化

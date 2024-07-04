@@ -18,19 +18,43 @@ const children = ref([]);
 
 
 // リストを作成
-function generateDirectoryList(node) {
+//
+// node: カーソルを合わせた円弧or円のデータ
+// option: オプション
+function generateDirectoryList(node, option) {
+
+    // ファイルサイズカウント用
+    let otherSize = 0;
 
     // 配列を初期化
     children.value.splice(0);
 
-    ownColor.value = node.color;
-    ownName.value = node.data.name;
-    ownSize.value = node.data.size;
+    // optionを指定しない場合
+    if (option == null) {
+        // childrenがnullではない場合
+        if (node.children != null) {
+            // Deep copy
+            children.value = node.children.concat();
+        }
 
-    // childrenがnullではない場合
-    if (node.children != null) {
-        // Deep copy
-        children.value = node.children.concat();
+        ownColor.value = node.color;
+        ownName.value = getLastPath(node.data.name);
+        ownSize.value = array2String(toReadable(node.data.size));
+    }
+
+    // optionを指定する場合
+    else {
+        node.children.forEach(element => {
+            // 閾値よりも小さなもので配列を再構成する
+            if (element.value <= option.threshold) {
+                otherSize += element.value;
+                children.value.push(element);
+            }
+        });
+
+        ownColor.value = option.color;
+        ownName.value = "Other small size items";
+        ownSize.value = array2String(toReadable(otherSize));
     }
 }
 
@@ -78,7 +102,7 @@ function showContextMenu(node) {
 //
 // node: ノードデータ
 function mouseEntered(node) {
-    return props.viewSunburstChart.mouseEntered(null, node);
+    return props.viewSunburstChart.mouseEntered(null, node, null);
 }
 
 
@@ -102,8 +126,8 @@ defineExpose({
         <tbody>
             <tr v-if="ownColor && ownName && ownSize">
                 <th width="36"><v-icon :color="ownColor">mdi-circle</v-icon></th>
-                <th width="auto" nowrap class="text-left">{{ getLastPath(ownName) }}</th>
-                <th width="100" nowrap class="text-right">{{ array2String(toReadable(ownSize)) }}</th>
+                <th width="auto" nowrap class="text-left">{{ ownName }}</th>
+                <th width="100" nowrap class="text-right">{{ ownSize }}</th>
             </tr>
         </tbody>
     </v-table>
