@@ -71,14 +71,14 @@ async fn walk_start(
             );
             println!("Walk done.");
 
-            // ノードをセット
-            state.set_node(walk_data);
+            // Walk Dataのクローン
+            let walk_data_clone = walk_data.clone();
 
-            // ノードを取得
-            let node = state.get_node();
+            // ノードをセット
+            state.set_node(walk_data_clone);
 
             // ノードをjsonに変換
-            return node_to_json(node);
+            return node_to_json(walk_data);
         }
         // パラメータのデコードに失敗した場合
         Err(err) => {
@@ -107,11 +107,11 @@ fn abort(state: tauri::State<'_, WalkManager>) {
 
 // ファイルマネージャーを開く
 #[tauri::command(rename_all = "snake_case")]
-async fn open_file_manager(path: String) -> Result<String, String> {
+async fn open_file_manager(path: String) -> Result<(), String> {
     let result = open(path);
 
     match result {
-        Ok(_) => Ok("".to_string()),
+        Ok(ok) => Ok(ok),
         Err(err) => Err(err.to_string()),
     }
 }

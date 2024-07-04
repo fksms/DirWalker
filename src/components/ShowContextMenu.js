@@ -2,17 +2,18 @@ import { invoke } from "@tauri-apps/api";
 import { listen } from "@tauri-apps/api/event";
 
 
-// リスナー関数
-async function registerListeners() {
-    await listen("openFileManager", event => {
-        openFileManager(event.payload);
-    });
-}
-registerListeners(); // リスナーを起動
-
-
 // コンテキストメニューを表示する関数
 async function showContextMenu(node) {
+
+    // イベントを受信するためのリスナーを起動
+    const unlisten = await listen("openFileManager", event => {
+        // ファイルマネージャーを開く
+        openFileManager(event.payload);
+        // リスナーを停止
+        unlisten();
+    });
+
+    // バックエンド側の関数を実行
     await invoke("plugin:context_menu|show_context_menu", {
         items: [
             {

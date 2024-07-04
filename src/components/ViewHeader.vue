@@ -4,10 +4,11 @@ import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 
+import "@mdi/font/css/materialdesignicons.css";
+
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewSunburstChart"]);
 
-/* -------------------------------------------------------------------------- */
 
 // Walkのパラメータ（バックエンドに渡す）
 const walkParams = ref({
@@ -21,18 +22,15 @@ const walkParams = ref({
 walkParams.value.target_directory = "/Users/shogo/Downloads";
 //walkParams.value.target_directory = "/Users/shogo";
 
-// Walkデータ格納用
-const walkData = ref();
+// ボタンの状態を保持
+const buttonState = ref(false);
 
 // 受信メッセージ格納用（バックエンドから受け取る）
 const progressMessage = ref("");
 
-/* -------------------------------------------------------------------------- */
 
-// ボタンの状態を保持
-const buttonState = ref(false);
 // ボタンの状態を変更
-async function changeState() {
+function changeState() {
     buttonState.value = !buttonState.value;
     if (buttonState.value) {
         walkStart();
@@ -41,53 +39,70 @@ async function changeState() {
     }
 };
 
+
 // Walk Start
 async function walkStart() {
+
+    // Walk Data
+    let walkData = null;
+
+    // エラーメッセージを格納
+    let error = "";
+
+    // Progressメッセージを受信するためのリスナーを起動
+    const unlisten = await listen("ProgressNotification", event => {
+        // 受信メッセージを格納
+        progressMessage.value = event.payload;
+    });
+
+    // バックエンド側の関数を実行
     await invoke("walk_start", { str_params: JSON.stringify(walkParams.value) })
         // 成功した場合
         .then((success) => {
-            // 受信メッセージを変更
-            progressMessage.value = "Post-processing";
-
-            // 受信したJSONをオブジェクトにデコード
-            walkData.value = JSON.parse(success);
-
-            // SVGエレメントを作成して格納
-            props.viewSunburstChart.generateSunburst(walkData.value);
-
-            // 受信メッセージを変更
-            progressMessage.value = "Completion!";
+            walkData = success;
         })
         // 失敗した場合
         .catch((failure) => {
-            // エラーメッセージを出力
-            progressMessage.value = "Error: " + failure;
-            console.error(failure);
+            error = "Error: " + failure;
         });
+
+    // リスナーを停止
+    unlisten();
+
+    // エラーが発生した場合
+    if (walkData == null) {
+        progressMessage.value = error;
+    }
+
+    // 強制終了した場合
+    else if (walkData == "") {
+        progressMessage.value = "Abort!";
+    }
+
+    // 正常に受信できた場合
+    else {
+        // Sunburstの作成
+        await generateSunburst(JSON.parse(walkData));
+        progressMessage.value = "Completion!";
+    }
+
     // ボタンの状態を戻す
     buttonState.value = false;
 }
 
-// Progress View
-async function progressView() {
-    await listen("ProgressNotification", event => {
-        // 受信メッセージを格納
-        progressMessage.value = event.payload;
-    });
-}
-progressView();
 
 // Abort
 async function abort() {
     await invoke("abort", {})
     // ボタンの状態を戻す
     buttonState.value = true;
-
-    // 受信メッセージを変更
-    progressMessage.value = "Abort!";
 }
 
-/* -------------------------------------------------------------------------- */
+
+// Sunburstの作成
+async function generateSunburst(data) {
+    return props.viewSunburstChart.generateSunburst(data);
+}
 
 </script>
 
@@ -101,6 +116,10 @@ async function abort() {
         <span class="mx-5 text-white cursor-default">
             {{ progressMessage }}
         </span>
+
+        <v-spacer></v-spacer>
+
+        <v-icon color="blue-grey-lighten-5" @click="">mdi-cog</v-icon>
 
     </v-container>
 </template>

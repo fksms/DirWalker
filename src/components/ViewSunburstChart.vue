@@ -6,7 +6,6 @@ import * as d3 from "d3";
 
 import { showContextMenu } from "./ShowContextMenu";
 
-
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
 

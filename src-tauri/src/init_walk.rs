@@ -14,6 +14,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use sysinfo::{System, SystemExt};
+use tauri::Manager;
 
 // Rayonのスタックサイズ
 const STACK_SIZE_OF_RAYON: usize = 1024 * 1024 * 1024; // Set stack size to 1024MB
@@ -36,6 +37,9 @@ pub fn init_walk(
     // エラー格納用
     let errors_for_rayon = errors.clone();
     let errors_final = errors.clone();
+
+    // appのクローン
+    let app_clone = app.clone();
 
     // 以下パラメータ設定
     let simplified_dir = normalize_path(walk_params.target_directory);
@@ -79,7 +83,7 @@ pub fn init_walk(
     init_rayon();
 
     // Progressを表示
-    let indicator_handler = indicator_spawn(progress, app);
+    let indicator_handler = indicator_spawn(progress, app_clone);
 
     // Walk
     let top_level_node = walk_it(simplified_dir, &walk_data);
@@ -87,6 +91,10 @@ pub fn init_walk(
     // Progressを終了
     indicator_stop(indicator_handler);
     println!();
+
+    // WebViewに送信
+    app.emit_all("ProgressNotification", "Post-processing...".to_string())
+        .unwrap();
 
     // 強制終了
     if errors_final.lock().unwrap().abort {
