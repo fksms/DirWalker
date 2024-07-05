@@ -7,6 +7,7 @@ import ViewSunburstChart from "./components/ViewSunburstChart.vue";
 import ViewDirectoryFileList from "./components/ViewDirectoryFileList.vue";
 import ViewBreadcrumbsList from "./components/ViewBreadcrumbsList.vue"
 
+
 // コンポーネントの参照を作成
 const viewHeader = ref();
 const viewSunburstChart = ref();
@@ -22,7 +23,8 @@ const viewBreadcrumbsList = ref();
 
         <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
 
-        <ViewBreadcrumbsList ref="viewBreadcrumbsList" :viewSunburstChart="viewSunburstChart"></ViewBreadcrumbsList>
+        <ViewBreadcrumbsList ref="viewBreadcrumbsList" :viewSunburstChart="viewSunburstChart"
+            :viewDirectoryFileList="viewDirectoryFileList"></ViewBreadcrumbsList>
 
         <v-container fluid class="pt-0 pb-0">
             <v-row>
@@ -46,6 +48,7 @@ const viewBreadcrumbsList = ref();
     /* フォントの指定 */
     font-family: Avenir, Futura, 'Century Gothic', YuGothic, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
 
+    /* テキストの選択不可 */
     user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;

@@ -2,8 +2,6 @@
 
 import { ref } from "vue";
 
-import "@mdi/font/css/materialdesignicons.css";
-
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewSunburstChart"]);
 
@@ -60,6 +58,8 @@ function generateDirectoryList(node, option) {
 
 
 // パスの最後の部分を取得
+//
+// path: ファイル・ディレクトリのパス（文字列）
 function getLastPath(path) {
     // パスをスラッシュで分割
     const segments = path.split('/');
@@ -117,6 +117,7 @@ function mouseLeaved(node) {
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateDirectoryList,
+    getLastPath,
 });
 
 </script>
@@ -125,18 +126,19 @@ defineExpose({
     <v-table class="bg-transparent text-white cursor-default">
         <tbody>
             <tr v-if="ownColor && ownName && ownSize">
-                <th width="36"><v-icon :color="ownColor">mdi-circle</v-icon></th>
+                <th width="36"><v-icon :color="ownColor" icon="mdi-circle"></v-icon></th>
                 <th width="auto" nowrap class="text-left">{{ ownName }}</th>
                 <th width="100" nowrap class="text-right">{{ ownSize }}</th>
             </tr>
         </tbody>
     </v-table>
+    <!-- childrenの要素が10以下の場合はフッターを表示しない -->
     <v-data-table :items="children" density="compact" class="bg-transparent text-white" hover hide-no-data
         hide-default-header :hide-default-footer="(children.length <= 10) ? true : false" :items-per-page="10">
         <template v-slot:item="{ item }">
             <tr @click.left="updateSunburst(item)" @click.right.prevent="showContextMenu(item)"
                 @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
-                <td width="36"><v-icon :color="item.color">mdi-circle-medium</v-icon></td>
+                <td width="36"><v-icon :color="item.color" icon="mdi-circle-medium"></v-icon></td>
                 <td width="auto" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
                 <td width="100" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
             </tr>

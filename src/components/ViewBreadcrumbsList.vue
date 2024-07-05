@@ -3,7 +3,7 @@
 import { ref } from "vue";
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(["viewSunburstChart"]);
+const props = defineProps(["viewSunburstChart", "viewDirectoryFileList"]);
 
 
 // 祖先ノード（自身も含む）
@@ -29,11 +29,10 @@ function generateBreadcrumbs(node) {
 
 
 // パスの最後の部分を取得
+//
+// path: ファイル・ディレクトリのパス（文字列）
 function getLastPath(path) {
-    // パスをスラッシュで分割
-    const segments = path.split('/');
-    // 最後の要素を返す
-    return segments[segments.length - 1];
+    return props.viewDirectoryFileList.getLastPath(path);
 }
 
 
@@ -63,8 +62,10 @@ defineExpose({
 
 <template>
     <v-container fluid class="pb-0">
-        <ul class="breadcrumbs">
+        <ul class="breadcrumbs enable-horizontal-scroll">
             <li v-for="(item, index) in ancestors">
+                <!-- ancestorsの一番後ろの要素に"current"クラスを設定する -->
+                <!-- ancestorsの一番後ろの要素を左クリックした場合は何もしない -->
                 <a v-bind:class="{ 'current': index == ancestors.length - 1 }"
                     @click.left="(index != ancestors.length - 1) ? updateSunburst(item) : null"
                     @click.right.prevent="showContextMenu(item)">
@@ -86,6 +87,29 @@ defineExpose({
     --breadcrumbs-current-bg-color: #FFB300;
 }
 
+/* スクロールバー全体の設定 */
+.enable-horizontal-scroll::-webkit-scrollbar {
+    height: 25px;
+}
+
+/* スクロールバーのハンドル部分の設定 */
+.enable-horizontal-scroll::-webkit-scrollbar-track {
+    /* 左右に余白を付ける */
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+/* スクロールバーの背景部分の設定 */
+.enable-horizontal-scroll::-webkit-scrollbar-thumb {
+    background: var(--breadcrumbs-bg-color);
+    border-radius: 15px;
+    /* 上下に透明なボーダーをつける */
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    /* 背景を切り取る */
+    background-clip: padding-box;
+}
+
 ul {
     margin: 0;
     padding: 0;
@@ -103,26 +127,6 @@ li {
     overflow-x: scroll;
     width: 100%;
     -webkit-overflow-scrolling: touch;
-}
-
-.breadcrumbs::-webkit-scrollbar {
-    height: 25px;
-}
-
-.breadcrumbs::-webkit-scrollbar-track {
-    /* 左右に余白を付ける */
-    margin-left: 4px;
-    margin-right: 4px;
-}
-
-.breadcrumbs::-webkit-scrollbar-thumb {
-    background: var(--breadcrumbs-bg-color);
-    border-radius: 12.5px;
-    /* 上下に透明なボーダーをつける */
-    border-top: 9px solid transparent;
-    border-bottom: 9px solid transparent;
-    /* 背景を切り取る */
-    background-clip: padding-box;
 }
 
 .breadcrumbs a {

@@ -1,16 +1,26 @@
 <script setup>
 
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 
-import "@mdi/font/css/materialdesignicons.css";
+import { detectOS } from "./DetectOS";
+import ViewHeaderSettings from "./ViewHeaderSettings.vue";
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewSunburstChart"]);
 
 
-// Walkのパラメータ（バックエンドに渡す）
+// ボタンの状態を保持
+const buttonState = ref(false);
+
+// ダイアログの状態（双方向バインディングを行う）
+const showDialog = ref(false);
+
+// 受信メッセージ格納用（バックエンドから受け取る）
+const progressMessage = ref("");
+
+// Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
 const walkParams = ref({
     target_directory: "",
     regex_filter: [],
@@ -18,15 +28,6 @@ const walkParams = ref({
     ignore_directories: [],
     use_apparent_size: false,
 });
-
-walkParams.value.target_directory = "/Users/shogo/Downloads";
-//walkParams.value.target_directory = "/Users/shogo";
-
-// ボタンの状態を保持
-const buttonState = ref(false);
-
-// 受信メッセージ格納用（バックエンドから受け取る）
-const progressMessage = ref("");
 
 
 // ボタンの状態を変更
@@ -40,8 +41,37 @@ function changeState() {
 };
 
 
+// マウントされた時に行う処理
+onMounted(() => {
+    // Windowsの場合
+    if (detectOS() == "Windows") {
+        walkParams.value.target_directory = "C:¥";
+    }
+    // Macの場合
+    else if (detectOS() == "Mac") {
+        walkParams.value.target_directory = "/";
+        walkParams.value.ignore_directories.push("/System/Volumes/Data");
+    }
+    // Linuxの場合
+    else if (detectOS() == "Linux") {
+        walkParams.value.target_directory = "/";
+    }
+    // それ以外
+    else { }
+
+    // 後で削除
+    walkParams.value.target_directory = "/Users/shogo/Downloads";
+})
+
+
 // Walk Start
 async function walkStart() {
+
+    // OS対象外の場合は終了
+    if (detectOS() == null) {
+        progressMessage.value = "OS Error";
+        return;
+    }
 
     // Walk Data
     let walkData = null;
@@ -110,7 +140,7 @@ async function generateSunburst(data) {
     <v-container fluid class="d-flex flex-row">
 
         <v-btn density="compact" :color="buttonState ? 'blue-grey-darken-1' : 'amber-darken-1'"
-            :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState">
+            :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState()">
         </v-btn>
 
         <span class="mx-5 text-white cursor-default">
@@ -119,9 +149,11 @@ async function generateSunburst(data) {
 
         <v-spacer></v-spacer>
 
-        <v-icon color="blue-grey-lighten-5" @click="">mdi-cog</v-icon>
-
+        <v-icon color="blue-grey-lighten-5" icon="mdi-cog" @click="showDialog = true"></v-icon>
     </v-container>
+
+    <!-- 双方向バインディングを利用する -->
+    <ViewHeaderSettings v-model:showDialog="showDialog" v-model:walkParams="walkParams"></ViewHeaderSettings>
 </template>
 
 <style>
