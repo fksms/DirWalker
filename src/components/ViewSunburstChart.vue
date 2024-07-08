@@ -462,6 +462,87 @@ function drawArc(lowerDepth, isFirstCalled) {
 }
 
 
+// リスト更新用タイマーID
+let timerId = null;
+
+// 他のアニメーションをinterruptしないように、transitionにnameを設定する
+const transitionName = "blink"
+
+
+// カーソルを合わせた時の動作
+//
+// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
+// node: カーソルを合わせた円弧or円のデータ
+// option: オプション
+function mouseEntered(event, node, option) {
+
+    // 円弧or円のパスを格納
+    let targetElement = null;
+
+    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
+    if (event) {
+        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
+        targetElement = d3.select(event.currentTarget);
+
+        // リスト更新用タイマーをセット（タイムアウト後に更新）
+        timerId = setTimeout(() => {
+            // Listの更新
+            updateList(node, option);
+        }, hoverTimeout);
+    }
+    else {
+        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
+        targetElement = svgElement.select("#" + node.nodeId);
+    }
+
+    // アニメーションをリピート
+    repeat();
+
+    // リピート用関数
+    function repeat() {
+        targetElement
+            .transition(transitionName)
+            .duration(blinkInterval / 2)
+            .ease(d3.easeLinear)
+            .attr("fill-opacity", 0.5)
+            .transition(transitionName)
+            .duration(blinkInterval / 2)
+            .ease(d3.easeLinear)
+            .attr("fill-opacity", 1)
+            .on("end", repeat);
+    };
+}
+
+
+// カーソルを離した時の動作
+//
+// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
+// node: カーソルを合わせた円弧or円のデータ
+function mouseLeaved(event, node) {
+
+    // 円弧or円のパスを格納
+    let targetElement = null;
+
+    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
+    if (event) {
+        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
+        targetElement = d3.select(event.currentTarget);
+
+        // リスト更新用タイマーをキャンセル
+        clearTimeout(timerId);
+    }
+    else {
+        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
+        targetElement = svgElement.select("#" + node.nodeId);
+    }
+
+    // アニメーションを中断
+    targetElement
+        .interrupt(transitionName)
+        .attr("fill-opacity", 1);
+}
+
+
 // 左クリックされた時の動作
 //
 // node: クリックされた円弧or円のデータ
@@ -473,14 +554,17 @@ function leftClicked(node) {
     // childrenがnullの場合はリターンして何もしない
     if (node.children == null) return;
 
-    // circleのデータを更新
-    svgElement.select("circle").datum(node);
+    // リスト更新用タイマーをキャンセル
+    clearTimeout(timerId);
 
     // Listの更新
     updateList(node, null);
 
     // Breadcrumbsの更新
     updateBreadcrumbs(node);
+
+    // circleのデータを更新
+    svgElement.select("circle").datum(node);
 
     // 各ノードにプロパティを追加する
     //
@@ -507,15 +591,12 @@ function leftClicked(node) {
 
     });
 
-    // 移動先のノードの深さ
-    const targetDepth = node.depth;
-
     // "path", "text"の要素を全て削除
     svgElement.selectAll("path").remove();
     svgElement.selectAll("text").remove();
 
     // Arcを描画
-    drawArc(targetDepth, false);
+    drawArc(node.depth, false);
 
     // FileSizeを描画
     drawFileSize(node.value);
@@ -563,87 +644,6 @@ function rightClicked(node) {
 
     // コンテキストメニューを表示
     showContextMenu(node);
-}
-
-
-// タイマーハンドラー
-let timerHandler = null;
-
-// 他のアニメーションをinterruptしないように、transitionにnameを設定する
-const transitionName = "blink"
-
-
-// カーソルを合わせた時の動作
-//
-// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
-// node: カーソルを合わせた円弧or円のデータ
-// option: オプション
-function mouseEntered(event, node, option) {
-
-    // 円弧or円のパスを格納
-    let targetElement = null;
-
-    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
-    if (event) {
-        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
-        targetElement = d3.select(event.currentTarget);
-
-        // タイマーをセット
-        timerHandler = setTimeout(() => {
-            // Listの更新
-            updateList(node, option);
-        }, hoverTimeout);
-    }
-    else {
-        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
-        targetElement = svgElement.select("#" + node.nodeId);
-    }
-
-    // アニメーションをリピート
-    repeat();
-
-    // リピート用関数
-    function repeat() {
-        targetElement
-            .transition(transitionName)
-            .duration(blinkInterval / 2)
-            .ease(d3.easeLinear)
-            .attr("fill-opacity", 0.5)
-            .transition(transitionName)
-            .duration(blinkInterval / 2)
-            .ease(d3.easeLinear)
-            .attr("fill-opacity", 1)
-            .on("end", repeat);
-    };
-}
-
-
-// カーソルを離した時の動作
-//
-// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
-// node: カーソルを合わせた円弧or円のデータ
-function mouseLeaved(event, node) {
-
-    // 円弧or円のパスを格納
-    let targetElement = null;
-
-    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
-    if (event) {
-        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
-        targetElement = d3.select(event.currentTarget);
-
-        // タイマーをキャンセル
-        clearTimeout(timerHandler);
-    }
-    else {
-        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
-        targetElement = svgElement.select("#" + node.nodeId);
-    }
-
-    // アニメーションを中断
-    targetElement
-        .interrupt(transitionName)
-        .attr("fill-opacity", 1);
 }
 
 
