@@ -2,12 +2,11 @@
 
 import { ref } from "vue";
 
+import ViewSettingsGeneral from "./ViewSettingsGeneral.vue"
+
 
 // ダイアログの状態（双方向バインディングを行う）
 const showDialog = defineModel("showDialog");
-
-// Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
-const walkParams = defineModel("walkParams");
 
 // 項目一覧
 const listItems = ref([
@@ -17,6 +16,9 @@ const listItems = ref([
 
 // 現在、選択されている項目（初期値はGeneral）
 const selectedItem = ref("General");
+
+// Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
+const walkParams = defineModel("walkParams");
 
 </script>
 
@@ -33,7 +35,7 @@ const selectedItem = ref("General");
                     </v-list>
                 </v-navigation-drawer>
 
-                <v-main height="500" class="bg-blue-grey-darken-1 text-white">
+                <v-main height="500" class="bg-blue-grey-darken-1 text-white enable-vertical-scroll">
 
                     <!-- 閉じるボタン -->
                     <v-app-bar color="transparent" height="40" elevation="0">
@@ -43,17 +45,18 @@ const selectedItem = ref("General");
                     </v-app-bar>
 
                     <!-- General -->
-                    <v-container v-if="selectedItem == 'General'" fluid class="d-flex flex-row py-2">
-                        <span>General</span>
+                    <v-container v-if="selectedItem == 'General'" fluid class="py-2">
+                        <!-- 双方向バインディングを利用する -->
+                        <ViewSettingsGeneral v-model:walkParams="walkParams"></ViewSettingsGeneral>
                     </v-container>
 
                     <!-- About -->
-                    <v-container v-else-if="selectedItem == 'About'" fluid class="d-flex flex-row py-2">
+                    <v-container v-else-if="selectedItem == 'About'" fluid class="py-2">
                         <span>About</span>
                     </v-container>
 
                     <!-- 要素無し -->
-                    <v-container v-else fluid class="d-flex flex-row py-2"></v-container>
+                    <v-container v-else fluid class="py-2"></v-container>
 
                 </v-main>
             </v-layout>
@@ -65,6 +68,10 @@ const selectedItem = ref("General");
 :root {
     /* blue-grey-darken-1 */
     --bg-color: #546E7A;
+}
+
+.enable-vertical-scroll {
+    overflow-y: scroll;
 }
 
 /* スクロールバー全体の設定 */

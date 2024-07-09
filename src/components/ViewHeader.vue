@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 
 import { detectOS } from "./DetectOS";
-import ViewHeaderSettings from "./ViewHeaderSettings.vue";
+import ViewSettings from "./dialog/ViewSettings.vue";
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewSunburstChart"]);
@@ -41,7 +41,7 @@ function changeState() {
 };
 
 
-// マウントされた時に行う処理
+// マウントされた後に行う処理
 onMounted(() => {
     // Windowsの場合
     if (detectOS() == "Windows") {
@@ -58,9 +58,6 @@ onMounted(() => {
     }
     // それ以外
     else { }
-
-    // 後で削除
-    walkParams.value.target_directory = "/Users/shogo/Downloads";
 })
 
 
@@ -70,6 +67,12 @@ async function walkStart() {
     // OS対象外の場合は終了
     if (detectOS() == null) {
         progressMessage.value = "OS Error";
+        return;
+    }
+
+    // ターゲットディレクトリ未設定の場合
+    if (walkParams.value.target_directory == "") {
+        progressMessage.value = "Please set the target directory.";
         return;
     }
 
@@ -153,7 +156,7 @@ async function generateSunburst(data) {
     </v-container>
 
     <!-- 双方向バインディングを利用する -->
-    <ViewHeaderSettings v-model:showDialog="showDialog" v-model:walkParams="walkParams"></ViewHeaderSettings>
+    <ViewSettings v-model:showDialog="showDialog" v-model:walkParams="walkParams"></ViewSettings>
 </template>
 
 <style>
