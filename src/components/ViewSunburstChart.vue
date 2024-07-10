@@ -68,9 +68,6 @@ const squashedColorCode = "#777777";
 // Hierarchy data
 let hierarchy = null;
 
-// Partition data
-let partition = null;
-
 // SVG element data
 let svgElement = null;
 
@@ -111,12 +108,11 @@ function generateSunburst(data) {
         .sum(d => d.children.length ? 0 : d.size)
         .sort((a, b) => b.value - a.value);
 
-    // パーティションデータの作成
+    // パーティションデータの追加
     //
-    // 横の長さが2π、縦の長さが1のつららチャート（Icicle Chart）を作成する。
     // (x0, y0): 左上の座標
     // (x1, y1): 右下の座標
-    partition = d3.partition().size([2 * Math.PI, hierarchy.height + 1])(hierarchy);
+    d3.partition().size([2 * Math.PI, hierarchy.height + 1])(hierarchy);
 
     // カラースケールの作成
     //
@@ -129,7 +125,7 @@ function generateSunburst(data) {
     // 各ノードにプロパティを追加する
     //
     // each: ノードを幅優先で呼び出す
-    partition.each(d => {
+    hierarchy.each(d => {
 
         // nodeIdの追加（SVGのidは数字から始まってはいけないため、先頭に文字を付ける）
         // https://stackoverflow.com/questions/58302561/howto-select-an-element-by-its-id-d3
@@ -205,9 +201,9 @@ function generateSunburst(data) {
     //
     // datum: 単一のエレメントを作成
     svgElement.append("circle")
-        .datum(partition)
+        .datum(hierarchy)
         // IDを設定
-        .attr("id", partition.nodeId)
+        .attr("id", hierarchy.nodeId)
         // 半径を設定
         .attr("r", radius)
         // fill属性（塗りつぶし）を設定
@@ -226,11 +222,11 @@ function generateSunburst(data) {
             rightClicked(d)
         });
 
-    // Arcを描画
-    drawArc(0, true);
+    // Arcを更新
+    updateArc(hierarchy, true);
 
-    // FileSizeを描画
-    drawFileSize(partition.value);
+    // Textを更新（中心のファイルサイズ）
+    updateText(hierarchy.value);
 
     // 初回のアニメーション（初回は不透明度を0に設定してから1になるようにフェードインさせる）
     svgElement.selectAll("path")
@@ -251,22 +247,20 @@ function generateSunburst(data) {
         .attr("fill-opacity", 1);
 
     // Listの更新
-    updateList(partition, null);
+    updateList(hierarchy, null);
 
     // Breadcrumbsの更新
-    updateBreadcrumbs(partition);
+    updateBreadcrumbs(hierarchy);
 
     // DOMを格納
     svgDOM.value = svgElement.node();
 }
 
 
-// visibleDepthで指定した値より深いノードはfalseを返す
-//
-// node: オブジェクト
-// lowerDepth: 表示されるグラフの最も内側のDepth
-function arcVisible(node, lowerDepth) {
-    return node.depth > lowerDepth && node.depth <= (visibleDepth + lowerDepth) && node.x1 > node.x0;
+// rgb形式からhex形式に変換
+function rgb2Hex(rgb) {
+    const hex = d3.color(rgb).formatHex();
+    return hex.toUpperCase();
 }
 
 
@@ -290,19 +284,12 @@ function toReadable(value) {
 }
 
 
-// rgb形式からhex形式に変換
-function rgb2Hex(rgb) {
-    const hex = d3.color(rgb).formatHex();
-    return hex.toUpperCase();
-}
-
-
-// FileSizeを描画
+// Textを更新（中心のファイルサイズ）
 //
-// fileSize: ファイルサイズを入力
-function drawFileSize(fileSize) {
+// value: ファイルサイズを入力
+function updateText(value) {
     svgElement.selectAll("text")
-        .data(toReadable(fileSize))
+        .data(toReadable(value))
         .join("text")
         .attr("text-anchor", "middle")
         .attr("fill", "#FFFFFF")
@@ -314,11 +301,19 @@ function drawFileSize(fileSize) {
 }
 
 
-// Arcを描画
+// visibleDepthで指定した値より深いノードはfalseを返す
 //
-// lowerDepth: 表示されるグラフの最も内側のDepth
+// node: クリックされた円弧or円のデータ
+function arcVisible(node) {
+    return node.target.y0 > 0 && node.target.y0 <= visibleDepth && node.target.x1 > node.target.x0;
+}
+
+
+// Arcを更新
+//
+// node: クリックされた円弧or円のデータ
 // isFirstCalled: 初めて呼ばれたか否か
-function drawArc(lowerDepth, isFirstCalled) {
+function updateArc(node, isFirstCalled) {
 
     // 座標格納用
     let coordinates = null;
@@ -330,9 +325,32 @@ function drawArc(lowerDepth, isFirstCalled) {
     // 指定した要素を全て選択
     svgElement.selectAll("path.main-arc")
         // データ配列を作成
-        .data(partition.descendants().filter(d => {
+        .data(hierarchy.descendants().filter(d => {
+
+            // --------------------ここからプロパティの更新--------------------
+            if (!isFirstCalled) {
+                // 処理軽減のために、後続の処理で面積な小さなアークをパスから除外しており、
+                // その結果として、除外されたアークはcurrentプロパティが更新されなくなる。
+                // そのため、ここでcurrentプロパティの更新を行う。
+                d.current = {
+                    x0: d.target.x0,
+                    x1: d.target.x1,
+                    y0: d.target.y0,
+                    y1: d.target.y1
+                }
+
+                // targetプロパティの更新
+                d.target = {
+                    x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+                    x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+                    y0: Math.max(0, d.y0 - node.depth),
+                    y1: Math.max(0, d.y1 - node.depth)
+                };
+            }
+            // --------------------ここまでプロパティの更新--------------------
+
             // visibleDepthより深い階層のものはパスから除外する
-            if (!arcVisible(d, lowerDepth)) return false;
+            if (!arcVisible(d)) return false;
 
             // First Called
             if (isFirstCalled) { coordinates = d.current; }
@@ -394,9 +412,9 @@ function drawArc(lowerDepth, isFirstCalled) {
         // fill属性（塗りつぶし）を設定
         .attr("fill", d => d.color)
         // fill-opacity属性（塗りつぶしの透明度）を設定
-        .attr("fill-opacity", d => arcVisible(d, lowerDepth) ? 1 : 0)
+        .attr("fill-opacity", d => arcVisible(d) ? 1 : 0)
         // ポインターイベントの設定
-        .attr("pointer-events", d => arcVisible(d, lowerDepth) ? "auto" : "none")
+        .attr("pointer-events", d => arcVisible(d) ? "auto" : "none")
         // カーソルを指差しの手にする
         .style("cursor", "pointer")
         // カーソルを合わせた時
@@ -566,40 +584,15 @@ function leftClicked(node) {
     // circleのデータを更新
     svgElement.select("circle").datum(node);
 
-    // 各ノードにプロパティを追加する
-    //
-    // each: ノードを幅優先で呼び出す
-    partition.each(d => {
-
-        // 処理軽減のために、面積な小さなアークをパスから除外しており、
-        // その結果として、除外されたアークはcurrentプロパティが更新されなくなる。
-        // そのため、ここでcurrentプロパティの更新を行う。
-        d.current = {
-            x0: d.target.x0,
-            x1: d.target.x1,
-            y0: d.target.y0,
-            y1: d.target.y1
-        }
-
-        // 円弧の移動先（target）を設定
-        d.target = {
-            x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
-            x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
-            y0: Math.max(0, d.y0 - node.depth),
-            y1: Math.max(0, d.y1 - node.depth)
-        };
-
-    });
-
     // "path", "text"の要素を全て削除
     svgElement.selectAll("path").remove();
     svgElement.selectAll("text").remove();
 
-    // Arcを描画
-    drawArc(node.depth, false);
+    // Arcを更新
+    updateArc(node, false);
 
-    // FileSizeを描画
-    drawFileSize(node.value);
+    // Textを更新（中心のファイルサイズ）
+    updateText(node.value);
 
     // 変更を反映させる
     svgElement.enter();
