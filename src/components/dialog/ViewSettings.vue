@@ -36,6 +36,7 @@ const walkParams = defineModel("walkParams");
                     </v-list>
                 </v-navigation-drawer>
 
+                <!-- 右のメイン画面 -->
                 <v-main height="500" class="bg-blue-grey-darken-1 text-white enable-vertical-scroll">
                     <!-- スクロールバー分のパディングを入れる -->
                     <div class="pl-5">

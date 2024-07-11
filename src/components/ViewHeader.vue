@@ -46,15 +46,18 @@ onMounted(() => {
     // Windowsの場合
     if (detectOS() == "Windows") {
         walkParams.value.target_directory = "C:¥";
+        walkParams.value.ignore_directories.push("");
     }
     // Macの場合
     else if (detectOS() == "Mac") {
         walkParams.value.target_directory = "/";
-        walkParams.value.ignore_directories.push("/System/Volumes/Data");
+        walkParams.value.ignore_directories.push("/System/Volumes");
+        walkParams.value.ignore_directories.push("");
     }
     // Linuxの場合
     else if (detectOS() == "Linux") {
         walkParams.value.target_directory = "/";
+        walkParams.value.ignore_directories.push("");
     }
     // それ以外
     else { }

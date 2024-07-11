@@ -472,7 +472,7 @@ function updateArc(node, isFirstCalled) {
                 // 右クリックした時
                 .on("contextmenu", (event, d) => {
                     event.preventDefault(); // デフォルトの動作をキャンセル
-                    rightClicked(d)
+                    //rightClicked(d)
                 });
         }
     });

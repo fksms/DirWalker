@@ -17,8 +17,13 @@
         "open": true
       },
       "dialog": {
-        "open": true,
-        "message": true
+        "all": false,
+        "message": true,
+        "open": true
+      },
+      "clipboard": {
+        "all": false,
+        "writeText": true
       }
     },
     "windows": [
@@ -38,7 +43,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.dirwalker.build",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

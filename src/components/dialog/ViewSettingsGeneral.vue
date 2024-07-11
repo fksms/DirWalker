@@ -31,6 +31,9 @@ async function saved() {
     // 空または空白の文字列を削除
     const newIgnoreDirectories = walkParamsClone.value.ignore_directories.filter(str => str.trim() !== "");
 
+    // 1つだけ空文字を追加
+    newIgnoreDirectories.push("");
+
     // 書き戻し（Deep copy）
     walkParamsClone.value.ignore_directories = newIgnoreDirectories.concat();
 
@@ -90,22 +93,21 @@ function addIgnore() {
     <h3>Ignore Directories</h3>
     <p class="text-grey-lighten-2">Enter the directories you want to exclude.</p>
     <v-container fluid class="px-0">
-        <v-row>
+        <v-row class="align-end">
             <v-col cols="1">
-                <v-icon color="blue-grey-lighten-5" icon="mdi-plus-circle" class="pt-3 pl-2"
-                    @click="addIgnore()"></v-icon>
+                <v-icon color="blue-grey-lighten-5" icon="mdi-plus-circle" class="pb-8" @click="addIgnore()"></v-icon>
             </v-col>
             <v-col>
                 <!-- https://zenn.dev/kokota/articles/d1a8582129c748 -->
                 <div v-for="(item, index) in walkParamsClone.ignore_directories" :key="index">
                     <v-text-field v-model="walkParamsClone.ignore_directories[index]" hide-details single-line
-                        density="compact" label="Path" class="pb-2"></v-text-field>
+                        density="compact" label="Path" class="pb-3"></v-text-field>
                 </div>
             </v-col>
         </v-row>
     </v-container>
 
-    <div class="py-2"></div>
+    <div class="py-1"></div>
 
     <v-container fluid class="d-flex flex-row align-center px-0">
         <v-spacer></v-spacer>
