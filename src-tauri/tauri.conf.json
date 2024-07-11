@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "tauri-test",
-    "version": "0.0.0"
+    "productName": "DirWalker",
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -23,7 +23,7 @@
     },
     "windows": [
       {
-        "title": "tauri-test",
+        "title": "DirWalker",
         "width": 864,
         "height": 648,
         "minWidth": 864,

@@ -79,7 +79,7 @@ function addIgnore() {
 
 <template>
     <h3>Target Directory</h3>
-    <p class="text-grey-lighten-1">Set the directory you want to scan.</p>
+    <p class="text-grey-lighten-2">Set the directory you want to scan.</p>
     <v-container fluid class="d-flex flex-row align-center px-0">
         <v-btn flat class="text-capitalize mr-4" color="blue-grey" text="Open" @click="openDialog()"></v-btn>
         <v-text-field v-model="walkParamsClone.target_directory" hide-details label="Path"></v-text-field>
@@ -88,11 +88,12 @@ function addIgnore() {
     <div class="py-2"></div>
 
     <h3>Ignore Directories</h3>
-    <p class="text-grey-lighten-1">Enter the directories you want to exclude.</p>
+    <p class="text-grey-lighten-2">Enter the directories you want to exclude.</p>
     <v-container fluid class="px-0">
         <v-row>
             <v-col cols="1">
-                <v-icon color="white" icon="mdi-plus-circle" class="pt-3 pl-2" @click="addIgnore()"></v-icon>
+                <v-icon color="blue-grey-lighten-5" icon="mdi-plus-circle" class="pt-3 pl-2"
+                    @click="addIgnore()"></v-icon>
             </v-col>
             <v-col>
                 <!-- https://zenn.dev/kokota/articles/d1a8582129c748 -->
@@ -109,9 +110,8 @@ function addIgnore() {
     <v-container fluid class="d-flex flex-row align-center px-0">
         <v-spacer></v-spacer>
         <v-btn flat class="text-capitalize mr-4" color="blue-grey-lighten-1" text="Cancel" @click="canceled()"></v-btn>
-        <v-btn flat class="text-capitalize mr-4" color="amber-darken-1" text="Save" @click="saved()"></v-btn>
+        <v-btn flat class="text-capitalize" color="amber-darken-1" text="Save" @click="saved()"></v-btn>
     </v-container>
-
 </template>
 
 <style></style>

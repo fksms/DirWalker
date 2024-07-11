@@ -580,6 +580,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "dir_walker"
+version = "0.1.0"
+dependencies = [
+ "opener",
+ "rayon",
+ "regex",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-context-menu",
+]
+
+[[package]]
 name = "dirs-next"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2991,21 +3006,6 @@ dependencies = [
  "webview2-com",
  "windows 0.39.0",
  "wry",
-]
-
-[[package]]
-name = "tauri-test"
-version = "0.0.0"
-dependencies = [
- "opener",
- "rayon",
- "regex",
- "serde",
- "serde_json",
- "sysinfo",
- "tauri",
- "tauri-build",
- "tauri-plugin-context-menu",
 ]
 
 [[package]]

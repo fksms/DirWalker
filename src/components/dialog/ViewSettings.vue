@@ -3,6 +3,7 @@
 import { ref } from "vue";
 
 import ViewSettingsGeneral from "./ViewSettingsGeneral.vue"
+import ViewSettingsAbout from "./ViewSettingsAbout.vue"
 
 
 // ダイアログの状態（双方向バインディングを行う）
@@ -36,28 +37,32 @@ const walkParams = defineModel("walkParams");
                 </v-navigation-drawer>
 
                 <v-main height="500" class="bg-blue-grey-darken-1 text-white enable-vertical-scroll">
+                    <!-- スクロールバー分のパディングを入れる -->
+                    <div class="pl-5">
 
-                    <!-- 閉じるボタン -->
-                    <v-app-bar color="transparent" height="40" elevation="0">
-                        <template v-slot:append>
-                            <v-icon color="white" icon="mdi-close" @click="showDialog = false" class="px-4"></v-icon>
-                        </template>
-                    </v-app-bar>
+                        <!-- 閉じるボタン -->
+                        <v-app-bar color="transparent" height="40" elevation="0">
+                            <template v-slot:append>
+                                <v-icon color="white" icon="mdi-close" @click="showDialog = false"
+                                    class="px-4"></v-icon>
+                            </template>
+                        </v-app-bar>
 
-                    <!-- General -->
-                    <v-container v-if="selectedItem == 'General'" fluid class="py-2">
-                        <!-- 双方向バインディングを利用する -->
-                        <ViewSettingsGeneral v-model:walkParams="walkParams"></ViewSettingsGeneral>
-                    </v-container>
+                        <!-- General -->
+                        <v-container v-if="selectedItem == 'General'" fluid class="py-0">
+                            <!-- 双方向バインディングを利用する -->
+                            <ViewSettingsGeneral v-model:walkParams="walkParams"></ViewSettingsGeneral>
+                        </v-container>
 
-                    <!-- About -->
-                    <v-container v-else-if="selectedItem == 'About'" fluid class="py-2">
-                        <span>About</span>
-                    </v-container>
+                        <!-- About -->
+                        <v-container v-else-if="selectedItem == 'About'" fluid class="py-0">
+                            <ViewSettingsAbout></ViewSettingsAbout>
+                        </v-container>
 
-                    <!-- 要素無し -->
-                    <v-container v-else fluid class="py-2"></v-container>
+                        <!-- 要素無し -->
+                        <v-container v-else fluid class="py-2"></v-container>
 
+                    </div>
                 </v-main>
             </v-layout>
         </v-card>
@@ -82,8 +87,8 @@ const walkParams = defineModel("walkParams");
 /* スクロールバーのハンドル部分の設定 */
 .enable-vertical-scroll::-webkit-scrollbar-track {
     /* 上下に余白を付ける */
-    margin-top: 4px;
-    margin-bottom: 4px;
+    margin-top: 40px;
+    margin-bottom: 8px;
 }
 
 /* スクロールバーの背景部分の設定 */
