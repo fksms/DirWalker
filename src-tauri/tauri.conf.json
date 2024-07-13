@@ -29,6 +29,8 @@
     "windows": [
       {
         "title": "DirWalker",
+        "fileDropEnabled": false,
+        "maximizable": false,
         "width": 864,
         "height": 648,
         "minWidth": 864,

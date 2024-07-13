@@ -19,6 +19,8 @@ sysinfo = "0.27"
 regex = "1"
 tauri-plugin-context-menu = "0.7.1"
 opener = "0.7.1"
+winapi-util = "0.1.8"
+filesize = "0.2.0"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
