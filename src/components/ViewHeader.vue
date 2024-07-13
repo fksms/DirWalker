@@ -45,7 +45,7 @@ function changeState() {
 onMounted(() => {
     // Windowsの場合
     if (detectOS() == "Windows") {
-        walkParams.value.target_directory = "C:¥";
+        walkParams.value.target_directory = "C:\\";
         walkParams.value.ignore_directories.push("");
     }
     // Macの場合

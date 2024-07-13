@@ -140,7 +140,7 @@ fn init_rayon() {
             s.refresh_memory();
             let available = s.available_memory();
 
-            if available > large_stack.try_into().unwrap() {
+            if available > u64::try_from(large_stack).unwrap() {
                 // Larger stack size to handle cases with lots of nested directories
                 rayon::ThreadPoolBuilder::new()
                     .stack_size(large_stack)

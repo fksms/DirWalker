@@ -2,6 +2,8 @@
 
 import { ref } from "vue";
 
+import { detectOS } from "./DetectOS";
+
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewSunburstChart"]);
 
@@ -61,8 +63,21 @@ function generateDirectoryList(node, option) {
 //
 // path: ファイル・ディレクトリのパス（文字列）
 function getLastPath(path) {
-    // パスをスラッシュで分割
-    const segments = path.split('/');
+
+    // 分解した各パスを格納
+    let segments = null;
+
+    // Windowsの場合
+    if (detectOS() == "Windows") {
+        // パスを"¥"で分割
+        segments = path.split('\\');
+    }
+    // Windows以外の場合
+    else {
+        // パスを"/"で分割
+        segments = path.split('/');
+    }
+
     // 最後の要素を返す
     return segments[segments.length - 1];
 }
@@ -124,23 +139,46 @@ defineExpose({
 
 <template>
     <v-table class="bg-transparent text-white cursor-default">
+        <!-- テーブルレイアウトでwidthの指定にピクセルとパーセントを混在させる場合は"colgroup"を利用する -->
+        <!-- https://azuma006.hatenablog.com/entry/2020/01/31/233206 -->
+        <colgroup>
+            <col style="width: 40px;">
+            </col>
+            <col style="width: auto;">
+            </col>
+            <col style="width: 100px;">
+            </col>
+        </colgroup>
         <tbody>
             <tr v-if="ownColor && ownName && ownSize">
-                <th width="36"><v-icon :color="ownColor" icon="mdi-circle"></v-icon></th>
-                <th width="auto" nowrap class="text-left">{{ ownName }}</th>
-                <th width="100" nowrap class="text-right">{{ ownSize }}</th>
+                <th class="left-column"><v-icon :color="ownColor" icon="mdi-circle"></v-icon></th>
+                <th class="center-column text-left">{{ ownName }}</th>
+                <th class="right-column text-right">{{ ownSize }}</th>
             </tr>
         </tbody>
     </v-table>
     <!-- childrenの要素が10以下の場合はフッターを表示しない -->
     <v-data-table :items="children" density="compact" class="bg-transparent text-white" hover hide-no-data
         hide-default-header :hide-default-footer="(children.length <= 10) ? true : false" :items-per-page="10">
+        <!-- テーブルレイアウトでwidthの指定にピクセルとパーセントを混在させる場合は"colgroup"を利用する -->
+        <!-- https://azuma006.hatenablog.com/entry/2020/01/31/233206 -->
+        <template v-slot:colgroup>
+            <colgroup>
+                <col style="width: 40px;">
+                </col>
+                <col style="width: auto;">
+                </col>
+                <col style="width: 100px;">
+                </col>
+            </colgroup>
+        </template>
         <template v-slot:item="{ item }">
             <tr @click.left="updateSunburst(item)" @click.right.prevent="showContextMenu(item)"
                 @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
-                <td width="36"><v-icon :color="item.color" icon="mdi-circle-medium"></v-icon></td>
-                <td width="auto" nowrap class="text-left">{{ getLastPath(item.data.name) }}</td>
-                <td width="100" nowrap class="text-right">{{ array2String(toReadable(item.data.size)) }}</td>
+                <td class="left-column"><v-icon :color="item.color" icon="mdi-circle-medium"></v-icon></td>
+                <td class="center-column text-left">{{ getLastPath(item.data.name) }}</td>
+                <td class="right-column text-right">{{ array2String(toReadable(item.data.size)) }}
+                </td>
             </tr>
         </template>
     </v-data-table>
@@ -148,12 +186,43 @@ defineExpose({
 
 
 <style>
-td,
-th {
-    /* 文字数が多い場合は省略 */
-    text-overflow: ellipsis;
+/* 左列 */
+.left-column {
+    /* 文字数が多い場合は省略しない */
+    text-overflow: clip;
+    /* 改行しない */
     white-space: nowrap;
+    /* はみ出たまま表示 */
+    overflow: visible;
+    /* https://zenn.dev/milkandhoney995/articles/63eb778df55361 */
+    max-width: 0;
+    /* 上下のボーダーを削除 */
+    border: none !important;
+}
+
+/* 中央列 */
+.center-column {
+    /* 文字数が多い場合は"..."で省略 */
+    text-overflow: ellipsis;
+    /* 改行しない */
+    white-space: nowrap;
+    /* はみ出た部分を隠して表示 */
     overflow: hidden;
+    /* https://zenn.dev/milkandhoney995/articles/63eb778df55361 */
+    max-width: 0;
+    /* 上下のボーダーを削除 */
+    border: none !important;
+}
+
+/* 右列 */
+.right-column {
+    /* 文字数が多い場合は"..."で省略 */
+    text-overflow: ellipsis;
+    /* 改行しない */
+    white-space: nowrap;
+    /* はみ出た部分を隠して表示 */
+    overflow: hidden;
+    /* https://zenn.dev/milkandhoney995/articles/63eb778df55361 */
     max-width: 0;
     /* 上下のボーダーを削除 */
     border: none !important;

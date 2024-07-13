@@ -11,7 +11,7 @@ mod walk_manager;
 
 use opener::open;
 use tauri::Manager;
-use tauri::{Menu, MenuItem, Submenu};
+use tauri::Menu;
 
 use crate::init_walk::init_walk;
 use crate::init_walk::WalkParams;
@@ -120,83 +120,79 @@ async fn open_file_manager(path: String) -> Result<(), String> {
 fn main() {
     let context = tauri::generate_context!();
 
-    // --------------------ここからカスタムメニュー--------------------
+    // --------------------ここからメニューバーの設定--------------------
+    #[allow(unused_mut)]
     let mut menu = Menu::new();
-    #[cfg(target_os = "macos")]
-    {
-        use tauri::AboutMetadata;
-        menu = menu.add_submenu(Submenu::new(
-            context.package_info().name.clone(), // アプリケーション名
-            Menu::new()
-                .add_native_item(MenuItem::About(
-                    context.package_info().name.clone(), // アプリケーション名
-                    AboutMetadata::default(),
-                ))
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Services)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Hide)
-                .add_native_item(MenuItem::HideOthers)
-                .add_native_item(MenuItem::ShowAll)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Quit),
-        ));
-    }
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(not(target_os = "windows"))]
     {
-        let mut file_menu = Menu::new();
-        file_menu = file_menu.add_native_item(MenuItem::Quit);
-        menu = menu.add_submenu(Submenu::new("File", file_menu));
-    }
+        use tauri::{MenuItem, Submenu};
 
-    #[cfg(not(target_os = "linux"))]
-    let mut edit_menu = Menu::new();
-    /*
-    #[cfg(target_os = "macos")]
-    {
-        edit_menu = edit_menu.add_native_item(MenuItem::Undo);
-        edit_menu = edit_menu.add_native_item(MenuItem::Redo);
-        edit_menu = edit_menu.add_native_item(MenuItem::Separator);
-    }
-    */
-    #[cfg(not(target_os = "linux"))]
-    {
-        edit_menu = edit_menu.add_native_item(MenuItem::Cut);
-        edit_menu = edit_menu.add_native_item(MenuItem::Copy);
-        edit_menu = edit_menu.add_native_item(MenuItem::Paste);
-    }
-    #[cfg(target_os = "macos")]
-    {
-        edit_menu = edit_menu.add_native_item(MenuItem::SelectAll);
-    }
-    #[cfg(not(target_os = "linux"))]
-    {
-        menu = menu.add_submenu(Submenu::new("Edit", edit_menu));
-    }
-    /*
-    #[cfg(target_os = "macos")]
-    {
-        menu = menu.add_submenu(Submenu::new(
-            "View",
-            Menu::new().add_native_item(MenuItem::EnterFullScreen),
-        ));
-    }
-    */
+        #[cfg(target_os = "macos")]
+        {
+            use tauri::AboutMetadata;
 
-    let mut window_menu = Menu::new();
-    window_menu = window_menu.add_native_item(MenuItem::Minimize);
-    /*
-    #[cfg(target_os = "macos")]
-    {
-        window_menu = window_menu.add_native_item(MenuItem::Zoom);
+            menu = menu.add_submenu(Submenu::new(
+                context.package_info().name.clone(), // アプリケーション名
+                Menu::new()
+                    .add_native_item(MenuItem::About(
+                        context.package_info().name.clone(), // アプリケーション名
+                        AboutMetadata::default(),
+                    ))
+                    .add_native_item(MenuItem::Separator)
+                    .add_native_item(MenuItem::Services)
+                    .add_native_item(MenuItem::Separator)
+                    .add_native_item(MenuItem::Hide)
+                    .add_native_item(MenuItem::HideOthers)
+                    .add_native_item(MenuItem::ShowAll)
+                    .add_native_item(MenuItem::Separator)
+                    .add_native_item(MenuItem::Quit),
+            ));
+        }
+
+        #[cfg(target_os = "linux")]
+        {
+            let mut file_menu = Menu::new();
+            file_menu = file_menu.add_native_item(MenuItem::Quit);
+            menu = menu.add_submenu(Submenu::new("File", file_menu));
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            let mut edit_menu = Menu::new();
+            /*
+            edit_menu = edit_menu.add_native_item(MenuItem::Undo);
+            edit_menu = edit_menu.add_native_item(MenuItem::Redo);
+            edit_menu = edit_menu.add_native_item(MenuItem::Separator);
+            */
+            edit_menu = edit_menu.add_native_item(MenuItem::Cut);
+            edit_menu = edit_menu.add_native_item(MenuItem::Copy);
+            edit_menu = edit_menu.add_native_item(MenuItem::Paste);
+            edit_menu = edit_menu.add_native_item(MenuItem::SelectAll);
+            menu = menu.add_submenu(Submenu::new("Edit", edit_menu));
+
+            /*
+            menu = menu.add_submenu(Submenu::new(
+                "View",
+                Menu::new().add_native_item(MenuItem::EnterFullScreen),
+            ));
+            */
+        }
+
+        let mut window_menu = Menu::new();
+        window_menu = window_menu.add_native_item(MenuItem::Minimize);
+        /*
+        #[cfg(target_os = "macos")]
+        {
+            window_menu = window_menu.add_native_item(MenuItem::Zoom);
+        }
+        */
         window_menu = window_menu.add_native_item(MenuItem::Separator);
-    }
-    */
-    window_menu = window_menu.add_native_item(MenuItem::CloseWindow);
+        window_menu = window_menu.add_native_item(MenuItem::CloseWindow);
 
-    menu = menu.add_submenu(Submenu::new("Window", window_menu));
-    // --------------------ここまでカスタムメニュー--------------------
+        menu = menu.add_submenu(Submenu::new("Window", window_menu));
+    }
+    // --------------------ここまでメニューバーの設定--------------------
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![

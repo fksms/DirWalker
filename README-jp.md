@@ -20,7 +20,30 @@
 <img src="assets/Screenshot_3.png" width="600">
 </div>
 
+## Install
+
+[Release](https://github.com/fksms/DirWalker/releases)を確認してください。
+
+- MacOS (Intel)<br>
+  `DirWalker_X.X.X_x64.dmg` をダウンロードして展開してください。
+
+- MacOS (Apple Silicon)<br>
+  `DirWalker_X.X.X_aarch64.dmg` をダウンロードして展開してください。
+
+- Windows<br>
+  `DirWalker_X.X.X_x64-setup.exe` をダウンロードして実行してください。
+
+<br>
+
 ## How to build
+
+### GitHub Actions
+
+`All Build Release` を手動で実行することで、MacOS、Windows、Linux用のBuild（Release）が可能で、Build完了後、ダウンロード用URLが発行されます。
+
+`All Build Debug` を手動で実行することで、MacOS、Windows、Linux用のBuild（Debug）が可能で、Build完了後、ダウンロード用URLが発行されます。
+
+<br>
 
 ### MacOS
 
@@ -59,6 +82,14 @@ Build（Release）
 ```
 cargo tauri build
 ```
+
+<br>
+
+### Windows (GitHub Actions)
+
+`Windows Build Release` を手動で実行することで、Build（Release）が可能で、Build完了後、ダウンロード用URLが発行されます。
+
+`Windows Build Debug` を手動で実行することで、Build（Debug）が可能で、Build完了後、ダウンロード用URLが発行されます。
 
 <br>
 

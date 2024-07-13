@@ -1,6 +1,10 @@
-name: "manual-release"
+name: "Auto Release"
 
-on: workflow_dispatch
+# "release-*"ブランチ発行時に自動で実行。
+on:
+  push:
+    branches:
+      - release-*
 
 # `tauri-action` can also upload app bundles to an existing GitHub release.
 # This workflow uses different actions to create and publish the release.
@@ -27,20 +31,19 @@ jobs:
 
       - name: create release
         id: create-release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `app-v${process.env.PACKAGE_VERSION}`,
-              name: `Desktop App v${process.env.PACKAGE_VERSION}`,
+              tag_name: `v${process.env.PACKAGE_VERSION}`,
+              name: `DirWalker v${process.env.PACKAGE_VERSION}`,
               body: 'Take a look at the assets to download and install this app.',
               draft: true,
               prerelease: false
             })
             return data.id
-
   build-tauri:
     needs: create-release
     permissions:
@@ -100,7 +103,7 @@ jobs:
     steps:
       - name: publish release
         id: publish-release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
         with:

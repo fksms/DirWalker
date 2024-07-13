@@ -1,4 +1,4 @@
-日本語版は[こちら](./README.md)<br><br>
+日本語版は[こちら](./README-jp.md)<br><br>
 
 # DirWalker
 
@@ -22,7 +22,30 @@
 <img src="assets/Screenshot_3.png" width="600">
 </div>
 
+## Install
+
+[Release](https://github.com/fksms/DirWalker/releases) page.
+
+- MacOS (Intel)<br>
+  Download and unpack `DirWalker_X.X.X_x64.dmg`.
+
+- MacOS (Apple Silicon)<br>
+  Download and unpack `DirWalker_X.X.X_aarch64.dmg`.
+
+- Windows<br>
+  Download and run `DirWalker_X.X.X_x64-setup.exe`.
+
+<br>
+
 ## How to build
+
+### GitHub Actions
+
+By manually running `All Build Release`, you can build releases for MacOS, Windows, and Linux. After the build is complete, a download URL will be issued.
+
+By manually running `All Build Debug`, you can build debug versions for MacOS, Windows, and Linux. After the build is complete, a download URL will be issued.
+
+<br>
 
 ### MacOS
 
@@ -61,6 +84,14 @@ Build (Release)
 ```
 cargo tauri build
 ```
+
+<br>
+
+### Windows (GitHub Actions)
+
+By manually running `Windows Build Release`, you can build a release for Windows. After the build is complete, a download URL will be issued.
+
+By manually running `Windows Build Debug`, you can build a debug version for Windows. After the build is complete, a download URL will be issued.
 
 <br>
 

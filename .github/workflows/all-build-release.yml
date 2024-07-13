@@ -1,17 +1,12 @@
-name: "auto-release"
+name: "All Build Release"
 
-on:
-  push:
-    branches:
-      - release-*
+# 手動で実行
+on: workflow_dispatch
 
-# This is the example from the `tauri-action` (https://github.com/tauri-apps/tauri-action/blob/dev/examples/publish-to-auto-release.yml).
-# On each push to the `release-*` branch it will create or update a GitHub release, build your app, and upload the artifacts to the release.
+# This workflow will build your tauri app without uploading it anywhere.
 
 jobs:
-  publish-tauri:
-    permissions:
-      contents: write
+  test-tauri:
     strategy:
       fail-fast: false
       matrix:
@@ -51,13 +46,14 @@ jobs:
       - name: install frontend dependencies
         run: yarn install # change this to npm, pnpm or bun depending on which one you use.
 
+      # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: "App v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
-          prerelease: false
           args: ${{ matrix.args }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: All-binary(Release)
+          path: src-tauri/target/release/bundle
