@@ -7,11 +7,15 @@
 <br>
 <img src="assets/icon/DirWalker.svg" width="130">
 
-<br>This is a tool that visualizes the usage of each directory using a sunburst chart.
-<br>You can set the directories to scan and exclude.
-<br>The frontend is processed with Vue3, and the backend is processed with Rust.
-
 <br>
+
+[![Auto Build](https://github.com/fksms/DirWalker/actions/workflows/auto-build.yml/badge.svg)](https://github.com/fksms/DirWalker/actions/workflows/auto-build.yml)
+
+This tool visualizes the usage rate of each directory using a sunburst chart.<br>
+You can configure which directories to scan and which directories to exclude from the scan.<br>
+The framework used is Tauri, and it operates on Linux, macOS, and Windows.<br>
+The frontend is implemented with Vue3 and JavaScript, while the backend is written in Rust.<br>
+
 </div>
 
 ## Screenshots
@@ -55,9 +59,16 @@ brew install rustup-init
 brew install nodebrew
 ```
 
+Setting up rustup-init and nodebrew
+```
+rustup-init
+nodebrew setup
+```
+
 Install the stable version of node.js (npm)
 ```
 nodebrew install stable
+nodebrew use stable
 ```
 
 Install tauri-cli

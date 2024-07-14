@@ -5,11 +5,15 @@
 <br>
 <img src="assets/icon/DirWalker.svg" width="130">
 
-<br>各ディレクトリの使用率をサンバースト図を用いて可視化するツールです。
-<br>スキャンを行うディレクトリや除外するディレクトリの設定が可能です。
-<br>フロントエンドの処理はVue3、バックエンドの処理はRustを使用しています。
-
 <br>
+
+[![Auto Build](https://github.com/fksms/DirWalker/actions/workflows/auto-build.yml/badge.svg)](https://github.com/fksms/DirWalker/actions/workflows/auto-build.yml)
+
+各ディレクトリの使用率をサンバースト図を用いて可視化するツールです。<br>
+スキャンを行うディレクトリやスキャンから除外するディレクトリの設定が可能です。<br>
+フレームワークはTauriを利用しており、Linux、macOS、Windowsで動作します。<br>
+フロントエンドの処理はVue3 + Javascript、バックエンドの処理はRustで書かれています。<br>
+
 </div>
 
 ## Screenshots
@@ -53,9 +57,16 @@ brew install rustup-init
 brew install nodebrew
 ```
 
+rustup-initとnodebrewのセットアップ
+```
+rustup-init
+nodebrew setup
+```
+
 node.js(npm)の安定版をインストール
 ```
 nodebrew install stable
+nodebrew use stable
 ```
 
 tauri-cliをインストール
