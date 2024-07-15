@@ -2,8 +2,8 @@
 
 import { ref } from "vue";
 
-import ViewSettingsGeneral from "./ViewSettingsGeneral.vue"
-import ViewSettingsAbout from "./ViewSettingsAbout.vue"
+import ViewSettingsGeneral from "./ViewSettingsGeneral.vue";
+import ViewSettingsAbout from "./ViewSettingsAbout.vue";
 
 
 // ダイアログの状態（双方向バインディングを行う）

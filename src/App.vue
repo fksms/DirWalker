@@ -5,7 +5,7 @@ import { ref } from "vue";
 import ViewHeader from "./components/ViewHeader.vue";
 import ViewSunburstChart from "./components/ViewSunburstChart.vue";
 import ViewDirectoryFileList from "./components/ViewDirectoryFileList.vue";
-import ViewBreadcrumbsList from "./components/ViewBreadcrumbsList.vue"
+import ViewBreadcrumbsList from "./components/ViewBreadcrumbsList.vue";
 
 
 // コンポーネントの参照を作成
