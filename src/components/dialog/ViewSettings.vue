@@ -61,7 +61,7 @@ const walkParams = defineModel("walkParams");
                         </v-container>
 
                         <!-- 要素無し -->
-                        <v-container v-else fluid class="py-2"></v-container>
+                        <v-container v-else fluid class="py-0"></v-container>
 
                     </div>
                 </v-main>

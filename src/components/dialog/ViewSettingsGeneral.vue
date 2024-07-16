@@ -98,7 +98,10 @@ function addIgnore() {
                 <v-icon color="blue-grey-lighten-5" icon="mdi-plus-circle" class="pb-8" @click="addIgnore()"></v-icon>
             </v-col>
             <v-col>
-                <!-- https://zenn.dev/kokota/articles/d1a8582129c748 -->
+                <!--
+                v-for内で配列の要素をv-modelに使用する。
+                https://zenn.dev/kokota/articles/d1a8582129c748
+                 -->
                 <div v-for="(item, index) in walkParamsClone.ignore_directories" :key="index">
                     <v-text-field v-model="walkParamsClone.ignore_directories[index]" hide-details single-line
                         density="compact" label="Path" class="pb-3"></v-text-field>

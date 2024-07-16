@@ -138,7 +138,7 @@ defineExpose({
 </script>
 
 <template>
-    <v-table class="bg-transparent text-white cursor-default">
+    <v-table class="bg-transparent text-white" style="cursor: default;">
         <!-- テーブルレイアウトでwidthの指定にピクセルとパーセントを混在させる場合は"colgroup"を利用する -->
         <!-- https://azuma006.hatenablog.com/entry/2020/01/31/233206 -->
         <colgroup>
@@ -228,14 +228,11 @@ defineExpose({
     border: none !important;
 }
 
+/* リストホバー時のカラーとポインターを設定 */
 tr:hover td {
     /* blue-grey-lighten-1 */
     background-color: #78909C;
     cursor: pointer;
-}
-
-.cursor-default {
-    cursor: default;
 }
 
 /* フッターの上にある水平線を透明に設定 */

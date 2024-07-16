@@ -149,7 +149,7 @@ async function generateSunburst(data) {
             :text="buttonState ? 'Abort' : 'Scan'" flat width="80" class="text-capitalize" @click="changeState()">
         </v-btn>
 
-        <span class="mx-5 text-white cursor-default">
+        <span class="mx-5 text-white" style="cursor: default;">
             {{ progressMessage }}
         </span>
 
@@ -162,8 +162,4 @@ async function generateSunburst(data) {
     <ViewSettings v-model:showDialog="showDialog" v-model:walkParams="walkParams"></ViewSettings>
 </template>
 
-<style>
-.cursor-default {
-    cursor: default;
-}
-</style>
+<style></style>

@@ -64,8 +64,10 @@ defineExpose({
     <v-container fluid class="pb-0">
         <ul class="breadcrumbs enable-horizontal-scroll">
             <li v-for="(item, index) in ancestors">
-                <!-- ancestorsの一番後ろの要素に"current"クラスを設定する -->
-                <!-- ancestorsの一番後ろの要素を左クリックした場合は何もしない -->
+                <!-- 
+                ancestorsの一番後ろの要素に"current"クラスを設定する
+                ancestorsの一番後ろの要素を左クリックした場合は何もしない
+                -->
                 <a v-bind:class="{ 'current': index == ancestors.length - 1 }"
                     @click.left="(index != ancestors.length - 1) ? updateSunburst(item) : null"
                     @click.right.prevent="showContextMenu(item)">
@@ -125,8 +127,6 @@ li {
     white-space: nowrap;
     overflow: hidden;
     overflow-x: scroll;
-    width: 100%;
-    -webkit-overflow-scrolling: touch;
 }
 
 .breadcrumbs a {
