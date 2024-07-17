@@ -301,10 +301,10 @@ function updateText(value) {
 }
 
 
-// visibleDepthで指定した値より深いノードはfalseを返す
+// 入力されたnodeが可視化される場合はtrue、可視化されない場合はfalseを返す。
 //
 // node: クリックされた円弧or円のデータ
-function arcVisible(node) {
+function visualize(node) {
     return node.target.y0 > 0 && node.target.y0 <= visibleDepth && node.target.x1 > node.target.x0;
 }
 
@@ -349,8 +349,8 @@ function updateArc(node, isFirstCalled) {
             }
             // --------------------ここまでプロパティの更新--------------------
 
-            // visibleDepthより深い階層のものはパスから除外する
-            if (!arcVisible(d)) return false;
+            // 可視化されないものはパスから除外する
+            if (!visualize(d)) return false;
 
             // First Called
             if (isFirstCalled) { coordinates = d.current; }
@@ -412,9 +412,9 @@ function updateArc(node, isFirstCalled) {
         // fill属性（塗りつぶし）を設定
         .attr("fill", d => d.color)
         // fill-opacity属性（塗りつぶしの透明度）を設定
-        .attr("fill-opacity", d => arcVisible(d) ? 1 : 0)
+        .attr("fill-opacity", d => visualize(d) ? 1 : 0)
         // ポインターイベントの設定
-        .attr("pointer-events", d => arcVisible(d) ? "auto" : "none")
+        .attr("pointer-events", d => visualize(d) ? "auto" : "none")
         // カーソルを指差しの手にする
         .style("cursor", "pointer")
         // カーソルを合わせた時
