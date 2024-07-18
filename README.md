@@ -5,7 +5,7 @@
 <div align="center">
 
 <br>
-<img src="assets/icon/DirWalker.svg" width="130">
+<img src="./src/components/assets/DirWalker.svg" width="130">
 
 <br>
 
@@ -21,9 +21,9 @@ The frontend is implemented with Vue3 and JavaScript, while the backend is writt
 ## Screenshots
 
 <div align="center">
-<img src="assets/Screenshot_1.png" width="600">
-<img src="assets/Screenshot_2.png" width="600">
-<img src="assets/Screenshot_3.png" width="600">
+<img src="./images/Screenshot_1.png" width="600">
+<img src="./images/Screenshot_2.png" width="600">
+<img src="./images/Screenshot_3.png" width="600">
 </div>
 
 ## Install
