@@ -1,3 +1,5 @@
+# https://github.com/tauri-apps/tauri-action/blob/dev/examples/publish-to-manual-release.yml
+
 name: "Auto Release"
 
 # "release-*"ブランチ発行時に自動で実行。

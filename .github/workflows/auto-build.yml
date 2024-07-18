@@ -1,3 +1,5 @@
+# https://github.com/tauri-apps/tauri-action/blob/dev/examples/test-build-only.yml
+
 name: "Auto Build"
 
 # push、pull_request時に自動で実行。成果物のアップロードは無し。
