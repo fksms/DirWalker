@@ -14,7 +14,15 @@
       "all": false,
       "shell": {
         "all": false,
-        "open": true
+        "execute": true,
+        "open": true,
+        "scope": [
+          {
+            "name": "open",
+            "cmd": "open",
+            "args": true
+          }
+        ]
       },
       "dialog": {
         "all": false,

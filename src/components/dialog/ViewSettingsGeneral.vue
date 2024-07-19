@@ -84,7 +84,7 @@ function addIgnore() {
     <h3>Target Directory</h3>
     <p class="text-grey-lighten-2">Set the directory you want to scan.</p>
     <v-container fluid class="d-flex flex-row align-center px-0">
-        <v-btn flat class="text-capitalize mr-4" color="blue-grey" text="Open" @click="openDialog()"></v-btn>
+        <v-btn flat class="text-capitalize mr-4" color="blue-grey-lighten-1" text="Open" @click="openDialog()"></v-btn>
         <v-text-field v-model="walkParamsClone.target_directory" hide-details label="Path"></v-text-field>
     </v-container>
 
