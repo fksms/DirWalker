@@ -44,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows-binary(Debug)
-          path: src-tauri\target\debug\bundle\nsis
+          path: src-tauri\target\debug\bundle\nsis\*.exe
           
