@@ -17,9 +17,9 @@ const ownSize = ref();
 const children = ref([]);
 
 
-// リストを作成
+// リストを作成（入力されたノードデータのchildrenをリストにして表示）
 //
-// node: カーソルを合わせた円弧or円のデータ
+// node: ノードデータ
 // option: オプション
 function generateDirectoryList(node, option) {
 

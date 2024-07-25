@@ -10,9 +10,9 @@ const props = defineProps(["viewSunburstChart", "viewDirectoryFileList"]);
 const ancestors = ref([]);
 
 
-// パンくずリストを作成
+// パンくずリストを作成（入力されたノードデータのancestorsをパンくずリストにして表示）
 //
-// node: カーソルを合わせた円弧or円のデータ
+// node: ノードデータ
 function generateBreadcrumbs(node) {
 
     // 配列を初期化

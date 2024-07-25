@@ -1,10 +1,11 @@
 <script setup>
 
 import { ref, watch } from "vue";
+import { invoke } from "@tauri-apps/api";
+import { listen } from "@tauri-apps/api/event";
+import { writeText } from '@tauri-apps/api/clipboard';
 
 import * as d3 from "d3";
-
-import { showContextMenu } from "./ShowContextMenu";
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
@@ -100,27 +101,31 @@ const arc = d3.arc()
 // returnの型は(SVGSVGElement | null)
 function generateSunburst(data) {
 
-    // HierarchyNodeの作成
-    //
-    // sum: childrenの要素が0のもののサイズのみを足しこんでHierarchyNodeを作成
-    // sort: サイズを昇順でソート
-    hierarchy = d3.hierarchy(data)
-        .sum(d => d.children.length ? 0 : d.size)
-        .sort((a, b) => b.value - a.value);
-
-    // パーティションデータの追加
-    //
-    // (x0, y0): 左上の座標
-    // (x1, y1): 右下の座標
-    d3.partition().size([2 * Math.PI, hierarchy.height + 1])(hierarchy);
-
     // カラースケールの作成
     //
     // scaleOrdinal: 配列の繰り返し設定を行う
     const colorWheel = d3.scaleOrdinal().range(directoryColorCodes);
 
+    // HierarchyNodeの作成
+    //
+    // sum: childrenの要素が0のもののサイズのみを足しこんでHierarchyNodeを作成
+    // sort: サイズを降順でソート
+    hierarchy = d3.hierarchy(data)
+        .sum(d => d.children.length ? 0 : d.size)
+        .sort((a, b) => b.value - a.value);
+
     // nodeId用カウンター
     let count = 0;
+
+    // rootにパーティションデータを追加
+    // （幅は2π、高さは1の長方形とする。）
+    //
+    // (x0, y0): 左上の座標
+    // (x1, y1): 右下の座標
+    hierarchy.x0 = 0;
+    hierarchy.x1 = 2 * Math.PI;
+    hierarchy.y0 = 0;
+    hierarchy.y1 = 1;
 
     // 各ノードにプロパティを追加する
     //
@@ -131,6 +136,11 @@ function generateSunburst(data) {
         // https://stackoverflow.com/questions/58302561/howto-select-an-element-by-its-id-d3
         d.nodeId = "M" + count;
         count++;
+
+        // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
+        if (d.children) {
+            d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
+        }
 
         // currentプロパティの追加
         d.current = {
@@ -303,7 +313,7 @@ function updateText(value) {
 
 // 入力されたnodeが可視化される場合はtrue、可視化されない場合はfalseを返す。
 //
-// node: クリックされた円弧or円のデータ
+// node: ノードデータ
 function visualize(node) {
     return node.target.y0 > 0 && node.target.y0 <= visibleDepth && node.target.x1 > node.target.x0;
 }
@@ -311,7 +321,7 @@ function visualize(node) {
 
 // Arcを更新
 //
-// node: クリックされた円弧or円のデータ
+// node: ノードデータ
 // isFirstCalled: 初めて呼ばれたか否か
 function updateArc(node, isFirstCalled) {
 
@@ -480,109 +490,10 @@ function updateArc(node, isFirstCalled) {
 }
 
 
-// リスト更新用タイマーID
-let timerId = null;
-
-// 他のアニメーションをinterruptしないように、transitionにnameを設定する
-const transitionName = "blink"
-
-
-// カーソルを合わせた時の動作
+// Sunburstの更新
 //
-// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
-// node: カーソルを合わせた円弧or円のデータ
-// option: オプション
-function mouseEntered(event, node, option) {
-
-    // 円弧or円のパスを格納
-    let targetElement = null;
-
-    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
-    if (event) {
-        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
-        targetElement = d3.select(event.currentTarget);
-
-        // リスト更新用タイマーをセット（タイムアウト後に更新）
-        timerId = setTimeout(() => {
-            // Listの更新
-            updateList(node, option);
-        }, hoverTimeout);
-    }
-    else {
-        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
-        targetElement = svgElement.select("#" + node.nodeId);
-    }
-
-    // アニメーションをリピート
-    repeat();
-
-    // リピート用関数
-    function repeat() {
-        targetElement
-            .transition(transitionName)
-            .duration(blinkInterval / 2)
-            .ease(d3.easeLinear)
-            .attr("fill-opacity", 0.5)
-            .transition(transitionName)
-            .duration(blinkInterval / 2)
-            .ease(d3.easeLinear)
-            .attr("fill-opacity", 1)
-            .on("end", repeat);
-    };
-}
-
-
-// カーソルを離した時の動作
-//
-// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
-// node: カーソルを合わせた円弧or円のデータ
-function mouseLeaved(event, node) {
-
-    // 円弧or円のパスを格納
-    let targetElement = null;
-
-    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
-    if (event) {
-        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
-        targetElement = d3.select(event.currentTarget);
-
-        // リスト更新用タイマーをキャンセル
-        clearTimeout(timerId);
-    }
-    else {
-        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
-        targetElement = svgElement.select("#" + node.nodeId);
-    }
-
-    // アニメーションを中断
-    targetElement
-        .interrupt(transitionName)
-        .attr("fill-opacity", 1);
-}
-
-
-// 左クリックされた時の動作
-//
-// node: クリックされた円弧or円のデータ
-function leftClicked(node) {
-
-    // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
-    if (node == null) return;
-
-    // childrenがnullの場合はリターンして何もしない
-    if (node.children == null) return;
-
-    // リスト更新用タイマーをキャンセル
-    clearTimeout(timerId);
-
-    // Listの更新
-    updateList(node, null);
-
-    // Breadcrumbsの更新
-    updateBreadcrumbs(node);
-
-    // circleのデータを更新
-    svgElement.select("circle").datum(node);
+// node: ノードデータ
+function updateSunburst(node) {
 
     // "path", "text"の要素を全て削除
     svgElement.selectAll("path").remove();
@@ -627,9 +538,121 @@ function leftClicked(node) {
 }
 
 
+// リスト更新用タイマーID
+let timerId = null;
+
+// 他のアニメーションをinterruptしないように、transitionにnameを設定する
+const transitionName = "blink"
+
+
+// カーソルを合わせた時の動作
+//
+// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
+// node: ノードデータ
+// option: オプション
+function mouseEntered(event, node, option) {
+
+    // 円弧or円のパスを格納
+    let targetElement = null;
+
+    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
+    if (event) {
+        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
+        targetElement = d3.select(event.currentTarget);
+
+        // リスト更新用タイマーをセット（タイムアウト後に更新）
+        timerId = setTimeout(() => {
+            // Listの更新
+            updateList(node, option);
+        }, hoverTimeout);
+    }
+    else {
+        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
+        targetElement = svgElement.select("#" + node.nodeId);
+    }
+
+    // アニメーションをリピート
+    repeat();
+
+    // リピート用関数
+    function repeat() {
+        targetElement
+            .transition(transitionName)
+            .duration(blinkInterval / 2)
+            .ease(d3.easeLinear)
+            .attr("fill-opacity", 0.5)
+            .transition(transitionName)
+            .duration(blinkInterval / 2)
+            .ease(d3.easeLinear)
+            .attr("fill-opacity", 1)
+            .on("end", repeat);
+    };
+}
+
+
+// カーソルを離した時の動作
+//
+// event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
+// node: ノードデータ
+function mouseLeaved(event, node) {
+
+    // 円弧or円のパスを格納
+    let targetElement = null;
+
+    // イベントハンドラーが有効かを確認（List側から呼び出された場合、イベントハンドラーは無効となる）
+    if (event) {
+        // イベントハンドラーが有効な場合は、イベントハンドラーからパスを検索する
+        targetElement = d3.select(event.currentTarget);
+
+        // リスト更新用タイマーをキャンセル
+        clearTimeout(timerId);
+    }
+    else {
+        // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
+        targetElement = svgElement.select("#" + node.nodeId);
+    }
+
+    // アニメーションを中断
+    targetElement
+        .interrupt(transitionName)
+        .attr("fill-opacity", 1);
+}
+
+
+// 左クリックされた時の動作
+//
+// node: ノードデータ
+function leftClicked(node) {
+
+    // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
+    if (node == null) return;
+
+    // childrenがnullの場合はリターンして何もしない
+    if (node.children == null) return;
+
+    // リスト更新用タイマーをキャンセル
+    clearTimeout(timerId);
+
+    // circleのデータを更新
+    svgElement.select("circle")
+        .datum(node)
+        // IDを設定
+        .attr("id", node.nodeId);
+
+    // Listの更新
+    updateList(node, null);
+
+    // Breadcrumbsの更新
+    updateBreadcrumbs(node);
+
+    // Sunburstの更新
+    updateSunburst(node);
+}
+
+
 // 右クリックされた時の動作
 //
-// node: クリックされた円弧or円のデータ
+// node: ノードデータ
 function rightClicked(node) {
 
     // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
@@ -637,6 +660,85 @@ function rightClicked(node) {
 
     // コンテキストメニューを表示
     showContextMenu(node);
+}
+
+
+// Nodeを削除
+//
+// node: ノードデータ
+function removeNode(node) {
+
+    // 削除対象のノードのサイズ・ID・親ノードを保持
+    const removedNodeSize = node.value;
+    const removedNodeId = node.nodeId;
+    const removedNodeParent = node.parent;
+
+    // 中心のノードを保持
+    let centerNode = null;
+
+    // nodeがnullになるまで繰り返し（上方向に走査）
+    while (node != null) {
+        // targetのy0が0、y1が1の時に中心となる（必ず存在する）
+        if (node.target.y0 == 0 && node.target.y1 == 1) {
+            centerNode = node;
+        }
+
+        // 減算
+        node.value = node.value - removedNodeSize;
+        node.data.size = node.data.size - removedNodeSize;
+
+        // childrenを持っている場合、降順で再ソート
+        if (node.children) {
+            node.children.sort((a, b) => b.value - a.value);
+        }
+
+        // 親に移動
+        node = node.parent;
+    }
+
+    // 一旦親ノードに移動してから、該当の子ノードを消去する（横方向に走査）
+    for (let i = 0; i < removedNodeParent.children.length; i++) {
+        // 消去対象のノードIDと一致するかを確認
+        if (removedNodeParent.children[i].nodeId == removedNodeId) {
+            removedNodeParent.children.splice(i, 1);
+            break;
+        }
+    }
+
+    // 各ノードのプロパティ（x0, x1, y0, y1）を更新する
+    //
+    // each: ノードを幅優先で呼び出す
+    hierarchy.each(d => {
+        // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
+        if (d.children) {
+            d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
+        }
+    });
+
+    // 中心のノードを削除した場合
+    if (removedNodeId == centerNode.nodeId) {
+        // 親ノードを設定
+        node = centerNode.parent;
+
+        // circleのデータも更新する
+        svgElement.select("circle")
+            .datum(node)
+            // IDを設定
+            .attr("id", node.nodeId);
+    }
+    // それ以外は中心のノードを維持
+    else {
+        node = centerNode;
+    }
+
+    // Listの更新
+    updateList(removedNodeParent, null);
+
+    // Breadcrumbsの更新
+    updateBreadcrumbs(node);
+
+    // Sunburstの更新
+    updateSunburst(node);
 }
 
 
@@ -654,6 +756,87 @@ function updateList(node, option) {
 // node: ノードデータ
 function updateBreadcrumbs(node) {
     return props.viewBreadcrumbsList.generateBreadcrumbs(node);
+}
+
+
+// コンテキストメニューを表示する関数
+async function showContextMenu(node) {
+
+    // イベントを受信するためのリスナーを起動
+    const unlisten1 = await listen("writeToClipboard", event => {
+        // クリップボードに書き込む
+        writeToClipboard(event.payload);
+        // リスナーをまとめて停止
+        unlistenAll();
+    });
+
+    // イベントを受信するためのリスナーを起動
+    const unlisten2 = await listen("openFileManager", event => {
+        // ファイルマネージャーを開く
+        openFileManager(event.payload);
+        // リスナーをまとめて停止
+        unlistenAll();
+    });
+
+    // イベントを受信するためのリスナーを起動
+    const unlisten3 = await listen("removeFileOrDirectory", event => {
+        // ファイル or ディレクトリを削除する
+        removeFileOrDirectory(event.payload);
+        // リスナーをまとめて停止
+        unlistenAll();
+    });
+
+    // バックエンド側の関数を実行
+    await invoke("plugin:context_menu|show_context_menu", {
+        items: [
+            {
+                label: "Copy path",
+                disabled: false,
+                event: "writeToClipboard",
+                payload: node.data.name,
+            },
+            {
+                label: "Open",
+                disabled: false,
+                event: "openFileManager",
+                payload: (node.children) ? node.data.name : node.parent.data.name,
+            },
+            {
+                label: "Remove",
+                disabled: false,
+                event: "removeFileOrDirectory",
+                payload: node.data.name,
+            },
+        ],
+    });
+
+    // リスナーをまとめて停止
+    function unlistenAll() {
+        unlisten1();
+        unlisten2();
+        unlisten3();
+    }
+
+    // ファイルマネージャーを開く関数
+    async function openFileManager(path) {
+        await invoke("open_file_manager", { path: path })
+            // 失敗した場合
+            .catch((failure) => {
+                // エラーメッセージを出力
+                console.error(failure);
+            });
+    }
+
+    // クリップボードに書き込む関数
+    async function writeToClipboard(path) {
+        await writeText(path);
+    }
+
+    // ファイル or ディレクトリを削除する関数
+    async function removeFileOrDirectory(path) {
+        /* ファイル削除用関数 */
+        removeNode(node);
+    }
 }
 
 
