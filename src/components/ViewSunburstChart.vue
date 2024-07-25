@@ -4,7 +4,7 @@ import { ref, watch } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 import { writeText } from "@tauri-apps/api/clipboard";
-import { ask } from "@tauri-apps/api/dialog";
+import { ask, message } from "@tauri-apps/api/dialog";
 
 import * as d3 from "d3";
 
@@ -823,8 +823,8 @@ async function showContextMenu(node) {
         await invoke("open_file_manager", { path: path })
             // 失敗した場合
             .catch((failure) => {
-                // エラーメッセージを出力
-                console.error(failure);
+                // Message Dialog
+                message(failure);
             });
     }
 
@@ -851,8 +851,18 @@ async function showContextMenu(node) {
         const result = await ask(dialogMessage, dialogTitle);
         // YESの場合
         if (result) {
-            /* ファイル削除用関数 */
-            removeNode(node);
+            // バックエンド側の関数を実行
+            await invoke("remove_file_or_directory", { path: path })
+                // 成功した場合
+                .then((success) => {
+                    // Nodeを削除
+                    removeNode(node);
+                })
+                // 失敗した場合
+                .catch((failure) => {
+                    // Message Dialog
+                    message(failure);
+                });
         }
     }
 }
