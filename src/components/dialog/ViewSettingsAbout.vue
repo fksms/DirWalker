@@ -1,6 +1,6 @@
 <script setup>
 
-import { getVersion } from '@tauri-apps/api/app';
+import { getVersion } from "@tauri-apps/api/app";
 
 const appVersion = await getVersion();
 

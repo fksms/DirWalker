@@ -1,9 +1,10 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
-import { writeText } from '@tauri-apps/api/clipboard';
+import { writeText } from "@tauri-apps/api/clipboard";
+import { ask } from "@tauri-apps/api/dialog";
 
 import * as d3 from "d3";
 
@@ -232,6 +233,12 @@ function generateSunburst(data) {
             rightClicked(d)
         });
 
+    // Listの更新
+    updateList(hierarchy, null);
+
+    // Breadcrumbsの更新
+    updateBreadcrumbs(hierarchy);
+
     // Arcを更新
     updateArc(hierarchy, true);
 
@@ -255,12 +262,6 @@ function generateSunburst(data) {
         .duration(transitionDuration)
         .ease(d3.easeLinear)
         .attr("fill-opacity", 1);
-
-    // Listの更新
-    updateList(hierarchy, null);
-
-    // Breadcrumbsの更新
-    updateBreadcrumbs(hierarchy);
 
     // DOMを格納
     svgDOM.value = svgElement.node();
@@ -687,7 +688,7 @@ function removeNode(node) {
         node.value = node.value - removedNodeSize;
         node.data.size = node.data.size - removedNodeSize;
 
-        // childrenを持っている場合、降順で再ソート
+        // childrenを持っている場合、childrenを降順で再ソート
         if (node.children) {
             node.children.sort((a, b) => b.value - a.value);
         }
@@ -834,8 +835,25 @@ async function showContextMenu(node) {
 
     // ファイル or ディレクトリを削除する関数
     async function removeFileOrDirectory(path) {
-        /* ファイル削除用関数 */
-        removeNode(node);
+
+        let dialogTitle = "";
+        let dialogMessage = "";
+
+        if (node.children) {
+            dialogTitle = "Remove Directory";
+            dialogMessage = "Are you sure you want to remove directory?" + "\n\n\n" + path + "\n";
+        }
+        else {
+            dialogTitle = "Remove File";
+            dialogMessage = "Are you sure you want to remove file?" + "\n\n\n" + path + "\n";
+        }
+
+        const result = await ask(dialogMessage, dialogTitle);
+        // YESの場合
+        if (result) {
+            /* ファイル削除用関数 */
+            removeNode(node);
+        }
     }
 }
 
