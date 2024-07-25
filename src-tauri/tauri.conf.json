@@ -27,7 +27,8 @@
       "dialog": {
         "all": false,
         "message": true,
-        "open": true
+        "open": true,
+        "ask": true
       },
       "clipboard": {
         "all": false,
