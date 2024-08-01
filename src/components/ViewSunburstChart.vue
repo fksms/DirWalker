@@ -628,8 +628,11 @@ function leftClicked(node) {
     // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
     if (node == null) return;
 
-    // childrenがnullの場合はリターンして何もしない
+    // childrenがnullの場合はリターンして何もしない（ファイルor空のディレクトリ）
     if (node.children == null) return;
+
+    // valueが0の場合はリターンして何もしない（サイズが0バイトのディレクトリ）
+    if (node.value == 0) return;
 
     // リスト更新用タイマーをキャンセル
     clearTimeout(timerId);
