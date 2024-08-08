@@ -68,7 +68,7 @@ const squashedColorCode = "#777777";
 // --------------------グローバル--------------------
 
 // Hierarchy data
-let hierarchy = null;
+let root = null;
 
 // SVG element data
 let svgElement = null;
@@ -76,30 +76,7 @@ let svgElement = null;
 // --------------------グローバル--------------------
 
 
-// 円弧（arc）の生成
-//
-// 上記で設定したパーティションデータ（長方形）を円弧（バウムクーヘン形）に変換
-// （横の長さを2πと指定しているため、直接角度として変換できる）
-//
-// startAngle: 円弧の開始角度
-// endAngle: 円弧の終了角度
-// padAngle: 円弧間の間隔（パディング角度）
-// padRadius: 円弧間の間隔（パディング半径）
-// innerRadius: 円弧の内側の半径
-// outerRadius: 円弧の外側の半径
-const arcHeight = (width - radius * 2) / (visibleDepth * 2); // 円弧の外側の半径-円弧の内側の半径
-const arc = d3.arc()
-    .startAngle(d => d.x0)
-    .endAngle(d => d.x1)
-    .padAngle(0.01)
-    .padRadius(radius)
-    .innerRadius(d => radius + (d.y0 - 1) * arcHeight)
-    .outerRadius(d => radius + (d.y1 - 1) * arcHeight - 1);
-
-
 // Sunburstの作成
-//
-// returnの型は(SVGSVGElement | null)
 function generateSunburst(data) {
 
     // カラースケールの作成
@@ -111,7 +88,7 @@ function generateSunburst(data) {
     //
     // sum: childrenの要素が0のもののサイズのみを足しこんでHierarchyNodeを作成
     // sort: サイズを降順でソート
-    hierarchy = d3.hierarchy(data)
+    root = d3.hierarchy(data)
         .sum(d => d.children.length ? 0 : d.size)
         .sort((a, b) => b.value - a.value);
 
@@ -123,15 +100,15 @@ function generateSunburst(data) {
     //
     // (x0, y0): 左上の座標
     // (x1, y1): 右下の座標
-    hierarchy.x0 = 0;
-    hierarchy.x1 = 2 * Math.PI;
-    hierarchy.y0 = 0;
-    hierarchy.y1 = 1;
+    root.x0 = 0;
+    root.x1 = 2 * Math.PI;
+    root.y0 = 0;
+    root.y1 = 1;
 
     // 各ノードにプロパティを追加する
     //
     // each: ノードを幅優先で呼び出す
-    hierarchy.each(d => {
+    root.each(d => {
 
         // nodeIdの追加（SVGのidは数字から始まってはいけないため、先頭に文字を付ける）
         // https://stackoverflow.com/questions/58302561/howto-select-an-element-by-its-id-d3
@@ -212,17 +189,19 @@ function generateSunburst(data) {
     //
     // datum: 単一のエレメントを作成
     svgElement.append("circle")
-        .datum(hierarchy)
+        .datum(root)
         // IDを設定
-        .attr("id", hierarchy.nodeId)
+        .attr("id", root.nodeId)
         // 半径を設定
         .attr("r", radius)
         // fill属性（塗りつぶし）を設定
         .attr("fill", "none")
         // ポインターイベントの設定
         .attr("pointer-events", "all")
+        // カーソルを指差しの手にする
+        .style("cursor", "pointer")
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => mouseEntered(event, d, null))
+        .on("mouseenter", (event, d) => mouseEntered(event, d))
         // カーソルを離した時
         .on("mouseleave", (event, d) => mouseLeaved(event, d))
         // 左クリックした時
@@ -233,17 +212,17 @@ function generateSunburst(data) {
             rightClicked(d)
         });
 
-    // Listの更新
-    updateList(hierarchy, null);
-
-    // Breadcrumbsの更新
-    updateBreadcrumbs(hierarchy);
-
     // Arcを更新
-    updateArc(hierarchy, true);
+    updateArc(root, true);
 
     // Textを更新（中心のファイルサイズ）
-    updateText(hierarchy.value);
+    updateText(root.value);
+
+    // Listの更新
+    updateList(root);
+
+    // Breadcrumbsの更新
+    updateBreadcrumbs(root);
 
     // 初回のアニメーション（初回は不透明度を0に設定してから1になるようにフェードインさせる）
     svgElement.selectAll("path")
@@ -312,6 +291,28 @@ function updateText(value) {
 }
 
 
+// 円弧（arc）生成関数
+function createArc() {
+    // パーティションデータ（長方形）を円弧（バウムクーヘン形）に変換
+    // （横の長さを2πと指定しているため、直接角度として変換できる）
+    //
+    // startAngle: 円弧の開始角度
+    // endAngle: 円弧の終了角度
+    // padAngle: 円弧間の間隔（パディング角度）
+    // padRadius: 円弧間の間隔（パディング半径）
+    // innerRadius: 円弧の内側の半径
+    // outerRadius: 円弧の外側の半径
+    const arcHeight = (width - radius * 2) / (visibleDepth * 2); // 円弧の外側の半径-円弧の内側の半径
+    return d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .padAngle(0.01)
+        .padRadius(radius)
+        .innerRadius(d => radius + (d.y0 - 1) * arcHeight)
+        .outerRadius(d => radius + (d.y1 - 1) * arcHeight - 1);
+}
+
+
 // 入力されたnodeが可視化される場合はtrue、可視化されない場合はfalseを返す。
 //
 // node: ノードデータ
@@ -326,8 +327,8 @@ function visualize(node) {
 // isFirstCalled: 初めて呼ばれたか否か
 function updateArc(node, isFirstCalled) {
 
-    // 座標格納用
-    let coordinates = null;
+    // 円弧（arc）の生成
+    const arc = createArc();
 
     // Mapオブジェクト
     const squashedArcs = new Map();
@@ -336,7 +337,7 @@ function updateArc(node, isFirstCalled) {
     // 指定した要素を全て選択
     svgElement.selectAll("path.main-arc")
         // データ配列を作成
-        .data(hierarchy.descendants().filter(d => {
+        .data(root.descendants().filter(d => {
 
             // --------------------ここからプロパティの更新--------------------
             if (!isFirstCalled) {
@@ -363,13 +364,8 @@ function updateArc(node, isFirstCalled) {
             // 可視化されないものはパスから除外する
             if (!visualize(d)) return false;
 
-            // First Called
-            if (isFirstCalled) { coordinates = d.current; }
-            // Update
-            else { coordinates = d.target; }
-
             // 円弧の角度[degree]が小さいものは除外する
-            if ((coordinates.x1 - coordinates.x0) < (angleThreshold * Math.PI / 180)) {
+            if ((d.target.x1 - d.target.x0) < (angleThreshold * Math.PI / 180)) {
 
                 // --------------------ここからsquashed-arc用--------------------
                 const parentName = d.parent.data.name;
@@ -380,10 +376,10 @@ function updateArc(node, isFirstCalled) {
                     const squashedObject = {
                         parentNode: d.parent,
                         head: d.value, // squashされた部分で最もサイズの大きいノードのvalue
-                        x0: coordinates.x0,
-                        x1: coordinates.x1,
-                        y0: coordinates.y0,
-                        y1: coordinates.y1
+                        x0: d.target.x0,
+                        x1: d.target.x1,
+                        y0: d.target.y0,
+                        y1: d.target.y1
                     }
                     // 除外された円弧のparentNameをキーとして、座標を格納
                     squashedArcs.set(parentName, squashedObject);
@@ -393,7 +389,7 @@ function updateArc(node, isFirstCalled) {
                     // 格納された座標を取得
                     let tmpCoordinates = squashedArcs.get(parentName);
                     // 座標をUpdate
-                    tmpCoordinates.x1 = coordinates.x1;
+                    tmpCoordinates.x1 = d.target.x1;
                     // 座標を格納
                     squashedArcs.set(parentName, tmpCoordinates);
                 }
@@ -412,14 +408,7 @@ function updateArc(node, isFirstCalled) {
         // IDを設定
         .attr("id", d => d.nodeId)
         // d属性（パス）を設定
-        .attr("d", d => {
-            // First Called
-            if (isFirstCalled) { coordinates = d.current; }
-            // Update
-            else { coordinates = d.target; }
-
-            return arc(coordinates);
-        })
+        .attr("d", d => arc(d.target))
         // fill属性（塗りつぶし）を設定
         .attr("fill", d => d.color)
         // fill-opacity属性（塗りつぶしの透明度）を設定
@@ -429,7 +418,7 @@ function updateArc(node, isFirstCalled) {
         // カーソルを指差しの手にする
         .style("cursor", "pointer")
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => mouseEntered(event, d, null))
+        .on("mouseenter", (event, d) => mouseEntered(event, d))
         // カーソルを離した時
         .on("mouseleave", (event, d) => mouseLeaved(event, d))
         // 左クリックした時
@@ -457,6 +446,7 @@ function updateArc(node, isFirstCalled) {
 
             // リスト生成時のオプションを指定
             const option = {
+                title: "Other small size items",
                 color: squashedColorCode,
                 threshold: value.head // リスト生成時の閾値
             }
@@ -470,10 +460,7 @@ function updateArc(node, isFirstCalled) {
                 // IDを設定
                 .attr("id", "_")
                 // d属性（パス）を設定
-                .attr("d", d => {
-                    coordinates = squashedArcCoordinates;
-                    return arc(coordinates);
-                })
+                .attr("d", arc(squashedArcCoordinates))
                 // fill属性（塗りつぶし）を設定
                 .attr("fill", squashedColorCode) // ダークグレー
                 // カーソルを合わせた時
@@ -495,6 +482,9 @@ function updateArc(node, isFirstCalled) {
 //
 // node: ノードデータ
 function updateSunburst(node) {
+
+    // 円弧（arc）の生成
+    const arc = createArc();
 
     // "path", "text"の要素を全て削除
     svgElement.selectAll("path").remove();
@@ -551,7 +541,7 @@ const transitionName = "blink"
 // event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
 // node: ノードデータ
 // option: オプション
-function mouseEntered(event, node, option) {
+function mouseEntered(event, node, option = null) {
 
     // 円弧or円のパスを格納
     let targetElement = null;
@@ -643,14 +633,14 @@ function leftClicked(node) {
         // IDを設定
         .attr("id", node.nodeId);
 
+    // Sunburstの更新
+    updateSunburst(node);
+
     // Listの更新
-    updateList(node, null);
+    updateList(node);
 
     // Breadcrumbsの更新
     updateBreadcrumbs(node);
-
-    // Sunburstの更新
-    updateSunburst(node);
 }
 
 
@@ -712,7 +702,7 @@ function removeNode(node) {
     // 各ノードのプロパティ（x0, x1, y0, y1）を更新する
     //
     // each: ノードを幅優先で呼び出す
-    hierarchy.each(d => {
+    root.each(d => {
         // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
         if (d.children) {
             d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
@@ -735,14 +725,14 @@ function removeNode(node) {
         node = centerNode;
     }
 
+    // Sunburstの更新
+    updateSunburst(node);
+
     // Listの更新
-    updateList(removedNodeParent, null);
+    updateList(removedNodeParent);
 
     // Breadcrumbsの更新
     updateBreadcrumbs(node);
-
-    // Sunburstの更新
-    updateSunburst(node);
 }
 
 
@@ -750,7 +740,7 @@ function removeNode(node) {
 //
 // node: ノードデータ
 // option: オプション
-function updateList(node, option) {
+function updateList(node, option = null) {
     return props.viewDirectoryFileList.generateDirectoryList(node, option);
 }
 
@@ -785,10 +775,17 @@ async function showContextMenu(node) {
     // イベントを受信するためのリスナーを起動
     const unlisten3 = await listen("removeFileOrDirectory", event => {
         // ファイル or ディレクトリを削除する
-        removeFileOrDirectory(event.payload);
+        removeFileOrDirectory(event.payload, node);
         // リスナーをまとめて停止
         unlistenAll();
     });
+
+    // リスナーをまとめて停止
+    function unlistenAll() {
+        unlisten1();
+        unlisten2();
+        unlisten3();
+    };
 
     // バックエンド側の関数を実行
     await invoke("plugin:context_menu|show_context_menu", {
@@ -813,60 +810,56 @@ async function showContextMenu(node) {
             },
         ],
     });
+}
 
-    // リスナーをまとめて停止
-    function unlistenAll() {
-        unlisten1();
-        unlisten2();
-        unlisten3();
+
+// ファイルマネージャーを開く関数
+async function openFileManager(path) {
+    await invoke("open_file_manager", { path: path })
+        // 失敗した場合
+        .catch((failure) => {
+            // Message Dialog
+            message(failure);
+        });
+}
+
+
+// クリップボードに書き込む関数
+async function writeToClipboard(path) {
+    await writeText(path);
+}
+
+
+// ファイル or ディレクトリを削除する関数
+async function removeFileOrDirectory(path, node) {
+
+    let dialogTitle = "";
+    let dialogMessage = "";
+
+    if (node.children) {
+        dialogTitle = "Remove Directory";
+        dialogMessage = "Are you sure you want to remove directory?" + "\n\n\n" + path + "\n";
+    }
+    else {
+        dialogTitle = "Remove File";
+        dialogMessage = "Are you sure you want to remove file?" + "\n\n\n" + path + "\n";
     }
 
-    // ファイルマネージャーを開く関数
-    async function openFileManager(path) {
-        await invoke("open_file_manager", { path: path })
+    const result = await ask(dialogMessage, dialogTitle);
+    // YESの場合
+    if (result) {
+        // バックエンド側の関数を実行
+        await invoke("remove_file_or_directory", { path: path })
+            // 成功した場合
+            .then((success) => {
+                // Nodeを削除
+                removeNode(node);
+            })
             // 失敗した場合
             .catch((failure) => {
                 // Message Dialog
                 message(failure);
             });
-    }
-
-    // クリップボードに書き込む関数
-    async function writeToClipboard(path) {
-        await writeText(path);
-    }
-
-    // ファイル or ディレクトリを削除する関数
-    async function removeFileOrDirectory(path) {
-
-        let dialogTitle = "";
-        let dialogMessage = "";
-
-        if (node.children) {
-            dialogTitle = "Remove Directory";
-            dialogMessage = "Are you sure you want to remove directory?" + "\n\n\n" + path + "\n";
-        }
-        else {
-            dialogTitle = "Remove File";
-            dialogMessage = "Are you sure you want to remove file?" + "\n\n\n" + path + "\n";
-        }
-
-        const result = await ask(dialogMessage, dialogTitle);
-        // YESの場合
-        if (result) {
-            // バックエンド側の関数を実行
-            await invoke("remove_file_or_directory", { path: path })
-                // 成功した場合
-                .then((success) => {
-                    // Nodeを削除
-                    removeNode(node);
-                })
-                // 失敗した場合
-                .catch((failure) => {
-                    // Message Dialog
-                    message(failure);
-                });
-        }
     }
 }
 

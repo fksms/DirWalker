@@ -53,7 +53,7 @@ function generateDirectoryList(node, option) {
         });
 
         ownColor.value = option.color;
-        ownName.value = "Other small size items";
+        ownName.value = option.title;
         ownSize.value = array2String(toReadable(otherSize));
     }
 }
@@ -117,7 +117,7 @@ function showContextMenu(node) {
 //
 // node: ノードデータ
 function mouseEntered(node) {
-    return props.viewSunburstChart.mouseEntered(null, node, null);
+    return props.viewSunburstChart.mouseEntered(null, node);
 }
 
 
