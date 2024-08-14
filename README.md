@@ -40,6 +40,14 @@ The frontend is implemented with Vue3 and JavaScript, while the backend is writt
   Download and run `DirWalker_X.X.X_x64-setup.exe`.
 
 <br>
+<br>
+
+In the case of Windows, installation is also possible from the following:<br>
+<a href="https://apps.microsoft.com/detail/9nxz7km9m483">
+	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+</a>
+
+<br>
 
 ## How to build
 
@@ -86,7 +94,7 @@ Install the necessary packages (node_modules will be created)
 npm install
 ```
 
-Build (Debug)
+Build & Preview (Debug)
 ```
 cargo tauri dev
 ```
@@ -94,6 +102,11 @@ cargo tauri dev
 Build (Release)
 ```
 cargo tauri build
+```
+
+Build (Debug)
+```
+cargo tauri build --debug
 ```
 
 <br>

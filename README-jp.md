@@ -38,6 +38,14 @@
   `DirWalker_X.X.X_x64-setup.exe` をダウンロードして実行してください。
 
 <br>
+<br>
+
+Windowsの場合は以下からインストールも可能です。<br>
+<a href="https://apps.microsoft.com/detail/9nxz7km9m483">
+	<img src="https://get.microsoft.com/images/ja%20dark.svg" width="200"/>
+</a>
+
+<br>
 
 ## How to build
 
@@ -84,7 +92,7 @@ cd DirWalker
 npm install
 ```
 
-Build（Debug）
+Build & Preview（Debug）
 ```
 cargo tauri dev
 ```
@@ -92,6 +100,11 @@ cargo tauri dev
 Build（Release）
 ```
 cargo tauri build
+```
+
+Build（Debug）
+```
+cargo tauri build --debug
 ```
 
 <br>
