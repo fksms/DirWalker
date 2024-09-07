@@ -14,6 +14,12 @@
 フレームワークはTauriを利用しており、Linux、macOS、Windowsで動作します。<br>
 フロントエンドの処理はVue3 + Javascript、バックエンドの処理はRustで書かれています。<br>
 
+<br>
+<img src="./images/ScreenRecording.gif" width="550">
+<br>
+<br>
+<br>
+
 </div>
 
 ## Screenshots
@@ -41,10 +47,12 @@
 <br>
 
 Windowsの場合は以下からインストールも可能です。<br>
+
 <a href="https://apps.microsoft.com/detail/9nxz7km9m483">
 	<img src="https://get.microsoft.com/images/ja%20dark.svg" width="200"/>
 </a>
 
+<br>
 <br>
 
 ## How to build

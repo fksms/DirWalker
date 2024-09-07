@@ -16,6 +16,12 @@ You can configure which directories to scan and which directories to exclude fro
 The framework used is Tauri, and it operates on Linux, macOS, and Windows.<br>
 The frontend is implemented with Vue3 and JavaScript, while the backend is written in Rust.<br>
 
+<br>
+<img src="./images/ScreenRecording.gif" width="550">
+<br>
+<br>
+<br>
+
 </div>
 
 ## Screenshots
@@ -43,10 +49,12 @@ The frontend is implemented with Vue3 and JavaScript, while the backend is writt
 <br>
 
 In the case of Windows, installation is also possible from the following:<br>
+
 <a href="https://apps.microsoft.com/detail/9nxz7km9m483">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
 </a>
 
+<br>
 <br>
 
 ## How to build
