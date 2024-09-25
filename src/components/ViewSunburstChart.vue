@@ -54,6 +54,12 @@ const hoverTimeout = 500;
 // マウスホバーした際の点滅の間隔[msec]
 const blinkInterval = 600;
 
+// 中心円が消灯した時のカラーコード（背景色（blue-grey-darken-3）と同じ色）
+const circleLightOffColorCodes = "#37474F";
+
+// 中心円が点灯した時のカラーコード（blue-grey-lighten-3）
+const circleLightOnColorCodes = "#B0BEC5";
+
 // ディレクトリのカラーコード（原色）
 const directoryColorCodes = ["#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#FF0080"];
 
@@ -185,17 +191,35 @@ function generateSunburst(data) {
         .style("width", "100%")
         .style("height", "100%");
 
+    // 背景の円を設定
+    // （背景の円を用意することで、手前の円の透過率を変化させた際に点滅しているように見える）
+    //
+    // datum: 単一のエレメントを作成
+    svgElement.append("circle")
+        // classを設定
+        .classed("back", true)
+        // 半径を設定（1だけ小さな値にする）
+        .attr("r", radius - 1)
+        // fill属性（塗りつぶし）を設定
+        .attr("fill", circleLightOnColorCodes)
+        // fill-opacity属性（塗りつぶしの透明度）を設定
+        .attr("fill-opacity", 1);
+
     // 中心の円のパスを設定
     //
     // datum: 単一のエレメントを作成
     svgElement.append("circle")
         .datum(root)
+        // classを設定
+        .classed("front", true)
         // IDを設定
         .attr("id", root.nodeId)
         // 半径を設定
         .attr("r", radius)
         // fill属性（塗りつぶし）を設定
-        .attr("fill", "none")
+        .attr("fill", circleLightOffColorCodes)
+        // fill-opacity属性（塗りつぶしの透明度）を設定
+        .attr("fill-opacity", 1)
         // ポインターイベントの設定
         .attr("pointer-events", "all")
         // カーソルを指差しの手にする
@@ -627,8 +651,8 @@ function leftClicked(node) {
     // リスト更新用タイマーをキャンセル
     clearTimeout(timerId);
 
-    // circleのデータを更新
-    svgElement.select("circle")
+    // circleのデータを更新（手前の円（front）を指定する）
+    svgElement.select("circle.front")
         .datum(node)
         // IDを設定
         .attr("id", node.nodeId);
