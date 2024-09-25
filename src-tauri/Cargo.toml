@@ -1,6 +1,6 @@
 [package]
 name = "dir_walker"
-version = "0.1.3"
+version = "0.1.4"
 description = "Tools to visualize directory usage"
 authors = ["Shogo Fukushima"]
 edition = "2021"
