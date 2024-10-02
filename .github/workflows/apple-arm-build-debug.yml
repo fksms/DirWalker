@@ -1,4 +1,4 @@
-name: "All Build Release"
+name: "Apple (Arm) Build Debug"
 
 # 手動で実行
 on: workflow_dispatch
@@ -13,12 +13,6 @@ jobs:
         include:
           - platform: "macos-latest" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
-            args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
-            args: ""
-          - platform: "windows-latest"
-            args: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -48,6 +42,8 @@ jobs:
 
       # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
       - uses: tauri-apps/tauri-action@v0
+        with:
+          args: --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           args: ${{ matrix.args }}
@@ -55,5 +51,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: All-binary(Release)
-          path: src-tauri/target/release/bundle
+          name: Apple(Arm)-binary(Debug)
+          path: src-tauri/target/debug/bundle/dmg/*.dmg
