@@ -1,8 +1,17 @@
 <script setup>
 
+import { ref, onMounted } from "vue";
 import { getVersion } from "@tauri-apps/api/app";
 
-const appVersion = await getVersion();
+
+// アプリのバージョン
+const appVersion = ref("");
+
+
+// マウントされた後に行う処理
+onMounted(async () => {
+    appVersion.value = await getVersion();
+})
 
 </script>
 

@@ -43,7 +43,7 @@ jobs:
       # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
       - uses: tauri-apps/tauri-action@v0
         with:
-          args: --debug
+          args: --debug --bundles app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           args: ${{ matrix.args }}
@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Apple(Arm)-binary(Debug)
-          path: src-tauri/target/debug/bundle/dmg/*.dmg
+          path: src-tauri/target/debug/bundle/macos/*
