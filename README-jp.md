@@ -85,9 +85,9 @@ nodebrew install stable
 nodebrew use stable
 ```
 
-tauri-cliをインストール
+tauri-cliをインストール（v1を利用する）
 ```
-cargo install tauri-cli
+cargo install tauri-cli --version "^1"
 ```
 
 作業ディレクトリに移動
