@@ -15,6 +15,7 @@ This tool visualizes the usage rate of each directory using a sunburst chart.<br
 You can configure which directories to scan and which directories to exclude from the scan.<br>
 The framework used is Tauri, and it operates on Linux, macOS, and Windows.<br>
 The frontend is implemented with Vue3 and JavaScript, while the backend is written in Rust.<br>
+The backend uses customized [dust](https://github.com/bootandy/dust) code.<br>
 
 <br>
 <img src="./images/ScreenRecording.gif" width="550">
@@ -70,50 +71,50 @@ By manually running `All Build Debug`, you can build debug versions for MacOS, W
 ### MacOS
 
 Install rustup-init and nodebrew
-```
+```sh
 brew install rustup-init
 brew install nodebrew
 ```
 
 Setting up rustup-init and nodebrew
-```
+```sh
 rustup-init
 nodebrew setup
 ```
 
 Install the stable version of node.js (npm)
-```
+```sh
 nodebrew install stable
 nodebrew use stable
 ```
 
 Install tauri-cli (Use v1)
-```
+```sh
 cargo install tauri-cli --version "^1"
 ```
 
 Move to the working directory
-```
+```sh
 cd DirWalker
 ```
 
 Install the necessary packages (node_modules will be created)
-```
+```sh
 npm install
 ```
 
 Build & Preview (Debug)
-```
+```sh
 cargo tauri dev
 ```
 
 Build (Release)
-```
+```sh
 cargo tauri build
 ```
 
 Build (Debug)
-```
+```sh
 cargo tauri build --debug
 ```
 
@@ -135,5 +136,5 @@ Since Japanese is the main language, English translations are also welcome.<br>
 <br>
 
 ## License
-MIT License<br>
+The MIT License (MIT)<br>
 Copyright (c) 2024 Shogo Fukushima

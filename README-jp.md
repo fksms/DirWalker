@@ -13,6 +13,7 @@
 スキャンを行うディレクトリやスキャンから除外するディレクトリの設定が可能です。<br>
 フレームワークはTauriを利用しており、Linux、macOS、Windowsで動作します。<br>
 フロントエンドの処理はVue3 + Javascript、バックエンドの処理はRustで書かれています。<br>
+バックエンドは[dust](https://github.com/bootandy/dust)のコードをカスタマイズして利用しています。<br>
 
 <br>
 <img src="./images/ScreenRecording.gif" width="550">
@@ -68,50 +69,50 @@ Windowsの場合は以下からインストールも可能です。<br>
 ### MacOS
 
 rustup-initとnodebrewをインストール
-```
+```sh
 brew install rustup-init
 brew install nodebrew
 ```
 
 rustup-initとnodebrewのセットアップ
-```
+```sh
 rustup-init
 nodebrew setup
 ```
 
 node.js(npm)の安定版をインストール
-```
+```sh
 nodebrew install stable
 nodebrew use stable
 ```
 
 tauri-cliをインストール（v1を利用する）
-```
+```sh
 cargo install tauri-cli --version "^1"
 ```
 
 作業ディレクトリに移動
-```
+```sh
 cd DirWalker
 ```
 
 必要なパッケージをインストール（node_modulesが作成される）
-```
+```sh
 npm install
 ```
 
 Build & Preview（Debug）
-```
+```sh
 cargo tauri dev
 ```
 
 Build（Release）
-```
+```sh
 cargo tauri build
 ```
 
 Build（Debug）
-```
+```sh
 cargo tauri build --debug
 ```
 
@@ -133,5 +134,5 @@ Issueへの投稿、PullRequest大歓迎です。
 <br>
 
 ## License
-MIT License<br>
+The MIT License (MIT)<br>
 Copyright (c) 2024 Shogo Fukushima
