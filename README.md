@@ -70,6 +70,8 @@ By manually running `All Build Debug`, you can build debug versions for MacOS, W
 
 ### MacOS
 
+#### Setup
+
 Install rustup-init and nodebrew
 ```sh
 brew install rustup-init
@@ -92,6 +94,8 @@ Install tauri-cli (Use v1)
 ```sh
 cargo install tauri-cli --version "^1"
 ```
+
+#### Build
 
 Move to the working directory
 ```sh

@@ -68,6 +68,8 @@ Windowsの場合は以下からインストールも可能です。<br>
 
 ### MacOS
 
+#### Setup
+
 rustup-initとnodebrewをインストール
 ```sh
 brew install rustup-init
@@ -90,6 +92,8 @@ tauri-cliをインストール（v1を利用する）
 ```sh
 cargo install tauri-cli --version "^1"
 ```
+
+#### Build
 
 作業ディレクトリに移動
 ```sh
