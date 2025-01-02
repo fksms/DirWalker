@@ -7,6 +7,7 @@ mod progress;
 mod utils;
 mod walk_manager;
 
+use tauri::menu::{AboutMetadata, Menu, SubmenuBuilder};
 use tauri::Manager;
 
 use crate::frontend_utils::remove_file_or_directory;
@@ -111,15 +112,43 @@ fn abort(state: tauri::State<'_, WalkManager>) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // コンテキストを生成
-    let context = tauri::generate_context!();
-    // メニューを生成
-    //let menu = generate_menu(context.package_info().name.clone());
-
     tauri::Builder::default()
-        .setup(|app| {
+        .setup(move |app| {
             let walk_manager = WalkManager::new();
             app.manage(walk_manager);
+
+            let menu = Menu::new(app)?;
+
+            let mut submenu = SubmenuBuilder::new(app, "File")
+                .about(Some(AboutMetadata::default()))
+                .separator()
+                .quit()
+                .build()?;
+
+            menu.append(&submenu)?;
+
+            submenu = SubmenuBuilder::new(app, "Edit")
+                .undo()
+                .redo()
+                .separator()
+                .cut()
+                .copy()
+                .paste()
+                .select_all()
+                .build()?;
+
+            menu.append(&submenu)?;
+
+            submenu = SubmenuBuilder::new(app, "Window")
+                .minimize()
+                .separator()
+                .close_window()
+                .build()?;
+
+            menu.append(&submenu)?;
+
+            app.set_menu(menu)?;
+
             Ok(())
         })
         .plugin(tauri_plugin_shell::init())
@@ -131,8 +160,6 @@ pub fn run() {
             abort,
             remove_file_or_directory,
         ])
-        // メニューバーをカスタマイズ
-        //.menu(menu)
-        .run(context)
+        .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
