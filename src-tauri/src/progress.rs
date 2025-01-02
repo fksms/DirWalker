@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-use tauri::Manager;
+use tauri::Emitter;
 
 // インジケーターの更新間隔
 const INDICATOR_UPDATE_INTERVAL: u64 = 100; // [ms]
@@ -68,7 +68,7 @@ pub fn indicator_spawn(
             msg = format!("Scanned:  {file_count} files,  {size_count} bytes");
 
             // WebViewに送信
-            app.emit_all("ProgressNotification", msg.clone()).unwrap();
+            app.emit("ProgressNotification", msg.clone()).unwrap();
 
             write!(stdout, "\r{msg}").unwrap();
             stdout.flush().unwrap();

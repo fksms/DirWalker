@@ -1,18 +1,6 @@
-use tauri::Menu;
+//use tauri::menu::Menu;
 
-use opener::open;
 use std::{fs, path::Path};
-
-// ファイルマネージャーを開く
-#[tauri::command(rename_all = "snake_case")]
-pub async fn open_file_manager(path: String) -> Result<(), String> {
-    let result = open(path);
-
-    match result {
-        Ok(ok) => Ok(ok),
-        Err(err) => Err(err.to_string()),
-    }
-}
 
 // ファイルorディレクトリを削除する
 #[tauri::command(rename_all = "snake_case")]
@@ -33,18 +21,21 @@ pub async fn remove_file_or_directory(path: String) -> Result<(), String> {
     }
 }
 
+/*
 // メニューを生成する
 pub fn generate_menu(app_name: String) -> Menu {
     #[allow(unused_mut)]
     let mut menu = Menu::new();
 
+    let menus = Menu::with_items(app, &[&visible])?;
+
     #[cfg(not(target_os = "windows"))]
     {
-        use tauri::{MenuItem, Submenu};
+        use tauri::menu::{MenuItem, Submenu};
 
         #[cfg(target_os = "macos")]
         {
-            use tauri::AboutMetadata;
+            use tauri::menu::AboutMetadata;
 
             menu = menu.add_submenu(Submenu::new(
                 app_name.clone(), // アプリケーション名
@@ -109,3 +100,4 @@ pub fn generate_menu(app_name: String) -> Menu {
 
     return menu;
 }
+*/
