@@ -1,7 +1,7 @@
 <script setup>
 
 import { ref, onMounted } from "vue";
-import { open, message } from "@tauri-apps/api/dialog";
+import { open, message } from "@tauri-apps/plugin-dialog";
 
 
 // Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）

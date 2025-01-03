@@ -2,69 +2,44 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "DirWalker",
-    "version": "0.1.5"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "macOS": {
+      "signingIdentity": "-"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "execute": true,
-        "open": true,
-        "scope": [
-          {
-            "name": "open",
-            "cmd": "open",
-            "args": true
-          }
-        ]
-      },
-      "dialog": {
-        "all": false,
-        "message": true,
-        "open": true,
-        "ask": true
-      },
-      "clipboard": {
-        "all": false,
-        "writeText": true
-      }
+  "productName": "DirWalker",
+  "mainBinaryName": "DirWalker",
+  "version": "0.2.0",
+  "identifier": "com.dirwalker.build",
+  "plugins": {},
+  "app": {
+    "security": {
+      "csp": null
     },
     "windows": [
       {
         "title": "DirWalker",
-        "fileDropEnabled": false,
         "maximizable": false,
         "width": 864,
         "height": 648,
         "minWidth": 864,
         "minHeight": 648,
         "maxWidth": 1920,
-        "maxHeight": 648
+        "maxHeight": 648,
+        "useHttpsScheme": true
       }
-    ],
-    "security": {
-      "csp": null
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.dirwalker.build",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "macOS": {
-        "signingIdentity": "-"
-      }
-    }
+    ]
   }
 }

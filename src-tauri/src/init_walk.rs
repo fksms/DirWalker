@@ -14,7 +14,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
 use sysinfo::{System, SystemExt};
-use tauri::Manager;
+use tauri::Emitter;
 
 // Rayonのスタックサイズ
 const STACK_SIZE_OF_RAYON: usize = 1024 * 1024 * 1024; // Set stack size to 1024MB
@@ -93,7 +93,7 @@ pub fn init_walk(
     println!();
 
     // WebViewに送信
-    app.emit_all("ProgressNotification", "Post-processing...".to_string())
+    app.emit("ProgressNotification", "Post-processing...".to_string())
         .unwrap();
 
     // 強制終了

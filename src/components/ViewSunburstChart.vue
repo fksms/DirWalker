@@ -1,10 +1,11 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { invoke } from "@tauri-apps/api/tauri";
-import { listen } from "@tauri-apps/api/event";
-import { writeText } from "@tauri-apps/api/clipboard";
-import { ask, message } from "@tauri-apps/api/dialog";
+import { invoke } from "@tauri-apps/api/core";
+import { Menu, MenuItem } from "@tauri-apps/api/menu";
+import { ask, message } from "@tauri-apps/plugin-dialog";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+//import { revealItemInDir } from "@tauri-apps/plugin-opener"
 
 import * as d3 from "d3";
 
@@ -23,7 +24,7 @@ watch(svgDOM, (newValue) => {
     const container = svgDOMRef.value;
     if (container && newValue) {
         // 既存の描画をクリア
-        container.innerHTML = '';
+        container.innerHTML = "";
         // 新しいSVGSVGElementを追加
         container.appendChild(newValue);
     }
@@ -780,65 +781,39 @@ function updateBreadcrumbs(node) {
 // コンテキストメニューを表示する関数
 async function showContextMenu(node) {
 
-    // イベントを受信するためのリスナーを起動
-    const unlisten1 = await listen("writeToClipboard", event => {
-        // クリップボードに書き込む
-        writeToClipboard(event.payload);
-        // リスナーをまとめて停止
-        unlistenAll();
-    });
-
-    // イベントを受信するためのリスナーを起動
-    const unlisten2 = await listen("openFileManager", event => {
-        // ファイルマネージャーを開く
-        openFileManager(event.payload);
-        // リスナーをまとめて停止
-        unlistenAll();
-    });
-
-    // イベントを受信するためのリスナーを起動
-    const unlisten3 = await listen("removeFileOrDirectory", event => {
-        // ファイル or ディレクトリを削除する
-        removeFileOrDirectory(event.payload, node);
-        // リスナーをまとめて停止
-        unlistenAll();
-    });
-
-    // リスナーをまとめて停止
-    function unlistenAll() {
-        unlisten1();
-        unlisten2();
-        unlisten3();
-    };
-
-    // バックエンド側の関数を実行
-    await invoke("plugin:context_menu|show_context_menu", {
-        items: [
-            {
-                label: "Copy path",
-                disabled: false,
-                event: "writeToClipboard",
-                payload: node.data.name,
+    // メニューアイテムの生成
+    const menuItems = [
+        await MenuItem.new({
+            text: "Copy path",
+            action: async () => {
+                await writeToClipboard(node.data.name);
             },
-            {
-                label: "Open",
-                disabled: false,
-                event: "openFileManager",
-                payload: (node.children) ? node.data.name : node.parent.data.name,
+        }),
+        await MenuItem.new({
+            text: "Open",
+            action: async () => {
+                await openFileManager(node.children ? node.data.name : node.parent.data.name);
             },
-            {
-                label: "Remove",
-                disabled: false,
-                event: "removeFileOrDirectory",
-                payload: node.data.name,
+        }),
+        await MenuItem.new({
+            text: "Remove",
+            action: async () => {
+                await removeFileOrDirectory(node.data.name, node);
             },
-        ],
-    });
+        }),
+    ];
+
+    // メニューの生成
+    const menu = await Menu.new({ items: menuItems });
+
+    // メニューをポップアップ
+    menu.popup();
 }
 
 
 // ファイルマネージャーを開く関数
 async function openFileManager(path) {
+    //await revealItemInDir(path);
     await invoke("open_file_manager", { path: path })
         // 失敗した場合
         .catch((failure) => {

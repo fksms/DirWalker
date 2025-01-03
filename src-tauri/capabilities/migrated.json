@@ -1,0 +1,31 @@
+{
+  "identifier": "migrated",
+  "description": "permissions that were migrated from v1",
+  "local": true,
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "shell:default",
+    "shell:allow-open",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "args": true,
+          "cmd": "open",
+          "name": "open",
+          "sidecar": false
+        }
+      ]
+    },
+    "dialog:allow-open",
+    "dialog:allow-message",
+    "dialog:allow-ask",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-write-text",
+    "opener:default",
+    "opener:allow-reveal-item-in-dir"
+  ]
+}

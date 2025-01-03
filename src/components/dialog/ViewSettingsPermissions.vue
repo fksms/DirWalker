@@ -1,6 +1,6 @@
 <script setup>
 
-import { Command } from "@tauri-apps/api/shell";
+import { Command } from "@tauri-apps/plugin-shell";
 
 function openPrivacy_FilesAndFolders() {
     new Command("open", "x-apple.systempreferences:com.apple.preference.security?Privacy_FilesAndFolders").execute();
