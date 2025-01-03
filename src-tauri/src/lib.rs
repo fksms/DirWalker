@@ -10,7 +10,7 @@ mod walk_manager;
 use tauri::menu::{AboutMetadata, Menu, SubmenuBuilder};
 use tauri::Manager;
 
-use crate::frontend_utils::remove_file_or_directory;
+use crate::frontend_utils::{open_file_manager, remove_file_or_directory};
 use crate::init_walk::init_walk;
 use crate::init_walk::WalkParams;
 use crate::node::Node;
@@ -159,6 +159,7 @@ pub fn run() {
             walk_start,
             abort,
             remove_file_or_directory,
+            open_file_manager,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

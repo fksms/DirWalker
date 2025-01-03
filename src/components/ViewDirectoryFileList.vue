@@ -70,12 +70,12 @@ function getLastPath(path) {
     // Windowsの場合
     if (detectOS() == "Windows") {
         // パスを"¥"で分割
-        segments = path.split('\\');
+        segments = path.split("\\");
     }
     // Windows以外の場合
     else {
         // パスを"/"で分割
-        segments = path.split('/');
+        segments = path.split("/");
     }
 
     // 最後の要素を返す

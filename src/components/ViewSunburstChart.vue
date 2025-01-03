@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Menu, MenuItem } from "@tauri-apps/api/menu";
 import { ask, message } from "@tauri-apps/plugin-dialog";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { revealItemInDir } from '@tauri-apps/plugin-opener'
+//import { revealItemInDir } from "@tauri-apps/plugin-opener"
 
 import * as d3 from "d3";
 
@@ -24,7 +24,7 @@ watch(svgDOM, (newValue) => {
     const container = svgDOMRef.value;
     if (container && newValue) {
         // 既存の描画をクリア
-        container.innerHTML = '';
+        container.innerHTML = "";
         // 新しいSVGSVGElementを追加
         container.appendChild(newValue);
     }
@@ -792,7 +792,7 @@ async function showContextMenu(node) {
         await MenuItem.new({
             text: "Open",
             action: async () => {
-                await openFileManager(node.data.name);
+                await openFileManager(node.children ? node.data.name : node.parent.data.name);
             },
         }),
         await MenuItem.new({
@@ -813,7 +813,13 @@ async function showContextMenu(node) {
 
 // ファイルマネージャーを開く関数
 async function openFileManager(path) {
-    await revealItemInDir(path);
+    //await revealItemInDir(path);
+    await invoke("open_file_manager", { path: path })
+        // 失敗した場合
+        .catch((failure) => {
+            // Message Dialog
+            message(failure);
+        });
 }
 
 

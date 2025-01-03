@@ -46,7 +46,7 @@ const viewBreadcrumbsList = ref();
 <style>
 :root {
     /* フォントの指定 */
-    font-family: Avenir, YuGothic, 'Yu Gothic', Futura, 'Century Gothic', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    font-family: Avenir, YuGothic, "Yu Gothic", Futura, "Century Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
 
     /* テキストの選択不可 */
     user-select: none;

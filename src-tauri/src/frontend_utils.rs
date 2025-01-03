@@ -1,4 +1,16 @@
+use opener::open;
 use std::{fs, path::Path};
+
+// ファイルマネージャーを開く
+#[tauri::command(rename_all = "snake_case")]
+pub async fn open_file_manager(path: String) -> Result<(), String> {
+    let result = open(path);
+
+    match result {
+        Ok(ok) => Ok(ok),
+        Err(err) => Err(err.to_string()),
+    }
+}
 
 // ファイルorディレクトリを削除する
 #[tauri::command(rename_all = "snake_case")]
