@@ -4,6 +4,7 @@ import { ref, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
+import i18n from "./i18n";
 import { detectOS } from "./DetectOS";
 import ViewSettings from "./dialog/ViewSettings.vue";
 
@@ -69,13 +70,17 @@ async function walkStart() {
 
     // OS対象外の場合は終了
     if (detectOS() == null) {
-        progressMessage.value = "OS Error";
+        progressMessage.value = i18n.global.t("progress_messages.os_error")
+        // ボタンの状態を戻す
+        buttonState.value = false;
         return;
     }
 
     // ターゲットディレクトリ未設定の場合
     if (walkParams.value.target_directory == "") {
-        progressMessage.value = "Please set the target directory.";
+        progressMessage.value = i18n.global.t("progress_messages.not_set_target")
+        // ボタンの状態を戻す
+        buttonState.value = false;
         return;
     }
 
@@ -87,11 +92,26 @@ async function walkStart() {
 
     // Progressメッセージを受信するためのリスナーを起動
     const unlisten = await listen("ProgressNotification", event => {
-        // 受信メッセージを格納
-        progressMessage.value = event.payload;
+        // デコード
+        const progressNotification = JSON.parse(event.payload)
+
+        // スキャン中
+        if (progressNotification.scan_complete == false) {
+            // スキャン済みのファイル総数
+            const numFiles = progressNotification.num_files;
+            // スキャン済みのファイル総サイズ
+            const totalFileSize = progressNotification.total_file_size;
+
+            progressMessage.value = `${i18n.global.t("progress_messages.scanned")}  ${numFiles} files,  ${totalFileSize} bytes`;
+        }
+
+        // スキャン完了、後処理に移行
+        else {
+            progressMessage.value = i18n.global.t("progress_messages.post_processing")
+        }
     });
 
-    // バックエンド側の関数を実行
+    // スキャン実行
     await invoke("walk_start", { str_params: JSON.stringify(walkParams.value) })
         // 成功した場合
         .then((success) => {
@@ -99,27 +119,27 @@ async function walkStart() {
         })
         // 失敗した場合
         .catch((failure) => {
-            error = "Error: " + failure;
+            error = failure;
         });
 
     // リスナーを停止
     unlisten();
 
-    // エラーが発生した場合
+    // エラーが発生した場合（"walkData"がnull）
     if (walkData == null) {
-        progressMessage.value = error;
+        progressMessage.value = `${i18n.global.t("progress_messages.scan_error")} ${error}`
     }
 
-    // 強制終了した場合
+    // 強制終了した場合（"walkData"が空）
     else if (walkData == "") {
-        progressMessage.value = "Abort!";
+        progressMessage.value = i18n.global.t("progress_messages.aborted")
     }
 
     // 正常に受信できた場合
     else {
         // Sunburstの作成
         await generateSunburst(JSON.parse(walkData));
-        progressMessage.value = "Completion!";
+        progressMessage.value = i18n.global.t("progress_messages.completed")
     }
 
     // ボタンの状態を戻す

@@ -9,6 +9,8 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
 import * as d3 from "d3";
 
+import i18n from "./i18n";
+
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
 
@@ -471,7 +473,6 @@ function updateArc(node, isFirstCalled) {
 
             // リスト生成時のオプションを指定
             const option = {
-                title: "Other small size items",
                 color: squashedColorCode,
                 threshold: value.head // リスト生成時の閾値
             }
@@ -784,19 +785,19 @@ async function showContextMenu(node) {
     // メニューアイテムの生成
     const menuItems = [
         await MenuItem.new({
-            text: "Copy path",
+            text: i18n.global.t("context_menu.copy_path"),
             action: async () => {
                 await writeToClipboard(node.data.name);
             },
         }),
         await MenuItem.new({
-            text: "Open",
+            text: i18n.global.t("context_menu.open"),
             action: async () => {
                 await openFileManager(node.children ? node.data.name : node.parent.data.name);
             },
         }),
         await MenuItem.new({
-            text: "Remove",
+            text: i18n.global.t("context_menu.remove"),
             action: async () => {
                 await removeFileOrDirectory(node.data.name, node);
             },
@@ -836,12 +837,12 @@ async function removeFileOrDirectory(path, node) {
     let dialogMessage = "";
 
     if (node.children) {
-        dialogTitle = "Remove Directory";
-        dialogMessage = "Are you sure you want to remove directory?" + "\n\n\n" + path + "\n";
+        dialogTitle = i18n.global.t("remove_alert.directory");
+        dialogMessage = i18n.global.t("remove_alert.directory_desc") + "\n\n\n" + path + "\n";
     }
     else {
-        dialogTitle = "Remove File";
-        dialogMessage = "Are you sure you want to remove file?" + "\n\n\n" + path + "\n";
+        dialogTitle = i18n.global.t("remove_alert.file");
+        dialogMessage = i18n.global.t("remove_alert.file_desc") + "\n\n\n" + path + "\n";
     }
 
     const result = await ask(dialogMessage, dialogTitle);

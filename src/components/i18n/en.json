@@ -1,0 +1,54 @@
+{
+    "list_item": {
+        "general": "General",
+        "language": "Language",
+        "permissions": "Permissions",
+        "about": "About"
+    },
+    "general": {
+        "parameters_update": "The parameters have been updated.",
+        "target_directory": "Target Directory",
+        "target_directory_desc": "Set the directory you want to scan.",
+        "ignore_directories": "Ignore Directories",
+        "ignore_directories_desc": "Enter the directories you want to exclude."
+    },
+    "language": {
+        "language_setting": "Language settings",
+        "ja": "Japanese",
+        "en": "English"
+    },
+    "permissions": {
+        "files_and_folders": "Files and Folders",
+        "files_and_folders_desc": "If you want to allow access to the Downloads, Desktop, Documents folders, and Cloud storage folders, please click the button below to change the settings.",
+        "full_disk_access": "Full Disk Access",
+        "full_disk_access_desc": "If you want to allow access to all data on this Mac, please click the button below to change the settings."
+    },
+    "about": {
+        "lisense_1": "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:",
+        "lisense_2": "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.",
+        "lisense_3": "THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+    },
+    "progress_messages": {
+        "os_error": "OS Error",
+        "not_set_target": "Please set the target directory.",
+        "scanned": "Scanned:",
+        "post_processing": "Post-processing...",
+        "scan_error": "Error:",
+        "aborted": "Scan is aborted.",
+        "completed": "Scan is completed."
+    },
+    "directory_file_list": {
+        "small_size_items": "Small size items"
+    },
+    "context_menu": {
+        "copy_path": "Copy path",
+        "open": "Open",
+        "remove": "Remove"
+    },
+    "remove_alert": {
+        "directory": "Remove Directory",
+        "directory_desc": "Are you sure you want to remove directory?",
+        "file": "Remove File",
+        "file_desc": "Are you sure you want to remove file?"
+    }
+}

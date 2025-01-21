@@ -1,8 +1,8 @@
+use serde::Serialize;
 use std::{
     collections::HashSet,
-    io::Write,
     sync::{
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
         mpsc::{self, RecvTimeoutError, Sender},
         Arc,
     },
@@ -19,16 +19,18 @@ pub const ORDERING: Ordering = Ordering::Relaxed;
 
 /* -------------------------------------------------------------------------- */
 
-#[derive(Default)]
+#[derive(Default, Serialize)]
 pub struct ProgressHandler {
     pub num_files: AtomicUsize,
     pub total_file_size: AtomicU64,
+    pub scan_complete: AtomicBool,
 }
 
 impl ProgressHandler {
     pub fn clear_state(&self) {
         self.total_file_size.store(0, ORDERING);
         self.num_files.store(0, ORDERING);
+        self.scan_complete.store(false, ORDERING);
     }
 }
 
@@ -52,26 +54,21 @@ pub fn indicator_spawn(
     let (sender, receiver) = mpsc::channel::<()>();
 
     let indicator_thread = std::thread::spawn(move || {
-        let mut stdout = std::io::stdout();
-        let mut msg = "".to_string();
-
         // While the timeout triggers we go round the loop
         // If we disconnect or the sender sends its message we exit the while loop
         while let Err(RecvTimeoutError::Timeout) =
             receiver.recv_timeout(Duration::from_millis(INDICATOR_UPDATE_INTERVAL))
         {
-            // Clear the text written by 'write!'& Return at the start of line
-            print!("\r{:width$}", " ", width = msg.len());
-
-            let file_count = prog_data.num_files.load(ORDERING);
-            let size_count = prog_data.total_file_size.load(ORDERING);
-            msg = format!("Scanned:  {file_count} files,  {size_count} bytes");
-
-            // WebViewに送信
-            app.emit("ProgressNotification", msg.clone()).unwrap();
-
-            write!(stdout, "\r{msg}").unwrap();
-            stdout.flush().unwrap();
+            let encode_result: Result<String, _> = serde_json::to_string(&prog_data);
+            match encode_result {
+                // 正常にエンコードできた場合
+                Ok(str) => {
+                    // WebViewに送信
+                    app.emit("ProgressNotification", str).unwrap();
+                }
+                // エンコードに失敗した場合
+                Err(_) => println!("Progress encode error."),
+            }
         }
     });
 
