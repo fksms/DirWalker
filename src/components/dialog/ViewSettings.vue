@@ -1,9 +1,11 @@
 <script setup>
 
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
+import i18n from "../i18n";
 import { detectOS } from "../DetectOS";
 import ViewSettingsGeneral from "./ViewSettingsGeneral.vue";
+import ViewSettingsLanguage from "./ViewSettingsLanguage.vue";
 import ViewSettingsPermissions from "./ViewSettingsPermissions.vue";
 import ViewSettingsAbout from "./ViewSettingsAbout.vue";
 
@@ -12,19 +14,17 @@ import ViewSettingsAbout from "./ViewSettingsAbout.vue";
 const showDialog = defineModel("showDialog");
 
 // 項目一覧
-const listItems = [
-    { icon: "mdi-wrench", title: "General", visible: true },
-    { icon: "mdi-lock-open-check", title: "Permissions", visible: (detectOS() == "Mac") ? true : false },
-    { icon: "mdi-information-outline", title: "About", visible: true },
-];
+const listItems = computed(() => {
+    return [
+        { id: 1, icon: "mdi-wrench", title: i18n.global.t("list_item.general"), visible: true },
+        { id: 2, icon: "mdi-earth", title: i18n.global.t("list_item.language"), visible: true },
+        { id: 3, icon: "mdi-lock-open-check", title: i18n.global.t("list_item.permissions"), visible: (detectOS() == "Mac") ? true : false },
+        { id: 4, icon: "mdi-information-outline", title: i18n.global.t("list_item.about"), visible: true },
+    ].filter(item => item.visible); // visibleがtrueのものでフィルタリング
+})
 
-// visibleがtrueのものでフィルタリング
-const filteredItems = listItems.filter(item => {
-    if (item.visible) return item;
-});
-
-// 現在、選択されている項目（初期値はGeneral）
-const selectedItem = ref("General");
+// 現在、選択されている項目（初期値はid==1）
+const selectedItem = ref(1);
 
 // Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
 const walkParams = defineModel("walkParams");
@@ -39,8 +39,8 @@ const walkParams = defineModel("walkParams");
                 <v-navigation-drawer permanent floating class="bg-blue-grey-darken-3 text-white rounded-s-lg"
                     width="180">
                     <v-list>
-                        <v-list-item v-for="item in filteredItems" :prepend-icon="item.icon" :title="item.title"
-                            :active="item.title == selectedItem" @click="selectedItem = item.title"></v-list-item>
+                        <v-list-item v-for="item in listItems" :prepend-icon="item.icon" :title="item.title"
+                            :active="item.id == selectedItem" @click="selectedItem = item.id"></v-list-item>
                     </v-list>
                 </v-navigation-drawer>
 
@@ -58,18 +58,26 @@ const walkParams = defineModel("walkParams");
                         </v-app-bar>
 
                         <!-- General -->
-                        <v-container v-if="selectedItem == 'General'" fluid class="py-0">
+                        <v-container v-if="selectedItem == 1" fluid class="py-0">
                             <!-- 双方向バインディングを利用する -->
                             <ViewSettingsGeneral v-model:walkParams="walkParams"></ViewSettingsGeneral>
                         </v-container>
 
+                        <!-- Language -->
+                        <v-container v-else-if="selectedItem == 2" fluid class="py-0">
+                            <!-- 双方向バインディングを利用する -->
+                            <ViewSettingsLanguage></ViewSettingsLanguage>
+                        </v-container>
+
                         <!-- Permissions -->
-                        <v-container v-else-if="selectedItem == 'Permissions'" fluid class="py-0">
+                        <v-container v-else-if="selectedItem == 3" fluid class="py-0">
+                            <!-- 双方向バインディングを利用する -->
                             <ViewSettingsPermissions></ViewSettingsPermissions>
                         </v-container>
 
                         <!-- About -->
-                        <v-container v-else-if="selectedItem == 'About'" fluid class="py-0">
+                        <v-container v-else-if="selectedItem == 4" fluid class="py-0">
+                            <!-- 双方向バインディングを利用する -->
                             <ViewSettingsAbout></ViewSettingsAbout>
                         </v-container>
 

@@ -3,6 +3,7 @@ use crate::dir_walker::WalkData;
 use crate::node::Node;
 use crate::progress::ErrorHandler;
 use crate::progress::ProgressHandler;
+use crate::progress::ORDERING;
 use crate::progress::{indicator_spawn, indicator_stop};
 use crate::utils::normalize_path;
 
@@ -90,11 +91,21 @@ pub fn init_walk(
 
     // Progressを終了
     indicator_stop(indicator_handler);
-    println!();
 
-    // WebViewに送信
-    app.emit("ProgressNotification", "Post-processing...".to_string())
-        .unwrap();
+    // ステータスを更新
+    let prog_data = progress.clone();
+    prog_data.scan_complete.store(true, ORDERING);
+
+    let encode_result: Result<String, _> = serde_json::to_string(&prog_data);
+    match encode_result {
+        // 正常にエンコードできた場合
+        Ok(str) => {
+            // WebViewに送信
+            app.emit("ProgressNotification", str).unwrap();
+        }
+        // エンコードに失敗した場合
+        Err(_) => println!("Progress encode error."),
+    }
 
     // 強制終了
     if errors_final.lock().unwrap().abort {

@@ -3,6 +3,8 @@
 import { ref, onMounted } from "vue";
 import { open, message } from "@tauri-apps/plugin-dialog";
 
+import i18n from "../i18n";
+
 
 // Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
 const walkParams = defineModel("walkParams");
@@ -41,7 +43,7 @@ async function saved() {
     walkParams.value = JSON.parse(JSON.stringify(walkParamsClone.value));
 
     // Message Dialog
-    await message("The parameters have been updated.");
+    await message(i18n.global.t("general.parameters_update"));
 }
 
 
@@ -81,8 +83,8 @@ function addIgnore() {
 </script>
 
 <template>
-    <h3>Target Directory</h3>
-    <p class="text-grey-lighten-2">Set the directory you want to scan.</p>
+    <h3>{{ $t("general.target_directory") }}</h3>
+    <p class="text-grey-lighten-2">{{ $t("general.target_directory_desc") }}</p>
     <v-container fluid class="d-flex flex-row align-center px-0">
         <v-btn flat class="text-capitalize mr-4" color="blue-grey-lighten-1" text="Open" @click="openDialog()"></v-btn>
         <v-text-field v-model="walkParamsClone.target_directory" hide-details label="Path"></v-text-field>
@@ -90,8 +92,8 @@ function addIgnore() {
 
     <div class="py-2"></div>
 
-    <h3>Ignore Directories</h3>
-    <p class="text-grey-lighten-2">Enter the directories you want to exclude.</p>
+    <h3>{{ $t("general.ignore_directories") }}</h3>
+    <p class="text-grey-lighten-2">{{ $t("general.ignore_directories_desc") }}</p>
     <v-container fluid class="px-0">
         <v-row class="align-end">
             <v-col cols="1">

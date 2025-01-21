@@ -2,6 +2,7 @@
 
 import { ref } from "vue";
 
+import i18n from "./i18n";
 import { detectOS } from "./DetectOS";
 
 // 親から渡されたコンポーネントの参照を受け取る
@@ -53,7 +54,7 @@ function generateDirectoryList(node, option) {
         });
 
         ownColor.value = option.color;
-        ownName.value = option.title;
+        ownName.value = i18n.global.t("directory_file_list.small_size_items");
         ownSize.value = array2String(toReadable(otherSize));
     }
 }
