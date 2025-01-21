@@ -120,9 +120,9 @@ pub fn run() {
             let menu = Menu::new(app)?;
 
             let mut submenu = SubmenuBuilder::new(app, "File")
-                .about(Some(AboutMetadata::default()))
+                .about_with_text("About", Some(AboutMetadata::default()))
                 .separator()
-                .quit()
+                .quit_with_text("Quit")
                 .build()?;
 
             menu.append(&submenu)?;

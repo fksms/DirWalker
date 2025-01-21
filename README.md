@@ -141,4 +141,4 @@ Since Japanese is the main language, English translations are also welcome.<br>
 
 ## License
 The MIT License (MIT)<br>
-Copyright (c) 2024 Shogo Fukushima
+Copyright (c) 2025 Shogo Fukushima

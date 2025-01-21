@@ -139,4 +139,4 @@ Issueへの投稿、PullRequest大歓迎です。
 
 ## License
 The MIT License (MIT)<br>
-Copyright (c) 2024 Shogo Fukushima
+Copyright (c) 2025 Shogo Fukushima
