@@ -1,9 +1,7 @@
-# https://github.com/tauri-apps/tauri-action/blob/dev/examples/test-build-only.yml
+name: "Ubuntu (Arm) Build Release"
 
-name: "Auto Build"
-
-# push、pull_request時に自動で実行。成果物のアップロードは無し。
-on: [push, pull_request]
+# 手動で実行
+on: workflow_dispatch
 
 # This workflow will build your tauri app without uploading it anywhere.
 
@@ -13,13 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "macos-latest" # for Arm based macs (M1 and above).
-            args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
-            args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-22.04"
-            args: ""
-          - platform: "windows-latest"
+          - platform: "ubuntu-22.04-arm"
             args: ""
 
     runs-on: ${{ matrix.platform }}
@@ -50,6 +42,14 @@ jobs:
 
       # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
       - uses: tauri-apps/tauri-action@v0
+        with:
+          args: --bundles app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           args: ${{ matrix.args }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Apple(Arm)-binary(Release)
+          path: src-tauri/target/release/bundle/deb/*

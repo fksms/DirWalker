@@ -117,37 +117,41 @@ pub fn run() {
             let walk_manager = WalkManager::new();
             app.manage(walk_manager);
 
-            let menu = Menu::new(app)?;
+            // MacOSのみメニューを生成
+            #[cfg(target_os = "macos")]
+            {
+                let menu = Menu::new(app)?;
 
-            let mut submenu = SubmenuBuilder::new(app, "File")
-                .about_with_text("About", Some(AboutMetadata::default()))
-                .separator()
-                .quit_with_text("Quit")
-                .build()?;
+                let mut submenu = SubmenuBuilder::new(app, "File")
+                    .about_with_text("About", Some(AboutMetadata::default()))
+                    .separator()
+                    .quit_with_text("Quit")
+                    .build()?;
 
-            menu.append(&submenu)?;
+                menu.append(&submenu)?;
 
-            submenu = SubmenuBuilder::new(app, "Edit")
-                .undo()
-                .redo()
-                .separator()
-                .cut()
-                .copy()
-                .paste()
-                .select_all()
-                .build()?;
+                submenu = SubmenuBuilder::new(app, "Edit")
+                    .undo()
+                    .redo()
+                    .separator()
+                    .cut()
+                    .copy()
+                    .paste()
+                    .select_all()
+                    .build()?;
 
-            menu.append(&submenu)?;
+                menu.append(&submenu)?;
 
-            submenu = SubmenuBuilder::new(app, "Window")
-                .minimize()
-                .separator()
-                .close_window()
-                .build()?;
+                submenu = SubmenuBuilder::new(app, "Window")
+                    .minimize()
+                    .separator()
+                    .close_window()
+                    .build()?;
 
-            menu.append(&submenu)?;
+                menu.append(&submenu)?;
 
-            app.set_menu(menu)?;
+                app.set_menu(menu)?;
+            }
 
             Ok(())
         })
