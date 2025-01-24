@@ -837,12 +837,12 @@ async function removeFileOrDirectory(path, node) {
     let dialogMessage = "";
 
     if (node.children) {
-        dialogTitle = i18n.global.t("remove_alert.directory");
-        dialogMessage = i18n.global.t("remove_alert.directory_desc") + "\n\n\n" + path + "\n";
+        dialogTitle = i18n.global.t("removal_alert.directory");
+        dialogMessage = i18n.global.t("removal_alert.directory_desc") + "\n\n\n" + path + "\n";
     }
     else {
-        dialogTitle = i18n.global.t("remove_alert.file");
-        dialogMessage = i18n.global.t("remove_alert.file_desc") + "\n\n\n" + path + "\n";
+        dialogTitle = i18n.global.t("removal_alert.file");
+        dialogMessage = i18n.global.t("removal_alert.file_desc") + "\n\n\n" + path + "\n";
     }
 
     const result = await ask(dialogMessage, dialogTitle);

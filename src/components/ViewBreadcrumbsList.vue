@@ -71,7 +71,8 @@ defineExpose({
                 <a v-bind:class="{ 'current': index == ancestors.length - 1 }"
                     @click.left="(index != ancestors.length - 1) ? updateSunburst(item) : null"
                     @click.right.prevent="showContextMenu(item)">
-                    {{ getLastPath(item.data.name) }}
+                    <!-- ルートディレクトリはフルパスで表示する -->
+                    {{ index == 0 ? item.data.name : getLastPath(item.data.name) }}
                 </a>
             </li>
         </ul>

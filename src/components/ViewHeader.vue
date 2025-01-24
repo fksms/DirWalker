@@ -19,7 +19,7 @@ const buttonState = ref(false);
 const showDialog = ref(false);
 
 // 受信メッセージ格納用（バックエンドから受け取る）
-const progressMessage = ref("");
+const statusMessage = ref("");
 
 // Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
 const walkParams = ref({
@@ -29,17 +29,6 @@ const walkParams = ref({
     ignore_directories: [],
     use_apparent_size: false,
 });
-
-
-// ボタンの状態を変更
-function changeState() {
-    buttonState.value = !buttonState.value;
-    if (buttonState.value) {
-        walkStart();
-    } else {
-        abort();
-    }
-};
 
 
 // マウントされた後に行う処理
@@ -70,7 +59,8 @@ async function walkStart() {
 
     // OS対象外の場合は終了
     if (detectOS() == null) {
-        progressMessage.value = i18n.global.t("progress_messages.os_error")
+        // ステータスの更新
+        statusMessage.value = i18n.global.t("status_messages.os_error")
         // ボタンの状態を戻す
         buttonState.value = false;
         return;
@@ -78,7 +68,8 @@ async function walkStart() {
 
     // ターゲットディレクトリ未設定の場合
     if (walkParams.value.target_directory == "") {
-        progressMessage.value = i18n.global.t("progress_messages.not_set_target")
+        // ステータスの更新
+        statusMessage.value = i18n.global.t("status_messages.not_set_target")
         // ボタンの状態を戻す
         buttonState.value = false;
         return;
@@ -101,13 +92,14 @@ async function walkStart() {
             const numFiles = progressNotification.num_files;
             // スキャン済みのファイル総サイズ
             const totalFileSize = progressNotification.total_file_size;
-
-            progressMessage.value = `${i18n.global.t("progress_messages.scanned")}  ${numFiles} files,  ${totalFileSize} bytes`;
+            // ステータスの更新
+            statusMessage.value = `${i18n.global.t("status_messages.scanning")}  ${numFiles} files,  ${totalFileSize} bytes`;
         }
 
         // スキャン完了、後処理に移行
         else {
-            progressMessage.value = i18n.global.t("progress_messages.post_processing")
+            // ステータスの更新
+            statusMessage.value = i18n.global.t("status_messages.post_processing")
         }
     });
 
@@ -127,19 +119,22 @@ async function walkStart() {
 
     // エラーが発生した場合（"walkData"がnull）
     if (walkData == null) {
-        progressMessage.value = `${i18n.global.t("progress_messages.scan_error")} ${error}`
+        // ステータスの更新
+        statusMessage.value = `${i18n.global.t("status_messages.scan_error")} ${error}`
     }
 
     // 強制終了した場合（"walkData"が空）
     else if (walkData == "") {
-        progressMessage.value = i18n.global.t("progress_messages.aborted")
+        // ステータスの更新
+        statusMessage.value = i18n.global.t("status_messages.aborted")
     }
 
     // 正常に受信できた場合
     else {
         // Sunburstの作成
         await generateSunburst(JSON.parse(walkData));
-        progressMessage.value = i18n.global.t("progress_messages.completed")
+        // ステータスの更新
+        statusMessage.value = i18n.global.t("status_messages.completed")
     }
 
     // ボタンの状態を戻す
@@ -153,6 +148,17 @@ async function abort() {
     // ボタンの状態を戻す
     buttonState.value = true;
 }
+
+
+// ボタンの状態を変更
+function changeState() {
+    buttonState.value = !buttonState.value;
+    if (buttonState.value) {
+        walkStart();
+    } else {
+        abort();
+    }
+};
 
 
 // Sunburstの作成
@@ -170,7 +176,7 @@ async function generateSunburst(data) {
         </v-btn>
 
         <span class="mx-5 text-white" style="cursor: default;">
-            {{ progressMessage }}
+            {{ statusMessage }}
         </span>
 
         <v-spacer></v-spacer>

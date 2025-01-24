@@ -28,10 +28,10 @@
         "lisense_2": "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.",
         "lisense_3": "THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
     },
-    "progress_messages": {
+    "status_messages": {
         "os_error": "OS Error",
         "not_set_target": "Please set the target directory.",
-        "scanned": "Scanned:",
+        "scanning": "Scanned:",
         "post_processing": "Post-processing...",
         "scan_error": "Error:",
         "aborted": "Scan is aborted.",
@@ -45,7 +45,7 @@
         "open": "Open",
         "remove": "Remove"
     },
-    "remove_alert": {
+    "removal_alert": {
         "directory": "Remove Directory",
         "directory_desc": "Are you sure you want to remove directory?",
         "file": "Remove File",

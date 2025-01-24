@@ -2,7 +2,6 @@
 
 import { ref } from "vue";
 
-import i18n from "./i18n";
 import { detectOS } from "./DetectOS";
 
 // 親から渡されたコンポーネントの参照を受け取る
@@ -38,8 +37,9 @@ function generateDirectoryList(node, option) {
             children.value = node.children.concat();
         }
 
+        // targetが"/"の時は"getLastPath"がfalseになるので、"node.data.name"を使う
+        ownName.value = getLastPath(node.data.name) ? getLastPath(node.data.name) : node.data.name;
         ownColor.value = node.color;
-        ownName.value = getLastPath(node.data.name);
         ownSize.value = array2String(toReadable(node.data.size));
     }
 
@@ -53,8 +53,9 @@ function generateDirectoryList(node, option) {
             }
         });
 
+        // 名前無し
+        ownName.value = null;
         ownColor.value = option.color;
-        ownName.value = i18n.global.t("directory_file_list.small_size_items");
         ownSize.value = array2String(toReadable(otherSize));
     }
 }
@@ -151,9 +152,10 @@ defineExpose({
             </col>
         </colgroup>
         <tbody>
-            <tr v-if="ownColor && ownName && ownSize">
+            <tr v-if="ownColor && ownSize">
                 <th class="left-column"><v-icon :color="ownColor" icon="mdi-circle"></v-icon></th>
-                <th class="center-column text-left">{{ ownName }}</th>
+                <th class="center-column text-left">{{ ownName ? ownName : $t("directory_file_list.small_size_items") }}
+                </th>
                 <th class="right-column text-right">{{ ownSize }}</th>
             </tr>
         </tbody>
