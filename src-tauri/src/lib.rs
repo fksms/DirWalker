@@ -7,7 +7,6 @@ mod progress;
 mod utils;
 mod walk_manager;
 
-use tauri::menu::{AboutMetadata, Menu, SubmenuBuilder};
 use tauri::Manager;
 
 use crate::frontend_utils::{open_file_manager, remove_file_or_directory};
@@ -120,6 +119,8 @@ pub fn run() {
             // MacOSのみメニューを生成
             #[cfg(target_os = "macos")]
             {
+                use tauri::menu::{AboutMetadata, Menu, SubmenuBuilder};
+
                 let menu = Menu::new(app)?;
 
                 let mut submenu = SubmenuBuilder::new(app, "File")
