@@ -2,7 +2,7 @@
 
 import { ref } from "vue";
 
-import { detectOS } from "./DetectOS";
+import { detectOS } from "./detectOS";
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewSunburstChart"]);

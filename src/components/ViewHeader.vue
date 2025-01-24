@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
 import i18n from "./i18n";
-import { detectOS } from "./DetectOS";
+import { detectOS } from "./detectOS";
 import ViewSettings from "./dialog/ViewSettings.vue";
 
 // 親から渡されたコンポーネントの参照を受け取る

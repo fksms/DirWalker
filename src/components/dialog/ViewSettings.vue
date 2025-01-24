@@ -3,7 +3,7 @@
 import { ref, computed } from "vue";
 
 import i18n from "../i18n";
-import { detectOS } from "../DetectOS";
+import { detectOS } from "../detectOS";
 import ViewSettingsGeneral from "./ViewSettingsGeneral.vue";
 import ViewSettingsLanguage from "./ViewSettingsLanguage.vue";
 import ViewSettingsPermissions from "./ViewSettingsPermissions.vue";

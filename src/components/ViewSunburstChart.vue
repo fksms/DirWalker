@@ -66,10 +66,13 @@ const circleLightOnColorCodes = "#B0BEC5";
 // ディレクトリのカラーコード（原色）
 const directoryColorCodes = ["#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#FF0080"];
 
-// ファイルのカラーコード（ライトグレー）
+// ルートディレクトリのカラーコード
+const rootDirectoryColorCode = "#FFFFFF00";
+
+// ファイルのカラーコード
 const fileColorCode = "#C6C6C6";
 
-// squashされた部分のカラーコード（ダークグレー）
+// squashされた部分のカラーコード
 const squashedColorCode = "#777777";
 
 // --------------------パラメータ--------------------
@@ -151,7 +154,7 @@ function generateSunburst(data) {
         if (d.children) {
             // depthが0以下の場合
             if (d.depth <= 0) {
-                d.color = "#FFFFFF00"; // 透明
+                d.color = rootDirectoryColorCode;
             }
             // depthが1の場合
             else if (d.depth == 1) {
@@ -176,7 +179,7 @@ function generateSunburst(data) {
         }
         // 子ノードが無い場合 
         else {
-            d.color = fileColorCode; // ライトグレー
+            d.color = fileColorCode;
         }
 
     });
@@ -488,7 +491,7 @@ function updateArc(node, isFirstCalled) {
                 // d属性（パス）を設定
                 .attr("d", arc(squashedArcCoordinates))
                 // fill属性（塗りつぶし）を設定
-                .attr("fill", squashedColorCode) // ダークグレー
+                .attr("fill", squashedColorCode)
                 // カーソルを合わせた時
                 .on("mouseenter", (event, d) => mouseEntered(event, d, option))
                 // カーソルを離した時
