@@ -1,15 +1,10 @@
 <script setup>
 
 import { ref, watch } from "vue";
-import { invoke } from "@tauri-apps/api/core";
-import { Menu, MenuItem } from "@tauri-apps/api/menu";
-import { ask, message } from "@tauri-apps/plugin-dialog";
-import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-//import { revealItemInDir } from "@tauri-apps/plugin-opener"
 
 import * as d3 from "d3";
 
-import i18n from "./i18n";
+import { showContextMenu } from "./util";
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
@@ -197,56 +192,11 @@ function generateSunburst(data) {
         .style("width", "100%")
         .style("height", "100%");
 
-    // 背景の円を設定
-    // （背景の円を用意することで、手前の円の透過率を変化させた際に点滅しているように見える）
-    //
-    // datum: 単一のエレメントを作成
-    svgElement.append("circle")
-        // classを設定
-        .classed("back", true)
-        // 半径を設定（1だけ小さな値にする）
-        .attr("r", radius - 1)
-        // fill属性（塗りつぶし）を設定
-        .attr("fill", circleLightOnColorCodes)
-        // fill-opacity属性（塗りつぶしの透明度）を設定
-        .attr("fill-opacity", 1);
-
-    // 中心の円のパスを設定
-    //
-    // datum: 単一のエレメントを作成
-    svgElement.append("circle")
-        .datum(root)
-        // classを設定
-        .classed("front", true)
-        // IDを設定
-        .attr("id", root.nodeId)
-        // 半径を設定
-        .attr("r", radius)
-        // fill属性（塗りつぶし）を設定
-        .attr("fill", circleLightOffColorCodes)
-        // fill-opacity属性（塗りつぶしの透明度）を設定
-        .attr("fill-opacity", 1)
-        // ポインターイベントの設定
-        .attr("pointer-events", "all")
-        // カーソルを指差しの手にする
-        .style("cursor", "pointer")
-        // カーソルを合わせた時
-        .on("mouseenter", (event, d) => mouseEntered(event, d))
-        // カーソルを離した時
-        .on("mouseleave", (event, d) => mouseLeaved(event, d))
-        // 左クリックした時
-        .on("click", (event, d) => leftClicked(d.parent))
-        // 右クリックした時
-        .on("contextmenu", (event, d) => {
-            event.preventDefault(); // デフォルトの動作をキャンセル
-            rightClicked(d)
-        });
+    // Circleを更新
+    updateCircle(root, true);
 
     // Arcを更新
     updateArc(root, true);
-
-    // Textを更新（中心のファイルサイズ）
-    updateText(root.value);
 
     // Listの更新
     updateList(root);
@@ -304,23 +254,6 @@ function toReadable(value) {
 }
 
 
-// Textを更新（中心のファイルサイズ）
-//
-// value: ファイルサイズを入力
-function updateText(value) {
-    svgElement.selectAll("text")
-        .data(toReadable(value))
-        .join("text")
-        .attr("text-anchor", "middle")
-        .attr("fill", "#FFFFFF")
-        .attr("x", 0)
-        .attr("y", (d, i) => i * 35 - 5)
-        .attr("font-size", "2em")
-        .attr("pointer-events", "none")
-        .text(d => d);
-}
-
-
 // 円弧（arc）生成関数
 function createArc() {
     // パーティションデータ（長方形）を円弧（バウムクーヘン形）に変換
@@ -351,11 +284,90 @@ function visualize(node) {
 }
 
 
+// Circleを更新
+//
+// node: ノードデータ
+// isFirstCalled: 初めて呼ばれたか否か
+function updateCircle(node, isFirstCalled) {
+
+    if (isFirstCalled) {
+        // 更新前に"circle"の要素を全て削除
+        svgElement.selectAll("circle").remove();
+
+        // 背景の円を設定
+        // （背景の円を用意することで、手前の円の透過率を変化させた際に点滅しているように見える）
+        svgElement.append("circle")
+            // classを設定
+            .classed("back", true)
+            // 半径を設定（1だけ小さな値にする）
+            .attr("r", radius - 1)
+            // fill属性（塗りつぶし）を設定
+            .attr("fill", circleLightOnColorCodes)
+            // fill-opacity属性（塗りつぶしの透明度）を設定
+            .attr("fill-opacity", 1);
+
+        // 中心の円のパスを設定
+        svgElement.append("circle")
+            .datum(node)
+            // classを設定
+            .classed("front", true)
+            // IDを設定
+            .attr("id", node.nodeId)
+            // 半径を設定
+            .attr("r", radius)
+            // fill属性（塗りつぶし）を設定
+            .attr("fill", circleLightOffColorCodes)
+            // fill-opacity属性（塗りつぶしの透明度）を設定
+            .attr("fill-opacity", 1)
+            // ポインターイベントの設定
+            .attr("pointer-events", "all")
+            // カーソルを指差しの手にする
+            .style("cursor", "pointer")
+            // カーソルを合わせた時
+            .on("mouseenter", (event, d) => mouseEntered(event, d))
+            // カーソルを離した時
+            .on("mouseleave", (event, d) => mouseLeaved(event, d))
+            // 左クリックした時
+            .on("click", (event, d) => leftClicked(d.parent))
+            // 右クリックした時
+            .on("contextmenu", (event, d) => {
+                event.preventDefault(); // デフォルトの動作をキャンセル
+                rightClicked(d)
+            });
+    }
+    else {
+        // circleのデータを更新（手前の円（front）を指定する）
+        svgElement.select("circle.front")
+            .datum(node)
+            // IDを設定
+            .attr("id", node.nodeId);
+    }
+
+    // 更新前に"text"の要素を全て削除
+    svgElement.selectAll("text").remove();
+
+    // Textを設定（中心に表示されるファイルサイズ）
+    svgElement.selectAll("text")
+        .data(toReadable(node.value))
+        .join("text")
+        .attr("text-anchor", "middle")
+        .attr("fill", "#FFFFFF")
+        .attr("x", 0)
+        .attr("y", (d, i) => i * 35 - 5)
+        .attr("font-size", "2em")
+        .attr("pointer-events", "none")
+        .text(d => d);
+}
+
+
 // Arcを更新
 //
 // node: ノードデータ
 // isFirstCalled: 初めて呼ばれたか否か
 function updateArc(node, isFirstCalled) {
+
+    // 更新前に"path"の要素を全て削除
+    svgElement.selectAll("path").remove();
 
     // 円弧（arc）の生成
     const arc = createArc();
@@ -512,21 +524,14 @@ function updateArc(node, isFirstCalled) {
 // node: ノードデータ
 function updateSunburst(node) {
 
-    // 円弧（arc）の生成
-    const arc = createArc();
-
-    // "path", "text"の要素を全て削除
-    svgElement.selectAll("path").remove();
-    svgElement.selectAll("text").remove();
+    // Circleを更新
+    updateCircle(node, false);
 
     // Arcを更新
     updateArc(node, false);
 
-    // Textを更新（中心のファイルサイズ）
-    updateText(node.value);
-
-    // 変更を反映させる
-    svgElement.enter();
+    // 円弧（arc）の生成
+    const arc = createArc();
 
     // main-arcのアニメーション
     svgElement.selectAll("path.main-arc")
@@ -555,6 +560,78 @@ function updateSunburst(node) {
         .duration(transitionDuration)
         .ease(d3.easeExpIn)
         .attr("fill-opacity", 1);
+}
+
+
+// Nodeを削除
+//
+// node: ノードデータ
+function removeNode(node) {
+
+    // 削除対象のノードのサイズ・ID・親ノードを保持
+    const removedNodeSize = node.value;
+    const removedNodeId = node.nodeId;
+    const removedNodeParent = node.parent;
+
+    // 中心のノードを保持
+    let centerNode = null;
+
+    // nodeがnullになるまで繰り返し（上方向に走査）
+    while (node != null) {
+        // targetのy0が0、y1が1の時に中心となる（必ず存在する）
+        if (node.target.y0 == 0 && node.target.y1 == 1) {
+            centerNode = node;
+        }
+
+        // 減算
+        node.value = node.value - removedNodeSize;
+        node.data.size = node.data.size - removedNodeSize;
+
+        // childrenを持っている場合、childrenを降順で再ソート
+        if (node.children) {
+            node.children.sort((a, b) => b.value - a.value);
+        }
+
+        // 親に移動
+        node = node.parent;
+    }
+
+    // 一旦親ノードに移動してから、該当の子ノードを消去する（横方向に走査）
+    for (let i = 0; i < removedNodeParent.children.length; i++) {
+        // 消去対象のノードIDと一致するかを確認
+        if (removedNodeParent.children[i].nodeId == removedNodeId) {
+            removedNodeParent.children.splice(i, 1);
+            break;
+        }
+    }
+
+    // 各ノードのプロパティ（x0, x1, y0, y1）を更新する
+    //
+    // each: ノードを幅優先で呼び出す
+    root.each(d => {
+        // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
+        if (d.children) {
+            d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
+        }
+    });
+
+    // 中心のノードを削除した場合は親ノードを設定
+    if (removedNodeId == centerNode.nodeId) {
+        node = centerNode.parent;
+    }
+    // それ以外は中心のノードを維持
+    else {
+        node = centerNode;
+    }
+
+    // Sunburstの更新
+    updateSunburst(node);
+
+    // Listの更新
+    updateList(removedNodeParent);
+
+    // Breadcrumbsの更新
+    updateBreadcrumbs(node);
 }
 
 
@@ -656,12 +733,6 @@ function leftClicked(node) {
     // リスト更新用タイマーをキャンセル
     clearTimeout(timerId);
 
-    // circleのデータを更新（手前の円（front）を指定する）
-    svgElement.select("circle.front")
-        .datum(node)
-        // IDを設定
-        .attr("id", node.nodeId);
-
     // Sunburstの更新
     updateSunburst(node);
 
@@ -681,87 +752,8 @@ function rightClicked(node) {
     // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
     if (node == null) return;
 
-    // コンテキストメニューを表示
-    showContextMenu(node);
-}
-
-
-// Nodeを削除
-//
-// node: ノードデータ
-function removeNode(node) {
-
-    // 削除対象のノードのサイズ・ID・親ノードを保持
-    const removedNodeSize = node.value;
-    const removedNodeId = node.nodeId;
-    const removedNodeParent = node.parent;
-
-    // 中心のノードを保持
-    let centerNode = null;
-
-    // nodeがnullになるまで繰り返し（上方向に走査）
-    while (node != null) {
-        // targetのy0が0、y1が1の時に中心となる（必ず存在する）
-        if (node.target.y0 == 0 && node.target.y1 == 1) {
-            centerNode = node;
-        }
-
-        // 減算
-        node.value = node.value - removedNodeSize;
-        node.data.size = node.data.size - removedNodeSize;
-
-        // childrenを持っている場合、childrenを降順で再ソート
-        if (node.children) {
-            node.children.sort((a, b) => b.value - a.value);
-        }
-
-        // 親に移動
-        node = node.parent;
-    }
-
-    // 一旦親ノードに移動してから、該当の子ノードを消去する（横方向に走査）
-    for (let i = 0; i < removedNodeParent.children.length; i++) {
-        // 消去対象のノードIDと一致するかを確認
-        if (removedNodeParent.children[i].nodeId == removedNodeId) {
-            removedNodeParent.children.splice(i, 1);
-            break;
-        }
-    }
-
-    // 各ノードのプロパティ（x0, x1, y0, y1）を更新する
-    //
-    // each: ノードを幅優先で呼び出す
-    root.each(d => {
-        // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
-        if (d.children) {
-            d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
-        }
-    });
-
-    // 中心のノードを削除した場合
-    if (removedNodeId == centerNode.nodeId) {
-        // 親ノードを設定
-        node = centerNode.parent;
-
-        // circleのデータも更新する
-        svgElement.select("circle")
-            .datum(node)
-            // IDを設定
-            .attr("id", node.nodeId);
-    }
-    // それ以外は中心のノードを維持
-    else {
-        node = centerNode;
-    }
-
-    // Sunburstの更新
-    updateSunburst(node);
-
-    // Listの更新
-    updateList(removedNodeParent);
-
-    // Breadcrumbsの更新
-    updateBreadcrumbs(node);
+    // コンテキストメニューを表示（"removeNode"をコールバック関数として渡してあげる）
+    showContextMenu(node, removeNode);
 }
 
 
@@ -779,91 +771,6 @@ function updateList(node, option = null) {
 // node: ノードデータ
 function updateBreadcrumbs(node) {
     return props.viewBreadcrumbsList.generateBreadcrumbs(node);
-}
-
-
-// コンテキストメニューを表示する関数
-async function showContextMenu(node) {
-
-    // メニューアイテムの生成
-    const menuItems = [
-        await MenuItem.new({
-            text: i18n.global.t("context_menu.copy_path"),
-            action: async () => {
-                await writeToClipboard(node.data.name);
-            },
-        }),
-        await MenuItem.new({
-            text: i18n.global.t("context_menu.open"),
-            action: async () => {
-                await openFileManager(node.children ? node.data.name : node.parent.data.name);
-            },
-        }),
-        await MenuItem.new({
-            text: i18n.global.t("context_menu.remove"),
-            action: async () => {
-                await removeFileOrDirectory(node.data.name, node);
-            },
-        }),
-    ];
-
-    // メニューの生成
-    const menu = await Menu.new({ items: menuItems });
-
-    // メニューをポップアップ
-    menu.popup();
-}
-
-
-// ファイルマネージャーを開く関数
-async function openFileManager(path) {
-    //await revealItemInDir(path);
-    await invoke("open_file_manager", { path: path })
-        // 失敗した場合
-        .catch((failure) => {
-            // Message Dialog
-            message(failure);
-        });
-}
-
-
-// クリップボードに書き込む関数
-async function writeToClipboard(path) {
-    await writeText(path);
-}
-
-
-// ファイル or ディレクトリを削除する関数
-async function removeFileOrDirectory(path, node) {
-
-    let dialogTitle = "";
-    let dialogMessage = "";
-
-    if (node.children) {
-        dialogTitle = i18n.global.t("removal_alert.directory");
-        dialogMessage = i18n.global.t("removal_alert.directory_desc") + "\n\n\n" + path + "\n";
-    }
-    else {
-        dialogTitle = i18n.global.t("removal_alert.file");
-        dialogMessage = i18n.global.t("removal_alert.file_desc") + "\n\n\n" + path + "\n";
-    }
-
-    const result = await ask(dialogMessage, dialogTitle);
-    // YESの場合
-    if (result) {
-        // バックエンド側の関数を実行
-        await invoke("remove_file_or_directory", { path: path })
-            // 成功した場合
-            .then((success) => {
-                // Nodeを削除
-                removeNode(node);
-            })
-            // 失敗した場合
-            .catch((failure) => {
-                // Message Dialog
-                message(failure);
-            });
-    }
 }
 
 

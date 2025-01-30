@@ -9,7 +9,7 @@ const i18n = createI18n({
     // For composition API
     legacy: false,
     // デフォルトの言語を日本語に固定する
-    locale: userLocale.includes('ja') ? 'ja' : 'en',
+    locale: userLocale.includes("ja") ? "ja" : "en",
     // 言語の定義
     messages: {
         ja: i18n_ja,
