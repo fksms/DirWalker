@@ -72,27 +72,22 @@ By manually running `All Build Debug`, you can build debug versions for MacOS, W
 
 #### Setup
 
-Install rustup-init and nodebrew
+Install rustup and nodebrew
 ```sh
-brew install rustup-init
+brew install rustup
 brew install nodebrew
 ```
 
-Setting up rustup-init and nodebrew
+Setup rustup and nodebrew
 ```sh
 rustup-init
 nodebrew setup
 ```
 
-Install the stable version of node.js (npm)
+Install node.js
 ```sh
 nodebrew install stable
 nodebrew use stable
-```
-
-Install tauri-cli (Use v2)
-```sh
-cargo install tauri-cli --version "^2"
 ```
 
 #### Build
@@ -107,19 +102,14 @@ Install the necessary packages (node_modules will be created)
 npm install
 ```
 
-Build & Preview (Debug)
+Build (Debug)
 ```sh
-cargo tauri dev
+npm run tauri dev
 ```
 
 Build (Release)
 ```sh
-cargo tauri build
-```
-
-Build (Debug)
-```sh
-cargo tauri build --debug
+npm run tauri build
 ```
 
 <br>

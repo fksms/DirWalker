@@ -70,27 +70,22 @@ Windowsの場合は以下からインストールも可能です。<br>
 
 #### Setup
 
-rustup-initとnodebrewをインストール
+rustupとnodebrewをインストール
 ```sh
-brew install rustup-init
+brew install rustup
 brew install nodebrew
 ```
 
-rustup-initとnodebrewのセットアップ
+rustupとnodebrewのセットアップ
 ```sh
 rustup-init
 nodebrew setup
 ```
 
-node.js(npm)の安定版をインストール
+node.jsをインストール
 ```sh
 nodebrew install stable
 nodebrew use stable
-```
-
-tauri-cliをインストール（v2を利用する）
-```sh
-cargo install tauri-cli --version "^2"
 ```
 
 #### Build
@@ -105,19 +100,14 @@ cd DirWalker
 npm install
 ```
 
-Build & Preview（Debug）
+Build（Debug）
 ```sh
-cargo tauri dev
+npm run tauri dev
 ```
 
 Build（Release）
 ```sh
-cargo tauri build
-```
-
-Build（Debug）
-```sh
-cargo tauri build --debug
+npm run tauri build
 ```
 
 <br>
