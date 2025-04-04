@@ -72,22 +72,16 @@ By manually running `All Build Debug`, you can build debug versions for MacOS, W
 
 #### Setup
 
-Install rustup and nodebrew
+Install rustup and nvm
 ```sh
 brew install rustup
-brew install nodebrew
+brew install nvm
 ```
 
-Setup rustup and nodebrew
+Setup rustup and nvm
 ```sh
 rustup-init
-nodebrew setup
-```
-
-Install node.js
-```sh
-nodebrew install stable
-nodebrew use stable
+nvm install stable --latest-npm
 ```
 
 #### Build

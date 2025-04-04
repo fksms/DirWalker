@@ -70,22 +70,16 @@ Windowsの場合は以下からインストールも可能です。<br>
 
 #### Setup
 
-rustupとnodebrewをインストール
+rustupとnvmをインストール
 ```sh
 brew install rustup
-brew install nodebrew
+brew install nvm
 ```
 
-rustupとnodebrewのセットアップ
+rustupとnvmのセットアップ
 ```sh
 rustup-init
-nodebrew setup
-```
-
-node.jsをインストール
-```sh
-nodebrew install stable
-nodebrew use stable
+nvm install stable --latest-npm
 ```
 
 #### Build
