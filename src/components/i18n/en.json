@@ -21,7 +21,8 @@
         "files_and_folders": "Files and Folders",
         "files_and_folders_desc": "If you want to allow access to the Downloads, Desktop, Documents folders, and Cloud storage folders, please click the button below to change the settings.",
         "full_disk_access": "Full Disk Access",
-        "full_disk_access_desc": "If you want to allow access to all data on this Mac, please click the button below to change the settings."
+        "full_disk_access_desc": "If you want to allow access to all data on this Mac, please click the button below to change the settings.",
+        "full_disk_access_is_already_granted": "Full disk access is already granted."
     },
     "about": {
         "lisense_1": "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:",
