@@ -31,6 +31,7 @@ tauri-plugin-shell = "2.2"
 tauri-plugin-clipboard-manager = "2.2"
 tauri-plugin-opener = "2.2"
 opener = "0.7.2"
+trash = "5.2.2"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

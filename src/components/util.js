@@ -25,9 +25,9 @@ async function showContextMenu(node, callback) {
             },
         }),
         await MenuItem.new({
-            text: i18n.global.t("context_menu.remove"),
+            text: i18n.global.t("context_menu.move_to_trash"),
             action: async () => {
-                await removeFileOrDirectory(node.data.name, node, callback);
+                await moveToTrash(node.data.name, node, callback);
             },
         }),
     ];
@@ -59,7 +59,7 @@ async function openFileManager(path) {
 
 
 // ファイル or ディレクトリを削除する関数
-async function removeFileOrDirectory(path, node, removeNode) {
+async function removeFileOrDirectory(path, node, callback) {
 
     let dialogTitle = "";
     let dialogMessage = "";
@@ -81,7 +81,41 @@ async function removeFileOrDirectory(path, node, removeNode) {
             // 成功した場合
             .then((success) => {
                 // Nodeを削除
-                removeNode(node);
+                callback(node);
+            })
+            // 失敗した場合
+            .catch((failure) => {
+                // Message Dialog
+                message(failure);
+            });
+    }
+}
+
+
+// ゴミ箱に移動する関数
+async function moveToTrash(path, node, callback) {
+
+    let dialogTitle = "";
+    let dialogMessage = "";
+
+    if (node.children) {
+        dialogTitle = i18n.global.t("removal_alert.directory");
+        dialogMessage = i18n.global.t("removal_alert.directory_desc") + "\n\n\n" + path + "\n";
+    }
+    else {
+        dialogTitle = i18n.global.t("removal_alert.file");
+        dialogMessage = i18n.global.t("removal_alert.file_desc") + "\n\n\n" + path + "\n";
+    }
+
+    const result = await ask(dialogMessage, dialogTitle);
+    // YESの場合
+    if (result) {
+        // バックエンド側の関数を実行
+        await invoke("move_to_trash", { path: path })
+            // 成功した場合
+            .then((success) => {
+                // Nodeを削除
+                callback(node);
             })
             // 失敗した場合
             .catch((failure) => {

@@ -44,7 +44,8 @@
     "context_menu": {
         "copy_path": "パスをコピー",
         "open": "開く",
-        "remove": "削除"
+        "remove": "削除",
+        "move_to_trash": "ゴミ箱に移動"
     },
     "removal_alert": {
         "directory": "ディレクトリの削除",

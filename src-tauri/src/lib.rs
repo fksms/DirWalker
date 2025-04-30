@@ -10,7 +10,7 @@ mod walk_manager;
 use tauri::Manager;
 
 use crate::frontend_utils::{
-    check_full_disk_access_permission, open_file_manager, remove_file_or_directory,
+    check_full_disk_access_permission, move_to_trash, open_file_manager, remove_file_or_directory,
 };
 use crate::init_walk::init_walk;
 use crate::init_walk::WalkParams;
@@ -168,6 +168,7 @@ pub fn run() {
             remove_file_or_directory,
             open_file_manager,
             check_full_disk_access_permission,
+            move_to_trash
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

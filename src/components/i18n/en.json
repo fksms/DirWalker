@@ -44,7 +44,8 @@
     "context_menu": {
         "copy_path": "Copy path",
         "open": "Open",
-        "remove": "Remove"
+        "remove": "Remove",
+        "move_to_trash": "Move to Trash"
     },
     "removal_alert": {
         "directory": "Remove Directory",

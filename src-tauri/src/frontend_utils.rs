@@ -1,12 +1,13 @@
-use opener::open;
+use opener;
 use std::{fs, path::Path};
+use trash;
 
 use tauri::Manager;
 
 // ファイルマネージャーを開く
 #[tauri::command(rename_all = "snake_case")]
 pub async fn open_file_manager(path: String) -> Result<(), String> {
-    let result = open(path);
+    let result = opener::open(path);
 
     match result {
         Ok(ok) => Ok(ok),
@@ -30,6 +31,17 @@ pub async fn remove_file_or_directory(path: String) -> Result<(), String> {
             Ok(ok) => Ok(ok),
             Err(err) => Err(err.to_string()),
         }
+    }
+}
+
+// ゴミ箱に移動する
+#[tauri::command(rename_all = "snake_case")]
+pub async fn move_to_trash(path: String) -> Result<(), String> {
+    let result = trash::delete(path);
+
+    match result {
+        Ok(ok) => Ok(ok),
+        Err(err) => Err(err.to_string()),
     }
 }
 
