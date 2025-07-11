@@ -1,12 +1,10 @@
 <script setup>
+import { ref } from 'vue';
 
-import { ref } from "vue";
-
-import { detectOS } from "./detectOS";
+import { detectOS } from './detectOS';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(["viewSunburstChart"]);
-
+const props = defineProps(['viewSunburstChart']);
 
 // 自身の情報
 const ownColor = ref();
@@ -16,13 +14,11 @@ const ownSize = ref();
 // 子ノード
 const children = ref([]);
 
-
 // リストを作成（入力されたノードデータのchildrenをリストにして表示）
 //
 // node: ノードデータ
 // option: オプション
 function generateDirectoryList(node, option) {
-
     // ファイルサイズカウント用
     let otherSize = 0;
 
@@ -45,7 +41,7 @@ function generateDirectoryList(node, option) {
 
     // optionを指定する場合
     else {
-        node.children.forEach(element => {
+        node.children.forEach((element) => {
             // 閾値よりも小さなもので配列を再構成する
             if (element.value <= option.threshold) {
                 otherSize += element.value;
@@ -60,44 +56,39 @@ function generateDirectoryList(node, option) {
     }
 }
 
-
 // パスの最後の部分を取得
 //
 // path: ファイル・ディレクトリのパス（文字列）
 function getLastPath(path) {
-
     // 分解した各パスを格納
     let segments = null;
 
     // Windowsの場合
-    if (detectOS() == "Windows") {
+    if (detectOS() == 'Windows') {
         // パスを"¥"で分割
-        segments = path.split("\\");
+        segments = path.split('\\');
     }
     // Windows以外の場合
     else {
         // パスを"/"で分割
-        segments = path.split("/");
+        segments = path.split('/');
     }
 
     // 最後の要素を返す
     return segments[segments.length - 1];
 }
 
-
 // 配列から文字列に変換
 function array2String(array) {
     // デリミタを指定
-    const delimiter = " "
+    const delimiter = ' ';
     return array.join(delimiter);
 }
-
 
 // TB/GB/MB/KBに変換
 function toReadable(value) {
     return props.viewSunburstChart.toReadable(value);
 }
-
 
 // Sunburstの更新
 //
@@ -106,14 +97,12 @@ function updateSunburst(node) {
     return props.viewSunburstChart.leftClicked(node);
 }
 
-
 // コンテキストメニューの表示
 //
 // node: ノードデータ
 function showContextMenu(node) {
     return props.viewSunburstChart.rightClicked(node);
 }
-
 
 // カーソルを合わせた時の動作
 //
@@ -122,7 +111,6 @@ function mouseEntered(node) {
     return props.viewSunburstChart.mouseEntered(null, node);
 }
 
-
 // カーソルを離した時の動作
 //
 // node: ノードデータ
@@ -130,63 +118,59 @@ function mouseLeaved(node) {
     return props.viewSunburstChart.mouseLeaved(null, node);
 }
 
-
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateDirectoryList,
     getLastPath,
 });
-
 </script>
 
 <template>
-    <v-table class="bg-transparent text-white" style="cursor: default;">
+    <v-table class="bg-transparent text-white" style="cursor: default">
         <!-- テーブルレイアウトでwidthの指定にピクセルとパーセントを混在させる場合は"colgroup"を利用する -->
         <!-- https://azuma006.hatenablog.com/entry/2020/01/31/233206 -->
         <colgroup>
-            <col style="width: 40px;">
-            </col>
-            <col style="width: auto;">
-            </col>
-            <col style="width: 100px;">
-            </col>
+            <col style="width: 40px" />
+            <col style="width: auto" />
+            <col style="width: 100px" />
         </colgroup>
         <tbody>
             <tr v-if="ownColor && ownSize">
                 <th class="left-column"><v-icon :color="ownColor" icon="mdi-circle"></v-icon></th>
-                <th class="center-column text-left">{{ ownName ? ownName : $t("directory_file_list.small_size_items") }}
-                </th>
+                <th class="center-column text-left">{{ ownName ? ownName : $t('directory_file_list.small_size_items') }}</th>
                 <th class="right-column text-right">{{ ownSize }}</th>
             </tr>
         </tbody>
     </v-table>
     <!-- childrenの要素が10以下の場合はフッターを表示しない -->
-    <v-data-table :items="children" density="compact" class="bg-transparent text-white" hover hide-no-data
-        hide-default-header :hide-default-footer="(children.length <= 10) ? true : false" :items-per-page="10">
+    <v-data-table
+        :items="children"
+        density="compact"
+        class="bg-transparent text-white"
+        hover
+        hide-no-data
+        hide-default-header
+        :hide-default-footer="children.length <= 10 ? true : false"
+        :items-per-page="10"
+    >
         <!-- テーブルレイアウトでwidthの指定にピクセルとパーセントを混在させる場合は"colgroup"を利用する -->
         <!-- https://azuma006.hatenablog.com/entry/2020/01/31/233206 -->
-        <template v-slot:colgroup>
+        <template #colgroup>
             <colgroup>
-                <col style="width: 40px;">
-                </col>
-                <col style="width: auto;">
-                </col>
-                <col style="width: 100px;">
-                </col>
+                <col style="width: 40px" />
+                <col style="width: auto" />
+                <col style="width: 100px" />
             </colgroup>
         </template>
-        <template v-slot:item="{ item }">
-            <tr @click.left="updateSunburst(item)" @click.right.prevent="showContextMenu(item)"
-                @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
+        <template #item="{ item }">
+            <tr @click.left="updateSunburst(item)" @click.right.prevent="showContextMenu(item)" @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
                 <td class="left-column"><v-icon :color="item.color" icon="mdi-circle-medium"></v-icon></td>
                 <td class="center-column text-left">{{ getLastPath(item.data.name) }}</td>
-                <td class="right-column text-right">{{ array2String(toReadable(item.data.size)) }}
-                </td>
+                <td class="right-column text-right">{{ array2String(toReadable(item.data.size)) }}</td>
             </tr>
         </template>
     </v-data-table>
 </template>
-
 
 <style>
 /* 左列 */
@@ -234,7 +218,7 @@ defineExpose({
 /* リストホバー時のカラーとポインターを設定 */
 tr:hover td {
     /* blue-grey-lighten-1 */
-    background-color: #78909C;
+    background-color: #78909c;
     cursor: pointer;
 }
 

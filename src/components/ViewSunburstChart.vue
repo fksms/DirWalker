@@ -1,14 +1,12 @@
 <script setup>
+import { ref, watch } from 'vue';
 
-import { ref, watch } from "vue";
+import * as d3 from 'd3';
 
-import * as d3 from "d3";
-
-import { showContextMenu } from "./util";
+import { showContextMenu } from './util';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(["viewDirectoryFileList", "viewBreadcrumbsList"]);
-
+const props = defineProps(['viewDirectoryFileList', 'viewBreadcrumbsList']);
 
 // DOM格納用
 const svgDOM = ref();
@@ -21,12 +19,11 @@ watch(svgDOM, (newValue) => {
     const container = svgDOMRef.value;
     if (container && newValue) {
         // 既存の描画をクリア
-        container.innerHTML = "";
+        container.innerHTML = '';
         // 新しいSVGSVGElementを追加
         container.appendChild(newValue);
     }
 });
-
 
 // --------------------パラメータ--------------------
 
@@ -53,22 +50,22 @@ const hoverTimeout = 500;
 const blinkInterval = 600;
 
 // 中心円が消灯した時のカラーコード（背景色（blue-grey-darken-3）と同じ色）
-const circleLightOffColorCodes = "#37474F";
+const circleLightOffColorCodes = '#37474F';
 
 // 中心円が点灯した時のカラーコード（blue-grey-lighten-3）
-const circleLightOnColorCodes = "#B0BEC5";
+const circleLightOnColorCodes = '#B0BEC5';
 
 // ディレクトリのカラーコード（原色）
-const directoryColorCodes = ["#FF0000", "#FF8000", "#FFFF00", "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF", "#0000FF", "#8000FF", "#FF00FF", "#FF0080"];
+const directoryColorCodes = ['#FF0000', '#FF8000', '#FFFF00', '#80FF00', '#00FF00', '#00FF80', '#00FFFF', '#0080FF', '#0000FF', '#8000FF', '#FF00FF', '#FF0080'];
 
 // ルートディレクトリのカラーコード
-const rootDirectoryColorCode = "#FFFFFF00";
+const rootDirectoryColorCode = '#FFFFFF00';
 
 // ファイルのカラーコード
-const fileColorCode = "#C6C6C6";
+const fileColorCode = '#C6C6C6';
 
 // squashされた部分のカラーコード
-const squashedColorCode = "#777777";
+const squashedColorCode = '#777777';
 
 // --------------------パラメータ--------------------
 
@@ -82,10 +79,8 @@ let svgElement = null;
 
 // --------------------グローバル--------------------
 
-
 // Sunburstの作成
 function generateSunburst(data) {
-
     // カラースケールの作成
     //
     // scaleOrdinal: 配列の繰り返し設定を行う
@@ -95,8 +90,9 @@ function generateSunburst(data) {
     //
     // sum: childrenの要素が0のもののサイズのみを足しこんでHierarchyNodeを作成
     // sort: サイズを降順でソート
-    root = d3.hierarchy(data)
-        .sum(d => d.children.length ? 0 : d.size)
+    root = d3
+        .hierarchy(data)
+        .sum((d) => (d.children.length ? 0 : d.size))
         .sort((a, b) => b.value - a.value);
 
     // nodeId用カウンター
@@ -115,11 +111,10 @@ function generateSunburst(data) {
     // 各ノードにプロパティを追加する
     //
     // each: ノードを幅優先で呼び出す
-    root.each(d => {
-
+    root.each((d) => {
         // nodeIdの追加（SVGのidは数字から始まってはいけないため、先頭に文字を付ける）
         // https://stackoverflow.com/questions/58302561/howto-select-an-element-by-its-id-d3
-        d.nodeId = "M" + count;
+        d.nodeId = 'M' + count;
         count++;
 
         // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
@@ -132,7 +127,7 @@ function generateSunburst(data) {
             x0: d.x0,
             x1: d.x1,
             y0: d.y0,
-            y1: d.y1
+            y1: d.y1,
         };
 
         // targetプロパティの追加
@@ -140,7 +135,7 @@ function generateSunburst(data) {
             x0: d.x0,
             x1: d.x1,
             y0: d.y0,
-            y1: d.y1
+            y1: d.y1,
         };
 
         // colorプロパティの追加
@@ -157,14 +152,16 @@ function generateSunburst(data) {
             }
             // depthが1より大きくvisibleDepth以下の場合
             else if (d.depth > 1 && d.depth <= visibleDepth) {
-
                 // 考え方
                 //
                 // depth=1: 「原色->白」のカラーをX等分して、2つ目
                 // depth=2: 「depth=1->白」のカラーをX-1等分して、2つ目
                 // depth=3: 「depth=2->白」カラーをX-2等分して、2つ目
                 // ...
-                const newColorArray = d3.scaleLinear().domain([0, visibleDepth - d.depth + 3]).range([d.parent.color, "#FFFFFF"]);
+                const newColorArray = d3
+                    .scaleLinear()
+                    .domain([0, visibleDepth - d.depth + 3])
+                    .range([d.parent.color, '#FFFFFF']);
                 d.color = rgb2Hex(newColorArray(1)); // 階層が深くなるごとに明るくなる
             }
             // depthがvisibleDepthより大きい場合
@@ -172,11 +169,10 @@ function generateSunburst(data) {
                 d.color = d.parent.color; // 親のカラーと同じ
             }
         }
-        // 子ノードが無い場合 
+        // 子ノードが無い場合
         else {
             d.color = fileColorCode;
         }
-
     });
 
     // svgタグの作成
@@ -186,11 +182,12 @@ function generateSunburst(data) {
     // y: 左上のy座標
     // width: ビューポートの幅
     // height: ビューポートの高さ
-    svgElement = d3.create("svg")
-        .attr("viewBox", [-width / 2, -height / 2, width, height])
-        .attr("preserveAspectRatio", "xMidYMid meet")
-        .style("width", "100%")
-        .style("height", "100%");
+    svgElement = d3
+        .create('svg')
+        .attr('viewBox', [-width / 2, -height / 2, width, height])
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .style('width', '100%')
+        .style('height', '100%');
 
     // Circleを更新
     updateCircle(root, true);
@@ -205,27 +202,16 @@ function generateSunburst(data) {
     updateBreadcrumbs(root);
 
     // 初回のアニメーション（初回は不透明度を0に設定してから1になるようにフェードインさせる）
-    svgElement.selectAll("path")
-        .attr("fill-opacity", 0);
-    svgElement.selectAll("path")
-        .transition()
-        .duration(transitionDuration)
-        .ease(d3.easeLinear)
-        .attr("fill-opacity", 1);
+    svgElement.selectAll('path').attr('fill-opacity', 0);
+    svgElement.selectAll('path').transition().duration(transitionDuration).ease(d3.easeLinear).attr('fill-opacity', 1);
 
     // 初回のアニメーション（初回は不透明度を0に設定してから1になるようにフェードインさせる）
-    svgElement.selectAll("text")
-        .attr("fill-opacity", 0);
-    svgElement.selectAll("text")
-        .transition()
-        .duration(transitionDuration)
-        .ease(d3.easeLinear)
-        .attr("fill-opacity", 1);
+    svgElement.selectAll('text').attr('fill-opacity', 0);
+    svgElement.selectAll('text').transition().duration(transitionDuration).ease(d3.easeLinear).attr('fill-opacity', 1);
 
     // DOMを格納
     svgDOM.value = svgElement.node();
 }
-
 
 // rgb形式からhex形式に変換
 function rgb2Hex(rgb) {
@@ -233,26 +219,20 @@ function rgb2Hex(rgb) {
     return hex.toUpperCase();
 }
 
-
 // TB/GB/MB/KBに変換
 function toReadable(value) {
     if (value >= 1e12) {
-        return [(value / 1e12).toFixed(1), "TB"];
-    }
-    else if (value >= 1e9) {
-        return [(value / 1e9).toFixed(1), "GB"];
-    }
-    else if (value >= 1e6) {
-        return [(value / 1e6).toFixed(1), "MB"];
-    }
-    else if (value >= 1e3) {
-        return [(value / 1e3).toFixed(1), "KB"];
-    }
-    else {
-        return [value.toFixed(1), "B"];
+        return [(value / 1e12).toFixed(1), 'TB'];
+    } else if (value >= 1e9) {
+        return [(value / 1e9).toFixed(1), 'GB'];
+    } else if (value >= 1e6) {
+        return [(value / 1e6).toFixed(1), 'MB'];
+    } else if (value >= 1e3) {
+        return [(value / 1e3).toFixed(1), 'KB'];
+    } else {
+        return [value.toFixed(1), 'B'];
     }
 }
-
 
 // 円弧（arc）生成関数
 function createArc() {
@@ -266,15 +246,15 @@ function createArc() {
     // innerRadius: 円弧の内側の半径
     // outerRadius: 円弧の外側の半径
     const arcHeight = (width - radius * 2) / (visibleDepth * 2); // 円弧の外側の半径-円弧の内側の半径
-    return d3.arc()
-        .startAngle(d => d.x0)
-        .endAngle(d => d.x1)
+    return d3
+        .arc()
+        .startAngle((d) => d.x0)
+        .endAngle((d) => d.x1)
         .padAngle(0.01)
         .padRadius(radius)
-        .innerRadius(d => radius + (d.y0 - 1) * arcHeight)
-        .outerRadius(d => radius + (d.y1 - 1) * arcHeight - 1);
+        .innerRadius((d) => radius + (d.y0 - 1) * arcHeight)
+        .outerRadius((d) => radius + (d.y1 - 1) * arcHeight - 1);
 }
-
 
 // 入力されたnodeが可視化される場合はtrue、可視化されない場合はfalseを返す。
 //
@@ -283,91 +263,90 @@ function visualize(node) {
     return node.target.y0 > 0 && node.target.y0 <= visibleDepth && node.target.x1 > node.target.x0;
 }
 
-
 // Circleを更新
 //
 // node: ノードデータ
 // isFirstCalled: 初めて呼ばれたか否か
 function updateCircle(node, isFirstCalled) {
-
     if (isFirstCalled) {
         // 更新前に"circle"の要素を全て削除
-        svgElement.selectAll("circle").remove();
+        svgElement.selectAll('circle').remove();
 
         // 背景の円を設定
         // （背景の円を用意することで、手前の円の透過率を変化させた際に点滅しているように見える）
-        svgElement.append("circle")
+        svgElement
+            .append('circle')
             // classを設定
-            .classed("back", true)
+            .classed('back', true)
             // 半径を設定（1だけ小さな値にする）
-            .attr("r", radius - 1)
+            .attr('r', radius - 1)
             // fill属性（塗りつぶし）を設定
-            .attr("fill", circleLightOnColorCodes)
+            .attr('fill', circleLightOnColorCodes)
             // fill-opacity属性（塗りつぶしの透明度）を設定
-            .attr("fill-opacity", 1);
+            .attr('fill-opacity', 1);
 
         // 中心の円のパスを設定
-        svgElement.append("circle")
+        svgElement
+            .append('circle')
             .datum(node)
             // classを設定
-            .classed("front", true)
+            .classed('front', true)
             // IDを設定
-            .attr("id", node.nodeId)
+            .attr('id', node.nodeId)
             // 半径を設定
-            .attr("r", radius)
+            .attr('r', radius)
             // fill属性（塗りつぶし）を設定
-            .attr("fill", circleLightOffColorCodes)
+            .attr('fill', circleLightOffColorCodes)
             // fill-opacity属性（塗りつぶしの透明度）を設定
-            .attr("fill-opacity", 1)
+            .attr('fill-opacity', 1)
             // ポインターイベントの設定
-            .attr("pointer-events", "all")
+            .attr('pointer-events', 'all')
             // カーソルを指差しの手にする
-            .style("cursor", "pointer")
+            .style('cursor', 'pointer')
             // カーソルを合わせた時
-            .on("mouseenter", (event, d) => mouseEntered(event, d))
+            .on('mouseenter', (event, d) => mouseEntered(event, d))
             // カーソルを離した時
-            .on("mouseleave", (event, d) => mouseLeaved(event, d))
+            .on('mouseleave', (event, d) => mouseLeaved(event, d))
             // 左クリックした時
-            .on("click", (event, d) => leftClicked(d.parent))
+            .on('click', (event, d) => leftClicked(d.parent))
             // 右クリックした時
-            .on("contextmenu", (event, d) => {
+            .on('contextmenu', (event, d) => {
                 event.preventDefault(); // デフォルトの動作をキャンセル
-                rightClicked(d)
+                rightClicked(d);
             });
-    }
-    else {
+    } else {
         // circleのデータを更新（手前の円（front）を指定する）
-        svgElement.select("circle.front")
+        svgElement
+            .select('circle.front')
             .datum(node)
             // IDを設定
-            .attr("id", node.nodeId);
+            .attr('id', node.nodeId);
     }
 
     // 更新前に"text"の要素を全て削除
-    svgElement.selectAll("text").remove();
+    svgElement.selectAll('text').remove();
 
     // Textを設定（中心に表示されるファイルサイズ）
-    svgElement.selectAll("text")
+    svgElement
+        .selectAll('text')
         .data(toReadable(node.value))
-        .join("text")
-        .attr("text-anchor", "middle")
-        .attr("fill", "#FFFFFF")
-        .attr("x", 0)
-        .attr("y", (d, i) => i * 35 - 5)
-        .attr("font-size", "2em")
-        .attr("pointer-events", "none")
-        .text(d => d);
+        .join('text')
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#FFFFFF')
+        .attr('x', 0)
+        .attr('y', (d, i) => i * 35 - 5)
+        .attr('font-size', '2em')
+        .attr('pointer-events', 'none')
+        .text((d) => d);
 }
-
 
 // Arcを更新
 //
 // node: ノードデータ
 // isFirstCalled: 初めて呼ばれたか否か
 function updateArc(node, isFirstCalled) {
-
     // 更新前に"path"の要素を全て削除
-    svgElement.selectAll("path").remove();
+    svgElement.selectAll('path').remove();
 
     // 円弧（arc）の生成
     const arc = createArc();
@@ -377,98 +356,99 @@ function updateArc(node, isFirstCalled) {
 
     // --------------------ここからmain-arc用--------------------
     // 指定した要素を全て選択
-    svgElement.selectAll("path.main-arc")
+    svgElement
+        .selectAll('path.main-arc')
         // データ配列を作成
-        .data(root.descendants().filter(d => {
-
-            // --------------------ここからプロパティの更新--------------------
-            if (!isFirstCalled) {
-                // 処理軽減のために、後続の処理で面積な小さなアークをパスから除外しており、
-                // その結果として、除外されたアークはcurrentプロパティが更新されなくなる。
-                // そのため、ここでcurrentプロパティの更新を行う。
-                d.current = {
-                    x0: d.target.x0,
-                    x1: d.target.x1,
-                    y0: d.target.y0,
-                    y1: d.target.y1
-                }
-
-                // targetプロパティの更新
-                d.target = {
-                    x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
-                    x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
-                    y0: Math.max(0, d.y0 - node.depth),
-                    y1: Math.max(0, d.y1 - node.depth)
-                };
-            }
-            // --------------------ここまでプロパティの更新--------------------
-
-            // 可視化されないものはパスから除外する
-            if (!visualize(d)) return false;
-
-            // 円弧の角度[degree]が小さいものは除外する
-            if ((d.target.x1 - d.target.x0) < (angleThreshold * Math.PI / 180)) {
-
-                // --------------------ここからsquashed-arc用--------------------
-                const parentName = d.parent.data.name;
-
-                // 除外された円弧のparentNameが、まだMapに格納されていない場合
-                if (!squashedArcs.has(parentName)) {
-                    // オブジェクトの作成
-                    const squashedObject = {
-                        parentNode: d.parent,
-                        head: d.value, // squashされた部分で最もサイズの大きいノードのvalue
+        .data(
+            root.descendants().filter((d) => {
+                // --------------------ここからプロパティの更新--------------------
+                if (!isFirstCalled) {
+                    // 処理軽減のために、後続の処理で面積な小さなアークをパスから除外しており、
+                    // その結果として、除外されたアークはcurrentプロパティが更新されなくなる。
+                    // そのため、ここでcurrentプロパティの更新を行う。
+                    d.current = {
                         x0: d.target.x0,
                         x1: d.target.x1,
                         y0: d.target.y0,
-                        y1: d.target.y1
+                        y1: d.target.y1,
+                    };
+
+                    // targetプロパティの更新
+                    d.target = {
+                        x0: Math.max(0, Math.min(1, (d.x0 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+                        x1: Math.max(0, Math.min(1, (d.x1 - node.x0) / (node.x1 - node.x0))) * 2 * Math.PI,
+                        y0: Math.max(0, d.y0 - node.depth),
+                        y1: Math.max(0, d.y1 - node.depth),
+                    };
+                }
+                // --------------------ここまでプロパティの更新--------------------
+
+                // 可視化されないものはパスから除外する
+                if (!visualize(d)) return false;
+
+                // 円弧の角度[degree]が小さいものは除外する
+                if (d.target.x1 - d.target.x0 < (angleThreshold * Math.PI) / 180) {
+                    // --------------------ここからsquashed-arc用--------------------
+                    const parentName = d.parent.data.name;
+
+                    // 除外された円弧のparentNameが、まだMapに格納されていない場合
+                    if (!squashedArcs.has(parentName)) {
+                        // オブジェクトの作成
+                        const squashedObject = {
+                            parentNode: d.parent,
+                            head: d.value, // squashされた部分で最もサイズの大きいノードのvalue
+                            x0: d.target.x0,
+                            x1: d.target.x1,
+                            y0: d.target.y0,
+                            y1: d.target.y1,
+                        };
+                        // 除外された円弧のparentNameをキーとして、座標を格納
+                        squashedArcs.set(parentName, squashedObject);
                     }
-                    // 除外された円弧のparentNameをキーとして、座標を格納
-                    squashedArcs.set(parentName, squashedObject);
-                }
-                // 除外された円弧のparentNameが、既にMapに格納されている場合
-                else {
-                    // 格納された座標を取得
-                    let tmpCoordinates = squashedArcs.get(parentName);
-                    // 座標をUpdate
-                    tmpCoordinates.x1 = d.target.x1;
-                    // 座標を格納
-                    squashedArcs.set(parentName, tmpCoordinates);
-                }
-                // --------------------ここまでsquashed-arc用--------------------
+                    // 除外された円弧のparentNameが、既にMapに格納されている場合
+                    else {
+                        // 格納された座標を取得
+                        let tmpCoordinates = squashedArcs.get(parentName);
+                        // 座標をUpdate
+                        tmpCoordinates.x1 = d.target.x1;
+                        // 座標を格納
+                        squashedArcs.set(parentName, tmpCoordinates);
+                    }
+                    // --------------------ここまでsquashed-arc用--------------------
 
-                return false;
-            }
+                    return false;
+                }
 
-            // 上記で除外されなかったもの
-            return true;
-        }))
+                // 上記で除外されなかったもの
+                return true;
+            })
+        )
         // データ配列とDOMを結合
-        .join("path")
+        .join('path')
         // classを設定
-        .classed("main-arc", true)
+        .classed('main-arc', true)
         // IDを設定
-        .attr("id", d => d.nodeId)
+        .attr('id', (d) => d.nodeId)
         // d属性（パス）を設定
-        .attr("d", d => arc(d.target))
+        .attr('d', (d) => arc(d.target))
         // fill属性（塗りつぶし）を設定
-        .attr("fill", d => d.color)
+        .attr('fill', (d) => d.color)
         // fill-opacity属性（塗りつぶしの透明度）を設定
-        .attr("fill-opacity", d => visualize(d) ? 1 : 0)
+        .attr('fill-opacity', (d) => (visualize(d) ? 1 : 0))
         // ポインターイベントの設定
-        .attr("pointer-events", d => visualize(d) ? "auto" : "none")
+        .attr('pointer-events', (d) => (visualize(d) ? 'auto' : 'none'))
         // カーソルを指差しの手にする
-        .style("cursor", "pointer")
+        .style('cursor', 'pointer')
         // カーソルを合わせた時
-        .on("mouseenter", (event, d) => mouseEntered(event, d))
+        .on('mouseenter', (event, d) => mouseEntered(event, d))
         // カーソルを離した時
-        .on("mouseleave", (event, d) => mouseLeaved(event, d))
+        .on('mouseleave', (event, d) => mouseLeaved(event, d))
         // 左クリックした時
-        .on("click", (event, d) => leftClicked(d))
+        .on('click', (event, d) => leftClicked(d))
         // 右クリックした時
-        .on("contextmenu", (event, d) => {
+        .on('contextmenu', (event, d) => {
             event.preventDefault(); // デフォルトの動作をキャンセル
-            rightClicked(d)
+            rightClicked(d);
         });
     // --------------------ここまでmain-arc用--------------------
 
@@ -476,40 +456,40 @@ function updateArc(node, isFirstCalled) {
     // 除外された円弧を圧縮したものを表示
     squashedArcs.forEach((value, key) => {
         // 円弧の角度[degree]が大きいもののみ表示
-        if ((value.x1 - value.x0) > (angleThreshold * Math.PI / 180)) {
-
+        if (value.x1 - value.x0 > (angleThreshold * Math.PI) / 180) {
             // squashed-arc用座標を生成
             const squashedArcCoordinates = {
                 x0: value.x0,
                 x1: value.x1,
                 y0: value.y0,
-                y1: value.y1
-            }
+                y1: value.y1,
+            };
 
             // リスト生成時のオプションを指定
             const option = {
                 color: squashedColorCode,
-                threshold: value.head // リスト生成時の閾値
-            }
+                threshold: value.head, // リスト生成時の閾値
+            };
 
             // path要素を生成
-            svgElement.append("path")
+            svgElement
+                .append('path')
                 // データを作成
                 .datum(value.parentNode)
                 // classを設定
-                .classed("squashed-arc", true)
+                .classed('squashed-arc', true)
                 // IDを設定
-                .attr("id", "_")
+                .attr('id', '_')
                 // d属性（パス）を設定
-                .attr("d", arc(squashedArcCoordinates))
+                .attr('d', arc(squashedArcCoordinates))
                 // fill属性（塗りつぶし）を設定
-                .attr("fill", squashedColorCode)
+                .attr('fill', squashedColorCode)
                 // カーソルを合わせた時
-                .on("mouseenter", (event, d) => mouseEntered(event, d, option))
+                .on('mouseenter', (event, d) => mouseEntered(event, d, option))
                 // カーソルを離した時
-                .on("mouseleave", (event, d) => mouseLeaved(event, d))
+                .on('mouseleave', (event, d) => mouseLeaved(event, d))
                 // 右クリックした時
-                .on("contextmenu", (event, d) => {
+                .on('contextmenu', (event, d) => {
                     event.preventDefault(); // デフォルトの動作をキャンセル
                     //rightClicked(d)
                 });
@@ -518,12 +498,10 @@ function updateArc(node, isFirstCalled) {
     // --------------------ここまでsquashed-arc用--------------------
 }
 
-
 // Sunburstの更新
 //
 // node: ノードデータ
 function updateSunburst(node) {
-
     // Circleを更新
     updateCircle(node, false);
 
@@ -534,40 +512,29 @@ function updateSunburst(node) {
     const arc = createArc();
 
     // main-arcのアニメーション
-    svgElement.selectAll("path.main-arc")
+    svgElement
+        .selectAll('path.main-arc')
         .transition()
         .duration(transitionDuration)
-        .tween("scale", d => {
+        .tween('scale', (d) => {
             const i = d3.interpolate(d.current, d.target);
-            return t => d.current = i(t);
+            return (t) => (d.current = i(t));
         })
-        .attrTween("d", d => () => arc(d.current));
+        .attrTween('d', (d) => () => arc(d.current));
 
     // squashed-arcのアニメーション
-    svgElement.selectAll("path.squashed-arc")
-        .attr("fill-opacity", 0);
-    svgElement.selectAll("path.squashed-arc")
-        .transition()
-        .duration(transitionDuration)
-        .ease(d3.easeExpIn)
-        .attr("fill-opacity", 1);
+    svgElement.selectAll('path.squashed-arc').attr('fill-opacity', 0);
+    svgElement.selectAll('path.squashed-arc').transition().duration(transitionDuration).ease(d3.easeExpIn).attr('fill-opacity', 1);
 
     // textのアニメーション
-    svgElement.selectAll("text")
-        .attr("fill-opacity", 0);
-    svgElement.selectAll("text")
-        .transition()
-        .duration(transitionDuration)
-        .ease(d3.easeExpIn)
-        .attr("fill-opacity", 1);
+    svgElement.selectAll('text').attr('fill-opacity', 0);
+    svgElement.selectAll('text').transition().duration(transitionDuration).ease(d3.easeExpIn).attr('fill-opacity', 1);
 }
-
 
 // Nodeを削除
 //
 // node: ノードデータ
 function removeNode(node) {
-
     // 削除対象のノードのサイズ・ID・親ノードを保持
     const removedNodeSize = node.value;
     const removedNodeId = node.nodeId;
@@ -608,7 +575,7 @@ function removeNode(node) {
     // 各ノードのプロパティ（x0, x1, y0, y1）を更新する
     //
     // each: ノードを幅優先で呼び出す
-    root.each(d => {
+    root.each((d) => {
         // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
         if (d.children) {
             d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
@@ -634,13 +601,11 @@ function removeNode(node) {
     updateBreadcrumbs(node);
 }
 
-
 // リスト更新用タイマーID
 let timerId = null;
 
 // 他のアニメーションをinterruptしないように、transitionにnameを設定する
-const transitionName = "blink"
-
+const transitionName = 'blink';
 
 // カーソルを合わせた時の動作
 //
@@ -648,7 +613,6 @@ const transitionName = "blink"
 // node: ノードデータ
 // option: オプション
 function mouseEntered(event, node, option = null) {
-
     // 円弧or円のパスを格納
     let targetElement = null;
 
@@ -662,10 +626,9 @@ function mouseEntered(event, node, option = null) {
             // Listの更新
             updateList(node, option);
         }, hoverTimeout);
-    }
-    else {
+    } else {
         // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
-        targetElement = svgElement.select("#" + node.nodeId);
+        targetElement = svgElement.select('#' + node.nodeId);
     }
 
     // アニメーションをリピート
@@ -677,22 +640,20 @@ function mouseEntered(event, node, option = null) {
             .transition(transitionName)
             .duration(blinkInterval / 2)
             .ease(d3.easeLinear)
-            .attr("fill-opacity", 0.5)
+            .attr('fill-opacity', 0.5)
             .transition(transitionName)
             .duration(blinkInterval / 2)
             .ease(d3.easeLinear)
-            .attr("fill-opacity", 1)
-            .on("end", repeat);
-    };
+            .attr('fill-opacity', 1)
+            .on('end', repeat);
+    }
 }
-
 
 // カーソルを離した時の動作
 //
 // event: イベントハンドラー（List側から呼び出された場合、イベントハンドラーは無効となる）
 // node: ノードデータ
 function mouseLeaved(event, node) {
-
     // 円弧or円のパスを格納
     let targetElement = null;
 
@@ -703,24 +664,19 @@ function mouseLeaved(event, node) {
 
         // リスト更新用タイマーをキャンセル
         clearTimeout(timerId);
-    }
-    else {
+    } else {
         // イベントハンドラーが無効の場合は、nodeIdによってパスを検索する
-        targetElement = svgElement.select("#" + node.nodeId);
+        targetElement = svgElement.select('#' + node.nodeId);
     }
 
     // アニメーションを中断
-    targetElement
-        .interrupt(transitionName)
-        .attr("fill-opacity", 1);
+    targetElement.interrupt(transitionName).attr('fill-opacity', 1);
 }
-
 
 // 左クリックされた時の動作
 //
 // node: ノードデータ
 function leftClicked(node) {
-
     // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
     if (node == null) return;
 
@@ -743,19 +699,16 @@ function leftClicked(node) {
     updateBreadcrumbs(node);
 }
 
-
 // 右クリックされた時の動作
 //
 // node: ノードデータ
 function rightClicked(node) {
-
     // 自身がnullの場合はリターンして何もしない（parentがnullの時にクリックされた時）
     if (node == null) return;
 
     // コンテキストメニューを表示（"removeNode"をコールバック関数として渡してあげる）
     showContextMenu(node, removeNode);
 }
-
 
 // Listの更新
 //
@@ -765,14 +718,12 @@ function updateList(node, option = null) {
     return props.viewDirectoryFileList.generateDirectoryList(node, option);
 }
 
-
 // Breadcrumbsの更新
 //
 // node: ノードデータ
 function updateBreadcrumbs(node) {
     return props.viewBreadcrumbsList.generateBreadcrumbs(node);
 }
-
 
 // 外部から参照可能なプロパティを定義
 defineExpose({
@@ -783,9 +734,8 @@ defineExpose({
     mouseLeaved,
     toReadable,
 });
-
 </script>
 
 <template>
-    <div ref="svgDOMRef" style="height: 60vmin;"></div>
+    <div ref="svgDOMRef" style="height: 60vmin"></div>
 </template>

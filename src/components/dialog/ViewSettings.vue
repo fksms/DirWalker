@@ -1,34 +1,31 @@
 <script setup>
+import { ref, computed } from 'vue';
 
-import { ref, computed } from "vue";
-
-import i18n from "../i18n";
-import { detectOS } from "../detectOS";
-import ViewSettingsGeneral from "./ViewSettingsGeneral.vue";
-import ViewSettingsLanguage from "./ViewSettingsLanguage.vue";
-import ViewSettingsPermissions from "./ViewSettingsPermissions.vue";
-import ViewSettingsAbout from "./ViewSettingsAbout.vue";
-
+import i18n from '../i18n';
+import { detectOS } from '../detectOS';
+import ViewSettingsGeneral from './ViewSettingsGeneral.vue';
+import ViewSettingsLanguage from './ViewSettingsLanguage.vue';
+import ViewSettingsPermissions from './ViewSettingsPermissions.vue';
+import ViewSettingsAbout from './ViewSettingsAbout.vue';
 
 // ダイアログの状態（双方向バインディングを行う）
-const showDialog = defineModel("showDialog");
+const showDialog = defineModel('showDialog');
 
 // 項目一覧
 const listItems = computed(() => {
     return [
-        { id: 1, icon: "mdi-wrench", title: i18n.global.t("list_item.general"), visible: true },
-        { id: 2, icon: "mdi-earth", title: i18n.global.t("list_item.language"), visible: true },
-        { id: 3, icon: "mdi-lock-open-check", title: i18n.global.t("list_item.permissions"), visible: (detectOS() == "Mac") ? true : false },
-        { id: 4, icon: "mdi-information-outline", title: i18n.global.t("list_item.about"), visible: true },
-    ].filter(item => item.visible); // visibleがtrueのものでフィルタリング
-})
+        { id: 1, icon: 'mdi-wrench', title: i18n.global.t('list_item.general'), visible: true },
+        { id: 2, icon: 'mdi-earth', title: i18n.global.t('list_item.language'), visible: true },
+        { id: 3, icon: 'mdi-lock-open-check', title: i18n.global.t('list_item.permissions'), visible: detectOS() == 'Mac' ? true : false },
+        { id: 4, icon: 'mdi-information-outline', title: i18n.global.t('list_item.about'), visible: true },
+    ].filter((item) => item.visible); // visibleがtrueのものでフィルタリング
+});
 
 // 現在、選択されている項目（初期値はid==1）
 const selectedItem = ref(1);
 
 // Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
-const walkParams = defineModel("walkParams");
-
+const walkParams = defineModel('walkParams');
 </script>
 
 <template>
@@ -36,11 +33,16 @@ const walkParams = defineModel("walkParams");
         <v-card class="rounded-lg">
             <v-layout>
                 <!-- 左のナビゲーションバー -->
-                <v-navigation-drawer permanent floating class="bg-blue-grey-darken-3 text-white rounded-s-lg"
-                    width="180">
+                <v-navigation-drawer permanent floating class="bg-blue-grey-darken-3 text-white rounded-s-lg" width="180">
                     <v-list>
-                        <v-list-item v-for="item in listItems" :prepend-icon="item.icon" :title="item.title"
-                            :active="item.id == selectedItem" @click="selectedItem = item.id"></v-list-item>
+                        <v-list-item
+                            v-for="(item, index) in listItems"
+                            :key="index"
+                            :prepend-icon="item.icon"
+                            :title="item.title"
+                            :active="item.id == selectedItem"
+                            @click="selectedItem = item.id"
+                        ></v-list-item>
                     </v-list>
                 </v-navigation-drawer>
 
@@ -48,19 +50,17 @@ const walkParams = defineModel("walkParams");
                 <v-main height="500" class="bg-blue-grey-darken-1 text-white enable-vertical-scroll">
                     <!-- スクロールバー分のパディングを入れる -->
                     <div class="pl-5">
-
                         <!-- 閉じるボタン -->
                         <v-app-bar color="transparent" height="40" elevation="0">
-                            <template v-slot:append>
-                                <v-icon color="white" icon="mdi-close" @click="showDialog = false"
-                                    class="px-4"></v-icon>
+                            <template #append>
+                                <v-icon color="white" icon="mdi-close" class="px-4" @click="showDialog = false"></v-icon>
                             </template>
                         </v-app-bar>
 
                         <!-- General -->
                         <v-container v-if="selectedItem == 1" fluid class="py-0">
                             <!-- 双方向バインディングを利用する -->
-                            <ViewSettingsGeneral v-model:walkParams="walkParams"></ViewSettingsGeneral>
+                            <ViewSettingsGeneral v-model:walk-params="walkParams"></ViewSettingsGeneral>
                         </v-container>
 
                         <!-- Language -->
@@ -83,7 +83,6 @@ const walkParams = defineModel("walkParams");
 
                         <!-- 要素無し -->
                         <v-container v-else fluid class="py-0"></v-container>
-
                     </div>
                 </v-main>
             </v-layout>
@@ -94,7 +93,7 @@ const walkParams = defineModel("walkParams");
 <style>
 :root {
     /* blue-grey-darken-1 */
-    --bg-color: #546E7A;
+    --bg-color: #546e7a;
 }
 
 .enable-vertical-scroll {

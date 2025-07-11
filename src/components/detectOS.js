@@ -8,23 +8,16 @@ function detectOS() {
         return null;
     }
 
-    if (ua.indexOf("Mac") > -1) {
-        return "Mac";
-    }
-
-    else if (ua.indexOf("Windows") > -1) {
-        return "Windows";
-    }
-
-    else if (ua.indexOf("Linux") > -1) {
-        return "Linux";
-    }
-
-    else {
+    if (ua.indexOf('Mac') > -1) {
+        return 'Mac';
+    } else if (ua.indexOf('Windows') > -1) {
+        return 'Windows';
+    } else if (ua.indexOf('Linux') > -1) {
+        return 'Linux';
+    } else {
         return null;
     }
 }
 
-
 // 外部に公開
-export { detectOS }
+export { detectOS };

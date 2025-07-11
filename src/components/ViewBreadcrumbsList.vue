@@ -1,20 +1,16 @@
 <script setup>
-
-import { ref } from "vue";
+import { ref } from 'vue';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(["viewSunburstChart", "viewDirectoryFileList"]);
-
+const props = defineProps(['viewSunburstChart', 'viewDirectoryFileList']);
 
 // 祖先ノード（自身も含む）
 const ancestors = ref([]);
-
 
 // パンくずリストを作成（入力されたノードデータのancestorsをパンくずリストにして表示）
 //
 // node: ノードデータ
 function generateBreadcrumbs(node) {
-
     // 配列を初期化
     ancestors.value.splice(0);
 
@@ -27,14 +23,12 @@ function generateBreadcrumbs(node) {
     }
 }
 
-
 // パスの最後の部分を取得
 //
 // path: ファイル・ディレクトリのパス（文字列）
 function getLastPath(path) {
     return props.viewDirectoryFileList.getLastPath(path);
 }
-
 
 // Sunburstの更新
 //
@@ -43,7 +37,6 @@ function updateSunburst(node) {
     return props.viewSunburstChart.leftClicked(node);
 }
 
-
 // コンテキストメニューの表示
 //
 // node: ノードデータ
@@ -51,26 +44,21 @@ function showContextMenu(node) {
     return props.viewSunburstChart.rightClicked(node);
 }
 
-
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateBreadcrumbs,
 });
-
 </script>
-
 
 <template>
     <v-container fluid class="pb-0">
         <ul class="breadcrumbs enable-horizontal-scroll">
-            <li v-for="(item, index) in ancestors">
+            <li v-for="(item, index) in ancestors" :key="index">
                 <!-- 
                 ancestorsの一番後ろの要素に"current"クラスを設定する
                 ancestorsの一番後ろの要素を左クリックした場合は何もしない
                 -->
-                <a v-bind:class="{ 'current': index == ancestors.length - 1 }"
-                    @click.left="(index != ancestors.length - 1) ? updateSunburst(item) : null"
-                    @click.right.prevent="showContextMenu(item)">
+                <a :class="{ current: index == ancestors.length - 1 }" @click.left="index != ancestors.length - 1 ? updateSunburst(item) : null" @click.right.prevent="showContextMenu(item)">
                     <!-- ルートディレクトリはフルパスで表示する -->
                     {{ index == 0 ? item.data.name : getLastPath(item.data.name) }}
                 </a>
@@ -79,15 +67,14 @@ defineExpose({
     </v-container>
 </template>
 
-
 <style>
 :root {
     /* blue-grey-darken-3 */
-    --bg-color: #37474F;
+    --bg-color: #37474f;
     /* blue-grey-darken-1 */
-    --breadcrumbs-bg-color: #546E7A;
+    --breadcrumbs-bg-color: #546e7a;
     /* amber-darken-1 */
-    --breadcrumbs-current-bg-color: #FFB300;
+    --breadcrumbs-current-bg-color: #ffb300;
 }
 
 /* スクロールバー全体の設定 */
@@ -139,23 +126,23 @@ li {
 }
 
 .breadcrumbs a::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 50%;
-    margin-top: -1.0em;
-    border-width: 1.0em 0em 1.0em 1.0em;
+    margin-top: -1em;
+    border-width: 1em 0em 1em 1em;
     border-style: solid;
     border-color: var(--breadcrumbs-bg-color) transparent;
     left: -1em;
 }
 
 .breadcrumbs a::after {
-    content: "";
+    content: '';
     position: absolute;
     top: 50%;
-    margin-top: -1.0em;
-    border-top: 1.0em solid transparent;
-    border-bottom: 1.0em solid transparent;
+    margin-top: -1em;
+    border-top: 1em solid transparent;
+    border-bottom: 1em solid transparent;
     border-left: 1em solid var(--breadcrumbs-bg-color);
     right: -1em;
 }
