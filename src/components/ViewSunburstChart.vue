@@ -454,7 +454,7 @@ function updateArc(node, isFirstCalled) {
 
     // --------------------ここからsquashed-arc用--------------------
     // 除外された円弧を圧縮したものを表示
-    squashedArcs.forEach((value, key) => {
+    squashedArcs.forEach((value, _key) => {
         // 円弧の角度[degree]が大きいもののみ表示
         if (value.x1 - value.x0 > (angleThreshold * Math.PI) / 180) {
             // squashed-arc用座標を生成
@@ -489,7 +489,7 @@ function updateArc(node, isFirstCalled) {
                 // カーソルを離した時
                 .on('mouseleave', (event, d) => mouseLeaved(event, d))
                 // 右クリックした時
-                .on('contextmenu', (event, d) => {
+                .on('contextmenu', (event, _d) => {
                     event.preventDefault(); // デフォルトの動作をキャンセル
                     //rightClicked(d)
                 });

@@ -12,7 +12,15 @@ export default [
     {
         rules: {
             // override/add rules settings here, such as:
-            'no-unused-vars': 'warn',
+            'no-unused-vars': [
+                'warn',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                    destructuredArrayIgnorePattern: '^_',
+                },
+            ],
         },
         languageOptions: {
             sourceType: 'module',

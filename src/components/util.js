@@ -54,7 +54,7 @@ async function openFileManager(path) {
 }
 
 // ファイル or ディレクトリを削除する関数
-async function removeFileOrDirectory(path, node, callback) {
+async function _removeFileOrDirectory(path, node, callback) {
     let dialogTitle = '';
     let dialogMessage = '';
 
@@ -72,7 +72,7 @@ async function removeFileOrDirectory(path, node, callback) {
         // バックエンド側の関数を実行
         await invoke('remove_file_or_directory', { path: path })
             // 成功した場合
-            .then((success) => {
+            .then((_success) => {
                 // Nodeを削除
                 callback(node);
             })
@@ -103,7 +103,7 @@ async function moveToTrash(path, node, callback) {
         // バックエンド側の関数を実行
         await invoke('move_to_trash', { path: path })
             // 成功した場合
-            .then((success) => {
+            .then((_success) => {
                 // Nodeを削除
                 callback(node);
             })
