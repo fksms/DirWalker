@@ -52,7 +52,7 @@ The backend uses customized [dust](https://github.com/bootandy/dust) code.<br>
 In the case of Windows, installation is also possible from the following:<br>
 
 <a href="https://apps.microsoft.com/detail/9nxz7km9m483">
-	<img src="https://get.microsoft.com/assets/en-us%20dark.svg" width="200"/>
+	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
 </a>
 
 <br>
@@ -133,4 +133,4 @@ Since Japanese is the main language, English translations are also welcome.<br>
 ## License
 
 The MIT License (MIT)<br>
-Copyright (c) 2025 Shogo Fukushima
+Copyright (c) 2025 - Created by Shogo Fukushima

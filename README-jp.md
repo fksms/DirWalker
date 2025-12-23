@@ -50,7 +50,7 @@
 Windowsの場合は以下からインストールも可能です。<br>
 
 <a href="https://apps.microsoft.com/detail/9nxz7km9m483">
-	<img src="https://get.microsoft.com/assets/ja%20dark.svg" width="200"/>
+	<img src="https://get.microsoft.com/images/ja%20dark.svg" width="200"/>
 </a>
 
 <br>
@@ -131,4 +131,4 @@ Issueへの投稿、PullRequest大歓迎です。
 ## License
 
 The MIT License (MIT)<br>
-Copyright (c) 2025 Shogo Fukushima
+Copyright (c) 2025 - Created by Shogo Fukushima
