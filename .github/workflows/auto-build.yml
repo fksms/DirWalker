@@ -2,8 +2,8 @@
 
 name: "Auto Build"
 
-# push、pull_request時に自動で実行。成果物のアップロードは無し。
-on: [push, pull_request]
+# pull_request時に自動で実行。成果物のアップロードは無し。
+on: [pull_request]
 
 # This workflow will build your tauri app without uploading it anywhere.
 

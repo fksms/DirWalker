@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n';
 
-import i18n_ja from './i18n/ja';
-import i18n_en from './i18n/en';
+import i18n_ja from '../i18n/ja';
+import i18n_en from '../i18n/en';
 
 const userLocale = navigator.language || navigator.userLanguage;
 

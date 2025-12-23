@@ -5,7 +5,7 @@
 <div align="center">
 
 <br>
-<img src="./src/components/assets/DirWalker.svg" width="130">
+<img src="./public/DirWalker.svg" width="130">
 
 <br>
 
@@ -18,7 +18,7 @@ The frontend is implemented with Vue3 and JavaScript, while the backend is writt
 The backend uses customized [dust](https://github.com/bootandy/dust) code.<br>
 
 <br>
-<img src="./images/ScreenRecording.gif" width="550">
+<img src="./assets/ScreenRecording.gif" width="550">
 <br>
 <br>
 <br>
@@ -28,9 +28,9 @@ The backend uses customized [dust](https://github.com/bootandy/dust) code.<br>
 ## Screenshots
 
 <div align="center">
-<img src="./images/Screenshot_1.png" width="600">
-<img src="./images/Screenshot_2.png" width="600">
-<img src="./images/Screenshot_3.png" width="600">
+<img src="./assets/Screenshot_1.png" width="600">
+<img src="./assets/Screenshot_2.png" width="600">
+<img src="./assets/Screenshot_3.png" width="600">
 </div>
 
 ## Install
@@ -52,7 +52,7 @@ The backend uses customized [dust](https://github.com/bootandy/dust) code.<br>
 In the case of Windows, installation is also possible from the following:<br>
 
 <a href="https://apps.microsoft.com/detail/9nxz7km9m483">
-	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+	<img src="https://get.microsoft.com/assets/en-us%20dark.svg" width="200"/>
 </a>
 
 <br>
@@ -73,12 +73,14 @@ By manually running `All Build Debug`, you can build debug versions for MacOS, W
 #### Setup
 
 Install rustup and nvm
+
 ```sh
 brew install rustup
 brew install nvm
 ```
 
 Setup rustup and nvm
+
 ```sh
 rustup-init
 nvm install stable --latest-npm
@@ -87,21 +89,25 @@ nvm install stable --latest-npm
 #### Build
 
 Move to the working directory
+
 ```sh
 cd DirWalker
 ```
 
 Install the necessary packages (node_modules will be created)
+
 ```sh
 npm install
 ```
 
 Build (Debug)
+
 ```sh
 npm run tauri dev
 ```
 
 Build (Release)
+
 ```sh
 npm run tauri build
 ```
@@ -117,6 +123,7 @@ By manually running `Windows Build Debug`, you can build a debug version for Win
 <br>
 
 ## Contribution
+
 Contributions to Issues and Pull Requests are welcome.<br>
 If you find bugs or improvements, please feel free to send a Pull Request.<br>
 Since Japanese is the main language, English translations are also welcome.<br>
@@ -124,5 +131,6 @@ Since Japanese is the main language, English translations are also welcome.<br>
 <br>
 
 ## License
+
 The MIT License (MIT)<br>
 Copyright (c) 2025 Shogo Fukushima

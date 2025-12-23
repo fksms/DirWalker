@@ -3,10 +3,19 @@ import { ref, watch } from 'vue';
 
 import * as d3 from 'd3';
 
-import { showContextMenu } from './util';
+import { showContextMenu } from '../lib/util';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(['viewDirectoryFileList', 'viewBreadcrumbsList']);
+const props = defineProps({
+    directoryFileList: {
+        type: Object,
+        required: true,
+    },
+    breadcrumbsList: {
+        type: Object,
+        required: true,
+    },
+});
 
 // DOM格納用
 const svgDOM = ref();
@@ -715,14 +724,14 @@ function rightClicked(node) {
 // node: ノードデータ
 // option: オプション
 function updateList(node, option = null) {
-    return props.viewDirectoryFileList.generateDirectoryList(node, option);
+    return props.directoryFileList.generateDirectoryList(node, option);
 }
 
 // Breadcrumbsの更新
 //
 // node: ノードデータ
 function updateBreadcrumbs(node) {
-    return props.viewBreadcrumbsList.generateBreadcrumbs(node);
+    return props.breadcrumbsList.generateBreadcrumbs(node);
 }
 
 // 外部から参照可能なプロパティを定義

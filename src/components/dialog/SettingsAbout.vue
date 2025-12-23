@@ -13,7 +13,7 @@ onMounted(async () => {
 
 <template>
     <div style="text-align: center">
-        <img src="../assets/DirWalker.svg" style="height: 20vmin" />
+        <img src="/DirWalker.svg" style="height: 20vmin" />
         <h2 class="pb-4">DirWalker</h2>
         <span class="pr-10">Version: {{ appVersion }}</span>
         <a href="https://github.com/fksms/DirWalker" target="_blank" class="text-white">GitHub</a>

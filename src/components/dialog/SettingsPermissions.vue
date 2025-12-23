@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { Command } from '@tauri-apps/plugin-shell';
 
-import { detectOS } from '../detectOS';
+import { detectOS } from '../../lib/detectOS';
 
 // フルディスクアクセスの権限状況を保持
 const fullDiskAccessPermission = ref(false);

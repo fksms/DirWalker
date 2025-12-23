@@ -6,7 +6,7 @@ import { createApp } from 'vue';
 import { createVuetify } from 'vuetify';
 
 import App from './App.vue';
-import i18n from './components/i18n';
+import i18n from './lib/i18n';
 
 const vuetify = createVuetify();
 

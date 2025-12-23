@@ -3,7 +3,7 @@
 <div align="center">
 
 <br>
-<img src="./src/components/assets/DirWalker.svg" width="130">
+<img src="./public/DirWalker.svg" width="130">
 
 <br>
 
@@ -16,7 +16,7 @@
 バックエンドは[dust](https://github.com/bootandy/dust)のコードをカスタマイズして利用しています。<br>
 
 <br>
-<img src="./images/ScreenRecording.gif" width="550">
+<img src="./assets/ScreenRecording.gif" width="550">
 <br>
 <br>
 <br>
@@ -26,9 +26,9 @@
 ## Screenshots
 
 <div align="center">
-<img src="./images/Screenshot_1.png" width="600">
-<img src="./images/Screenshot_2.png" width="600">
-<img src="./images/Screenshot_3.png" width="600">
+<img src="./assets/Screenshot_1.png" width="600">
+<img src="./assets/Screenshot_2.png" width="600">
+<img src="./assets/Screenshot_3.png" width="600">
 </div>
 
 ## Install
@@ -50,7 +50,7 @@
 Windowsの場合は以下からインストールも可能です。<br>
 
 <a href="https://apps.microsoft.com/detail/9nxz7km9m483">
-	<img src="https://get.microsoft.com/images/ja%20dark.svg" width="200"/>
+	<img src="https://get.microsoft.com/assets/ja%20dark.svg" width="200"/>
 </a>
 
 <br>
@@ -71,12 +71,14 @@ Windowsの場合は以下からインストールも可能です。<br>
 #### Setup
 
 rustupとnvmをインストール
+
 ```sh
 brew install rustup
 brew install nvm
 ```
 
 rustupとnvmのセットアップ
+
 ```sh
 rustup-init
 nvm install stable --latest-npm
@@ -85,21 +87,25 @@ nvm install stable --latest-npm
 #### Build
 
 作業ディレクトリに移動
+
 ```sh
 cd DirWalker
 ```
 
 必要なパッケージをインストール（node_modulesが作成される）
+
 ```sh
 npm install
 ```
 
 Build（Debug）
+
 ```sh
 npm run tauri dev
 ```
 
 Build（Release）
+
 ```sh
 npm run tauri build
 ```
@@ -115,6 +121,7 @@ npm run tauri build
 <br>
 
 ## Contribution
+
 Issueへの投稿、PullRequest大歓迎です。
 バグや改善点を見つけた場合は、遠慮なくPullRequestを送ってください。
 日本語がメインなので、英訳も歓迎です。
@@ -122,5 +129,6 @@ Issueへの投稿、PullRequest大歓迎です。
 <br>
 
 ## License
+
 The MIT License (MIT)<br>
 Copyright (c) 2025 Shogo Fukushima

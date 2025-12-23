@@ -9,7 +9,7 @@
         "preview": "vite preview",
         "tauri": "tauri",
         "lint": "eslint",
-        "format": "prettier --write './**/*.{js,css,html,vue,json}'"
+        "format": "prettier --write ."
     },
     "dependencies": {
         "@mdi/font": "^7.4.47",

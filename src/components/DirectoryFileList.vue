@@ -1,10 +1,15 @@
 <script setup>
 import { ref } from 'vue';
 
-import { detectOS } from './detectOS';
+import { detectOS } from '../lib/detectOS';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(['viewSunburstChart']);
+const props = defineProps({
+    sunburstChart: {
+        type: Object,
+        required: true,
+    },
+});
 
 // 自身の情報
 const ownColor = ref();
@@ -87,35 +92,35 @@ function array2String(array) {
 
 // TB/GB/MB/KBに変換
 function toReadable(value) {
-    return props.viewSunburstChart.toReadable(value);
+    return props.sunburstChart.toReadable(value);
 }
 
 // Sunburstの更新
 //
 // node: ノードデータ
 function updateSunburst(node) {
-    return props.viewSunburstChart.leftClicked(node);
+    return props.sunburstChart.leftClicked(node);
 }
 
 // コンテキストメニューの表示
 //
 // node: ノードデータ
 function showContextMenu(node) {
-    return props.viewSunburstChart.rightClicked(node);
+    return props.sunburstChart.rightClicked(node);
 }
 
 // カーソルを合わせた時の動作
 //
 // node: ノードデータ
 function mouseEntered(node) {
-    return props.viewSunburstChart.mouseEntered(null, node);
+    return props.sunburstChart.mouseEntered(null, node);
 }
 
 // カーソルを離した時の動作
 //
 // node: ノードデータ
 function mouseLeaved(node) {
-    return props.viewSunburstChart.mouseLeaved(null, node);
+    return props.sunburstChart.mouseLeaved(null, node);
 }
 
 // 外部から参照可能なプロパティを定義

@@ -3,12 +3,17 @@ import { ref, onMounted } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
-import i18n from './i18n';
-import { detectOS } from './detectOS';
-import ViewSettings from './dialog/ViewSettings.vue';
+import i18n from '../lib/i18n';
+import { detectOS } from '../lib/detectOS';
+import Settings from './dialog/Settings.vue';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(['viewSunburstChart']);
+const props = defineProps({
+    sunburstChart: {
+        type: Object,
+        required: true,
+    },
+});
 
 // ボタンの状態を保持
 const buttonState = ref(false);
@@ -157,7 +162,7 @@ function changeState() {
 
 // Sunburstの作成
 async function generateSunburst(data) {
-    return props.viewSunburstChart.generateSunburst(data);
+    return props.sunburstChart.generateSunburst(data);
 }
 </script>
 
@@ -176,7 +181,7 @@ async function generateSunburst(data) {
     </v-container>
 
     <!-- 双方向バインディングを利用する -->
-    <ViewSettings v-model:show-dialog="showDialog" v-model:walk-params="walkParams"></ViewSettings>
+    <Settings v-model:show-dialog="showDialog" v-model:walk-params="walkParams"></Settings>
 </template>
 
 <style></style>

@@ -47,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           args: ${{ matrix.args }}
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

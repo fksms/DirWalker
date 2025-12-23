@@ -1,15 +1,18 @@
 <script setup>
 import { ref, computed } from 'vue';
 
-import i18n from '../i18n';
-import { detectOS } from '../detectOS';
-import ViewSettingsGeneral from './ViewSettingsGeneral.vue';
-import ViewSettingsLanguage from './ViewSettingsLanguage.vue';
-import ViewSettingsPermissions from './ViewSettingsPermissions.vue';
-import ViewSettingsAbout from './ViewSettingsAbout.vue';
+import i18n from '../../lib/i18n';
+import { detectOS } from '../../lib/detectOS';
+import SettingsGeneral from './SettingsGeneral.vue';
+import SettingsLanguage from './SettingsLanguage.vue';
+import SettingsPermissions from './SettingsPermissions.vue';
+import SettingsAbout from './SettingsAbout.vue';
 
 // ダイアログの状態（双方向バインディングを行う）
-const showDialog = defineModel('showDialog');
+const showDialog = defineModel('showDialog', { type: Boolean });
+
+// Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
+const walkParams = defineModel('walkParams', { type: Object });
 
 // 項目一覧
 const listItems = computed(() => {
@@ -23,9 +26,6 @@ const listItems = computed(() => {
 
 // 現在、選択されている項目（初期値はid==1）
 const selectedItem = ref(1);
-
-// Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
-const walkParams = defineModel('walkParams');
 </script>
 
 <template>
@@ -60,25 +60,25 @@ const walkParams = defineModel('walkParams');
                         <!-- General -->
                         <v-container v-if="selectedItem == 1" fluid class="py-0">
                             <!-- 双方向バインディングを利用する -->
-                            <ViewSettingsGeneral v-model:walk-params="walkParams"></ViewSettingsGeneral>
+                            <SettingsGeneral v-model:walk-params="walkParams"></SettingsGeneral>
                         </v-container>
 
                         <!-- Language -->
                         <v-container v-else-if="selectedItem == 2" fluid class="py-0">
                             <!-- 双方向バインディングを利用する -->
-                            <ViewSettingsLanguage></ViewSettingsLanguage>
+                            <SettingsLanguage></SettingsLanguage>
                         </v-container>
 
                         <!-- Permissions -->
                         <v-container v-else-if="selectedItem == 3" fluid class="py-0">
                             <!-- 双方向バインディングを利用する -->
-                            <ViewSettingsPermissions></ViewSettingsPermissions>
+                            <SettingsPermissions></SettingsPermissions>
                         </v-container>
 
                         <!-- About -->
                         <v-container v-else-if="selectedItem == 4" fluid class="py-0">
                             <!-- 双方向バインディングを利用する -->
-                            <ViewSettingsAbout></ViewSettingsAbout>
+                            <SettingsAbout></SettingsAbout>
                         </v-container>
 
                         <!-- 要素無し -->

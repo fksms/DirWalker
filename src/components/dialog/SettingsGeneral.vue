@@ -2,10 +2,10 @@
 import { ref, onMounted } from 'vue';
 import { open, message } from '@tauri-apps/plugin-dialog';
 
-import i18n from '../i18n';
+import i18n from '../../lib/i18n';
 
 // Walkのパラメータ（バックエンドに渡す）（双方向バインディングを行う）
-const walkParams = defineModel('walkParams');
+const walkParams = defineModel('walkParams', { type: Object });
 
 // Walkのパラメータのクローン（ディープコピー）
 const walkParamsClone = ref(JSON.parse(JSON.stringify(walkParams.value)));

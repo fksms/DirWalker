@@ -2,7 +2,16 @@
 import { ref } from 'vue';
 
 // 親から渡されたコンポーネントの参照を受け取る
-const props = defineProps(['viewSunburstChart', 'viewDirectoryFileList']);
+const props = defineProps({
+    sunburstChart: {
+        type: Object,
+        required: true,
+    },
+    directoryFileList: {
+        type: Object,
+        required: true,
+    },
+});
 
 // 祖先ノード（自身も含む）
 const ancestors = ref([]);
@@ -27,21 +36,21 @@ function generateBreadcrumbs(node) {
 //
 // path: ファイル・ディレクトリのパス（文字列）
 function getLastPath(path) {
-    return props.viewDirectoryFileList.getLastPath(path);
+    return props.directoryFileList.getLastPath(path);
 }
 
 // Sunburstの更新
 //
 // node: ノードデータ
 function updateSunburst(node) {
-    return props.viewSunburstChart.leftClicked(node);
+    return props.sunburstChart.leftClicked(node);
 }
 
 // コンテキストメニューの表示
 //
 // node: ノードデータ
 function showContextMenu(node) {
-    return props.viewSunburstChart.rightClicked(node);
+    return props.sunburstChart.rightClicked(node);
 }
 
 // 外部から参照可能なプロパティを定義

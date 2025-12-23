@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 
-import i18n from '../i18n';
+import i18n from '../../lib/i18n';
 
 // 利用可能な言語
 const currentLocale = i18n.global.availableLocales;

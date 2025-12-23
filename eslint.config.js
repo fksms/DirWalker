@@ -21,6 +21,7 @@ export default [
                     destructuredArrayIgnorePattern: '^_',
                 },
             ],
+            'vue/multi-word-component-names': 'off',
         },
         languageOptions: {
             sourceType: 'module',
