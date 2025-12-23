@@ -19,7 +19,7 @@ onMounted(async () => {
         <a href="https://github.com/fksms/DirWalker" target="_blank" class="text-white">GitHub</a>
 
         <p class="pt-12 pb-0">The MIT License</p>
-        <p class="pt-0 pb-6">Copyright © 2025 Shogo Fukushima</p>
+        <p class="pt-0 pb-6">Copyright © {{ new Date().getFullYear() }} - Created by Shogo Fukushima</p>
     </div>
     <div class="px-10">
         <p class="pb-6">{{ $t('about.lisense_1') }}</p>

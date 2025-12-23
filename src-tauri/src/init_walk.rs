@@ -98,13 +98,10 @@ pub fn init_walk(
 
     let encode_result: Result<String, _> = serde_json::to_string(&prog_data);
     match encode_result {
-        // 正常にエンコードできた場合
-        Ok(str) => {
-            // WebViewに送信
-            app.emit("ProgressNotification", str).unwrap();
-        }
+        // 正常にエンコードできた場合はWebViewに送信
+        Ok(str) => app.emit("ProgressNotification", str).unwrap(),
         // エンコードに失敗した場合
-        Err(_) => println!("Progress encode error."),
+        Err(err) => eprintln!("Progress encode error: {}", err),
     }
 
     // 強制終了

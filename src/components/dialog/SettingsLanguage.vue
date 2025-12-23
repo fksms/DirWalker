@@ -1,18 +1,9 @@
 <script setup>
-import { computed } from 'vue';
-
-import i18n from '../../lib/i18n';
-
-// 利用可能な言語
-const currentLocale = i18n.global.availableLocales;
-
-// 現在の言語に基づいて選択肢を取得
-const localizedItems = computed(() => {
-    return currentLocale.map((locale) => ({
-        title: i18n.global.t(`language.${locale}`),
-        value: locale,
-    }));
-});
+// 選択肢を固定で定義
+const localizedItems = [
+    { title: '日本語', value: 'ja' },
+    { title: 'English', value: 'en' },
+];
 </script>
 
 <template>

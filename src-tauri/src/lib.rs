@@ -22,25 +22,20 @@ pub fn node_to_json(node: Option<Node>) -> Result<String, String> {
     match node {
         // ノードに要素がある場合
         Some(node) => {
-            println!("Node found.");
-
             let encode_result: Result<String, _> = serde_json::to_string(&node);
 
             match encode_result {
                 // 正常にノードデータをエンコードできた場合
-                Ok(str_node) => {
-                    println!("Encode done.");
-                    Ok(str_node)
-                }
+                Ok(str_node) => Ok(str_node),
                 // ノードデータのエンコードに失敗した場合
-                Err(err) => Err(err.to_string()),
+                Err(err) => {
+                    eprintln!("Node encode error: {}", err.to_string());
+                    Err(err.to_string())
+                }
             }
         }
         // ノードが空の場合
-        None => {
-            println!("Node is empty.");
-            Ok("".to_string())
-        }
+        None => Ok("".to_string()),
     }
 }
 
@@ -55,13 +50,10 @@ async fn walk_start(
     state.set_abort_flag(false);
 
     let decode_result: Result<WalkParams, _> = serde_json::from_str(&str_params);
-    println!("Receive Params.");
 
     match decode_result {
         // 正常にパラメータをデコードできた場合
         Ok(walk_params) => {
-            println!("Decode done.");
-
             // Walk
             let walk_data = init_walk(
                 walk_params,
@@ -69,7 +61,6 @@ async fn walk_start(
                 state.get_progress_handler(),
                 app,
             );
-            println!("Walk done.");
 
             // 現状使用しないので無効化
             /*
@@ -85,7 +76,7 @@ async fn walk_start(
         }
         // パラメータのデコードに失敗した場合
         Err(err) => {
-            println!("{}", err.to_string());
+            eprintln!("Parameter decode error: {}", err.to_string());
             Err(err.to_string())
         }
     }
