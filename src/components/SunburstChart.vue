@@ -95,27 +95,20 @@ function generateSunburst(data) {
     // scaleOrdinal: 配列の繰り返し設定を行う
     const colorWheel = d3.scaleOrdinal().range(directoryColorCodes);
 
-    // HierarchyNodeの作成
+    // HierarchyRectangularNodeの作成
     //
+    // size: HierarchyRectangularNodeのサイズを決定（幅は2π、高さは1の長方形とする。）
     // sum: childrenの要素が0のもののサイズのみを足しこんでHierarchyNodeを作成
     // sort: サイズを降順でソート
-    root = d3
-        .hierarchy(data)
-        .sum((d) => (d.children.length ? 0 : d.size))
-        .sort((a, b) => b.value - a.value);
+    root = d3.treemap().size([2 * Math.PI, 1])(
+        d3
+            .hierarchy(data)
+            .sum((d) => (d.children.length ? 0 : d.size))
+            .sort((a, b) => b.value - a.value)
+    );
 
     // nodeId用カウンター
     let count = 0;
-
-    // rootにパーティションデータを追加
-    // （幅は2π、高さは1の長方形とする。）
-    //
-    // (x0, y0): 左上の座標
-    // (x1, y1): 右下の座標
-    root.x0 = 0;
-    root.x1 = 2 * Math.PI;
-    root.y0 = 0;
-    root.y1 = 1;
 
     // 各ノードにプロパティを追加する
     //
@@ -128,7 +121,7 @@ function generateSunburst(data) {
 
         // childrenを持っている場合、childrenの各valueに応じて、childrenそれぞれにパーティションデータを設定する。
         if (d.children) {
-            d3.treemapDice(d, d.x0, d.depth + 1, d.x1, d.depth + 2);
+            d3.treemapDice(d, d.x0, d.y0 + 1, d.x1, d.y1 + 1);
         }
 
         // currentプロパティの追加

@@ -7,9 +7,9 @@ import DirectoryFileList from './components/DirectoryFileList.vue';
 import BreadcrumbsList from './components/BreadcrumbsList.vue';
 
 // コンポーネントの参照を作成
-const sunburstChart = ref();
-const directoryFileList = ref();
-const breadcrumbsList = ref();
+const sunburstChart = ref({});
+const directoryFileList = ref({});
+const breadcrumbsList = ref({});
 </script>
 
 <template>
