@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { onMounted, ref } from 'vue';
 
-import i18n from '../lib/i18n';
 import { detectOS } from '../lib/detectOS';
+import i18n from '../lib/i18n';
 import Settings from './dialog/Settings.vue';
 
 // 親から渡されたコンポーネントの参照を受け取る
@@ -183,5 +183,3 @@ async function generateSunburst(data) {
     <!-- 双方向バインディングを利用する -->
     <Settings v-model:show-dialog="showDialog" v-model:walk-params="walkParams"></Settings>
 </template>
-
-<style></style>

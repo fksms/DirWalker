@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { Command } from '@tauri-apps/plugin-shell';
+import { onMounted, ref } from 'vue';
 
 import { detectOS } from '../../lib/detectOS';
 
@@ -46,5 +46,3 @@ function openPrivacy_AllFiles() {
     <p v-if="fullDiskAccessPermission" class="mt-3">{{ $t('permissions.full_disk_access_is_already_granted') }}</p>
     <v-btn v-else flat class="text-capitalize mt-3" color="blue-grey-lighten-1" text="Open" @click="openPrivacy_AllFiles()"></v-btn>
 </template>
-
-<style></style>

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import { getVersion } from '@tauri-apps/api/app';
+import { onMounted, ref } from 'vue';
 
 // アプリのバージョン
 const appVersion = ref('');

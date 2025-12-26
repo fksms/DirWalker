@@ -1,13 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { Menu, MenuItem } from '@tauri-apps/api/menu';
-import { ask, message } from '@tauri-apps/plugin-dialog';
 import { writeText } from '@tauri-apps/plugin-clipboard-manager';
-//import { revealItemInDir } from "@tauri-apps/plugin-opener"
+import { ask, message } from '@tauri-apps/plugin-dialog';
 
+//import { revealItemInDir } from "@tauri-apps/plugin-opener"
 import i18n from './i18n';
 
 // コンテキストメニューを表示する関数
-async function showContextMenu(node, callback) {
+async function showContextMenu(node, onMoveToTrash) {
     // メニューアイテムの生成
     const menuItems = [
         await MenuItem.new({
@@ -25,7 +25,7 @@ async function showContextMenu(node, callback) {
         await MenuItem.new({
             text: i18n.global.t('context_menu.move_to_trash'),
             action: async () => {
-                await moveToTrash(node.data.name, node, callback);
+                await moveToTrash(node.data.name, node, onMoveToTrash);
             },
         }),
     ];
@@ -54,7 +54,7 @@ async function openFileManager(path) {
 }
 
 // ファイル or ディレクトリを削除する関数
-async function _removeFileOrDirectory(path, node, callback) {
+async function _removeFileOrDirectory(path, node, onRemoveFileOrDirectory) {
     let dialogTitle = '';
     let dialogMessage = '';
 
@@ -74,7 +74,7 @@ async function _removeFileOrDirectory(path, node, callback) {
             // 成功した場合
             .then((_success) => {
                 // Nodeを削除
-                callback(node);
+                onRemoveFileOrDirectory(node);
             })
             // 失敗した場合
             .catch((failure) => {
@@ -85,7 +85,7 @@ async function _removeFileOrDirectory(path, node, callback) {
 }
 
 // ゴミ箱に移動する関数
-async function moveToTrash(path, node, callback) {
+async function moveToTrash(path, node, onMoveToTrash) {
     let dialogTitle = '';
     let dialogMessage = '';
 
@@ -105,7 +105,7 @@ async function moveToTrash(path, node, callback) {
             // 成功した場合
             .then((_success) => {
                 // Nodeを削除
-                callback(node);
+                onMoveToTrash(node);
             })
             // 失敗した場合
             .catch((failure) => {

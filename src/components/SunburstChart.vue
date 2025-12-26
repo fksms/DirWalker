@@ -1,7 +1,6 @@
 <script setup>
-import { ref, watch } from 'vue';
-
 import * as d3 from 'd3';
+import { ref, watch } from 'vue';
 
 import { showContextMenu } from '../lib/util';
 

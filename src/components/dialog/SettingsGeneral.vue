@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { open, message } from '@tauri-apps/plugin-dialog';
+import { message, open } from '@tauri-apps/plugin-dialog';
+import { onMounted, ref } from 'vue';
 
 import i18n from '../../lib/i18n';
 
@@ -109,5 +109,3 @@ function addIgnore() {
         <v-btn flat class="text-capitalize" color="amber-darken-1" text="Save" @click="saved()"></v-btn>
     </v-container>
 </template>
-
-<style></style>

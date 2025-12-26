@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
-import i18n from '../../lib/i18n';
 import { detectOS } from '../../lib/detectOS';
+import i18n from '../../lib/i18n';
+import SettingsAbout from './SettingsAbout.vue';
 import SettingsGeneral from './SettingsGeneral.vue';
 import SettingsLanguage from './SettingsLanguage.vue';
 import SettingsPermissions from './SettingsPermissions.vue';
-import SettingsAbout from './SettingsAbout.vue';
 
 // ダイアログの状態（双方向バインディングを行う）
 const showDialog = defineModel('showDialog', { type: Boolean });

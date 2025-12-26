@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue';
 
+import BreadcrumbsList from './components/BreadcrumbsList.vue';
+import DirectoryFileList from './components/DirectoryFileList.vue';
 import Navbar from './components/Navbar.vue';
 import SunburstChart from './components/SunburstChart.vue';
-import DirectoryFileList from './components/DirectoryFileList.vue';
-import BreadcrumbsList from './components/BreadcrumbsList.vue';
 
 // コンポーネントの参照を作成
 const sunburstChart = ref({});
@@ -14,11 +14,11 @@ const breadcrumbsList = ref({});
 
 <template>
     <div class="bg-blue-grey-darken-3" style="height: 100vh">
-        <Navbar ref="navbar" :sunburst-chart="sunburstChart"></Navbar>
+        <Navbar :sunburst-chart="sunburstChart"></Navbar>
 
         <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
 
-        <BreadcrumbsList ref="breadcrumbsList" :sunburst-chart="sunburstChart" :directory-file-list="directoryFileList"></BreadcrumbsList>
+        <BreadcrumbsList ref="breadcrumbsList" :sunburst-chart="sunburstChart" :directory-file-list="directoryFileList"> </BreadcrumbsList>
 
         <v-container fluid class="py-0">
             <v-row>
