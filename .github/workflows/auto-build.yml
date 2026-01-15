@@ -8,7 +8,7 @@ on: [workflow_dispatch, pull_request]
 # This workflow will build your tauri app without uploading it anywhere.
 
 jobs:
-  test-tauri:
+  test-build:
     strategy:
       fail-fast: false
       matrix:
@@ -46,7 +46,7 @@ jobs:
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
       - name: install frontend dependencies
-        run: yarn install # change this to npm, pnpm or bun depending on which one you use.
+        run: yarn install --frozen-lockfile # change this to npm, pnpm or bun depending on which one you use.
 
       # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
       - uses: tauri-apps/tauri-action@v0
