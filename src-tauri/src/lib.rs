@@ -124,18 +124,6 @@ pub fn run() {
 
                 menu.append(&submenu)?;
 
-                submenu = SubmenuBuilder::new(app, "Edit")
-                    .undo()
-                    .redo()
-                    .separator()
-                    .cut()
-                    .copy()
-                    .paste()
-                    .select_all()
-                    .build()?;
-
-                menu.append(&submenu)?;
-
                 submenu = SubmenuBuilder::new(app, "Window")
                     .minimize()
                     .separator()

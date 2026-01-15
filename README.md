@@ -133,4 +133,4 @@ Since Japanese is the main language, English translations are also welcome.<br>
 ## License
 
 The MIT License (MIT)<br>
-Copyright (c) 2025 - Created by Shogo Fukushima
+Copyright (c) 2026 - Created by Shogo Fukushima

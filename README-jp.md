@@ -131,4 +131,4 @@ Issueへの投稿、PullRequest大歓迎です。
 ## License
 
 The MIT License (MIT)<br>
-Copyright (c) 2025 - Created by Shogo Fukushima
+Copyright (c) 2026 - Created by Shogo Fukushima

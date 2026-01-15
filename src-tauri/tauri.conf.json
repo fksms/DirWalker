@@ -21,7 +21,7 @@
   },
   "productName": "DirWalker",
   "mainBinaryName": "DirWalker",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "identifier": "com.dirwalker.build",
   "plugins": {},
   "app": {
