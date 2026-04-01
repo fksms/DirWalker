@@ -9,6 +9,7 @@
         "preview": "vite preview",
         "tauri": "tauri",
         "lint": "eslint",
+        "lint:fix": "eslint --fix",
         "format": "prettier --write ."
     },
     "dependencies": {
