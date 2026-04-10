@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 
-import { detectOS } from '../lib/detectOS';
+import { formatReadableSize } from '../lib/format';
+import { getLastPath } from '../lib/path';
 
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps({
@@ -41,7 +42,7 @@ function generateDirectoryList(node, option) {
         // targetが"/"の時は"getLastPath"がfalseになるので、"node.data.name"を使う
         ownName.value = getLastPath(node.data.name) ? getLastPath(node.data.name) : node.data.name;
         ownColor.value = node.color;
-        ownSize.value = array2String(toReadable(node.data.size));
+        ownSize.value = formatReadableSize(node.data.size);
     }
 
     // optionを指定する場合
@@ -57,42 +58,8 @@ function generateDirectoryList(node, option) {
         // 名前無し
         ownName.value = null;
         ownColor.value = option.color;
-        ownSize.value = array2String(toReadable(otherSize));
+        ownSize.value = formatReadableSize(otherSize);
     }
-}
-
-// パスの最後の部分を取得
-//
-// path: ファイル・ディレクトリのパス（文字列）
-function getLastPath(path) {
-    // 分解した各パスを格納
-    let segments = null;
-
-    // Windowsの場合
-    if (detectOS() == 'Windows') {
-        // パスを"¥"で分割
-        segments = path.split('\\');
-    }
-    // Windows以外の場合
-    else {
-        // パスを"/"で分割
-        segments = path.split('/');
-    }
-
-    // 最後の要素を返す
-    return segments[segments.length - 1];
-}
-
-// 配列から文字列に変換
-function array2String(array) {
-    // デリミタを指定
-    const delimiter = ' ';
-    return array.join(delimiter);
-}
-
-// TB/GB/MB/KBに変換
-function toReadable(value) {
-    return props.sunburstChart.toReadable(value);
 }
 
 // Sunburstの更新
@@ -126,7 +93,6 @@ function mouseLeaved(node) {
 // 外部から参照可能なプロパティを定義
 defineExpose({
     generateDirectoryList,
-    getLastPath,
 });
 </script>
 
@@ -171,7 +137,7 @@ defineExpose({
             <tr @click.left="updateSunburst(item)" @click.right.prevent="showContextMenu(item)" @mouseenter="mouseEntered(item)" @mouseleave="mouseLeaved(item)">
                 <td class="left-column"><v-icon :color="item.color" icon="mdi-circle-medium"></v-icon></td>
                 <td class="center-column text-left">{{ getLastPath(item.data.name) }}</td>
-                <td class="right-column text-right">{{ array2String(toReadable(item.data.size)) }}</td>
+                <td class="right-column text-right">{{ formatReadableSize(item.data.size) }}</td>
             </tr>
         </template>
     </v-data-table>

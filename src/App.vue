@@ -18,7 +18,7 @@ const breadcrumbsList = ref({});
 
         <v-divider class="border-opacity-25" color="blue-grey-lighten-3"></v-divider>
 
-        <BreadcrumbsList ref="breadcrumbsList" :sunburst-chart="sunburstChart" :directory-file-list="directoryFileList"> </BreadcrumbsList>
+        <BreadcrumbsList ref="breadcrumbsList" :sunburst-chart="sunburstChart"> </BreadcrumbsList>
 
         <v-container fluid class="py-0">
             <v-row>

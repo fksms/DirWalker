@@ -1,13 +1,11 @@
 <script setup>
 import { ref } from 'vue';
 
+import { getLastPath } from '../lib/path';
+
 // 親から渡されたコンポーネントの参照を受け取る
 const props = defineProps({
     sunburstChart: {
-        type: Object,
-        required: true,
-    },
-    directoryFileList: {
         type: Object,
         required: true,
     },
@@ -30,13 +28,6 @@ function generateBreadcrumbs(node) {
         // 親に移動
         node = node.parent;
     }
-}
-
-// パスの最後の部分を取得
-//
-// path: ファイル・ディレクトリのパス（文字列）
-function getLastPath(path) {
-    return props.directoryFileList.getLastPath(path);
 }
 
 // Sunburstの更新

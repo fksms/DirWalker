@@ -2,6 +2,7 @@
 import * as d3 from 'd3';
 import { ref, watch } from 'vue';
 
+import { toReadable } from '../lib/format';
 import { showContextMenu } from '../lib/util';
 
 // 親から渡されたコンポーネントの参照を受け取る
@@ -26,9 +27,7 @@ const svgDOMRef = ref();
 watch(svgDOM, (newValue) => {
     const container = svgDOMRef.value;
     if (container && newValue) {
-        // 既存の描画をクリア
         container.innerHTML = '';
-        // 新しいSVGSVGElementを追加
         container.appendChild(newValue);
     }
 });
@@ -220,21 +219,6 @@ function rgb2Hex(rgb) {
     return hex.toUpperCase();
 }
 
-// TB/GB/MB/KBに変換
-function toReadable(value) {
-    if (value >= 1e12) {
-        return [(value / 1e12).toFixed(1), 'TB'];
-    } else if (value >= 1e9) {
-        return [(value / 1e9).toFixed(1), 'GB'];
-    } else if (value >= 1e6) {
-        return [(value / 1e6).toFixed(1), 'MB'];
-    } else if (value >= 1e3) {
-        return [(value / 1e3).toFixed(1), 'KB'];
-    } else {
-        return [value.toFixed(1), 'B'];
-    }
-}
-
 // 円弧（arc）生成関数
 function createArc() {
     // パーティションデータ（長方形）を円弧（バウムクーヘン形）に変換
@@ -277,51 +261,32 @@ function updateCircle(node, isFirstCalled) {
         // （背景の円を用意することで、手前の円の透過率を変化させた際に点滅しているように見える）
         svgElement
             .append('circle')
-            // classを設定
             .classed('back', true)
-            // 半径を設定（1だけ小さな値にする）
             .attr('r', radius - 1)
-            // fill属性（塗りつぶし）を設定
             .attr('fill', circleLightOnColorCodes)
-            // fill-opacity属性（塗りつぶしの透明度）を設定
             .attr('fill-opacity', 1);
 
         // 中心の円のパスを設定
         svgElement
             .append('circle')
             .datum(node)
-            // classを設定
             .classed('front', true)
-            // IDを設定
             .attr('id', node.nodeId)
-            // 半径を設定
             .attr('r', radius)
-            // fill属性（塗りつぶし）を設定
             .attr('fill', circleLightOffColorCodes)
-            // fill-opacity属性（塗りつぶしの透明度）を設定
             .attr('fill-opacity', 1)
-            // ポインターイベントの設定
             .attr('pointer-events', 'all')
-            // カーソルを指差しの手にする
             .style('cursor', 'pointer')
-            // カーソルを合わせた時
             .on('mouseenter', (event, d) => mouseEntered(event, d))
-            // カーソルを離した時
             .on('mouseleave', (event, d) => mouseLeaved(event, d))
-            // 左クリックした時
             .on('click', (event, d) => leftClicked(d.parent))
-            // 右クリックした時
             .on('contextmenu', (event, d) => {
                 event.preventDefault(); // デフォルトの動作をキャンセル
                 rightClicked(d);
             });
     } else {
         // circleのデータを更新（手前の円（front）を指定する）
-        svgElement
-            .select('circle.front')
-            .datum(node)
-            // IDを設定
-            .attr('id', node.nodeId);
+        svgElement.select('circle.front').datum(node).attr('id', node.nodeId);
     }
 
     // 更新前に"text"の要素を全て削除
@@ -359,7 +324,6 @@ function updateArc(node, isFirstCalled) {
     // 指定した要素を全て選択
     svgElement
         .selectAll('path.main-arc')
-        // データ配列を作成
         .data(
             root.descendants().filter((d) => {
                 // --------------------ここからプロパティの更新--------------------
@@ -424,29 +388,17 @@ function updateArc(node, isFirstCalled) {
                 return true;
             })
         )
-        // データ配列とDOMを結合
         .join('path')
-        // classを設定
         .classed('main-arc', true)
-        // IDを設定
         .attr('id', (d) => d.nodeId)
-        // d属性（パス）を設定
         .attr('d', (d) => arc(d.target))
-        // fill属性（塗りつぶし）を設定
         .attr('fill', (d) => d.color)
-        // fill-opacity属性（塗りつぶしの透明度）を設定
         .attr('fill-opacity', (d) => (visualize(d) ? 1 : 0))
-        // ポインターイベントの設定
         .attr('pointer-events', (d) => (visualize(d) ? 'auto' : 'none'))
-        // カーソルを指差しの手にする
         .style('cursor', 'pointer')
-        // カーソルを合わせた時
         .on('mouseenter', (event, d) => mouseEntered(event, d))
-        // カーソルを離した時
         .on('mouseleave', (event, d) => mouseLeaved(event, d))
-        // 左クリックした時
         .on('click', (event, d) => leftClicked(d))
-        // 右クリックした時
         .on('contextmenu', (event, d) => {
             event.preventDefault(); // デフォルトの動作をキャンセル
             rightClicked(d);
@@ -475,21 +427,13 @@ function updateArc(node, isFirstCalled) {
             // path要素を生成
             svgElement
                 .append('path')
-                // データを作成
                 .datum(value.parentNode)
-                // classを設定
                 .classed('squashed-arc', true)
-                // IDを設定
                 .attr('id', '_')
-                // d属性（パス）を設定
                 .attr('d', arc(squashedArcCoordinates))
-                // fill属性（塗りつぶし）を設定
                 .attr('fill', squashedColorCode)
-                // カーソルを合わせた時
                 .on('mouseenter', (event, d) => mouseEntered(event, d, option))
-                // カーソルを離した時
                 .on('mouseleave', (event, d) => mouseLeaved(event, d))
-                // 右クリックした時
                 .on('contextmenu', (event, _d) => {
                     event.preventDefault(); // デフォルトの動作をキャンセル
                     //rightClicked(d)
@@ -733,7 +677,6 @@ defineExpose({
     rightClicked,
     mouseEntered,
     mouseLeaved,
-    toReadable,
 });
 </script>
 
